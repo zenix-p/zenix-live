@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zenix Platform - Login</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.cn">
+    <link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin>
+    <link href="https://fonts.googleapis.cn/css2?family=Orbitron:wght@700;900&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        window.__cfToken = null;
+
+        window.onCaptchaSuccess = function (token) {
+            window.__cfToken = token ||
+                (document.querySelector('[name="cf-turnstile-response"]') || {}).value ||
+                null;
+            try { document.dispatchEvent(new CustomEvent('cf-token-ready')); } catch (e) {}
+        };
+
+        window.onCaptchaExpired = function () {
+            window.__cfToken = null;
+            try { document.dispatchEvent(new CustomEvent('cf-token-ready')); } catch (e) {}
+        };
+
+        window.onCaptchaError = function () {
+            window.__cfToken = null;
+            try { document.dispatchEvent(new CustomEvent('cf-token-ready')); } catch (e) {}
+        };
+    </script>
+
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+    <script>(function(){var s=localStorage.getItem('zenix_lang')||'en',r=['fa','ar'];document.documentElement.setAttribute('dir',r.includes(s)?'rtl':'ltr');document.documentElement.setAttribute('lang',s);})();</script>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0;font-family:'Vazirmatn',system-ui,sans-serif}
+        body{background:#030712;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#f8fafc;padding:15px;position:relative;overflow-x:hidden}
+        .glow-1,.glow-2{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;pointer-events:none;z-index:1}
+        .glow-1{width:250px;height:250px;background:#0ea5e9;top:10%;left:10%}
+        .glow-2{width:250px;height:250px;background:#a855f7;bottom:10%;right:10%}
+        
+        .auth-card{width:100%;max-width:400px;background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:24px 22px;box-shadow:0 20px 50px rgba(0,0,0,.7);position:relative;z-index:10;backdrop-filter:blur(10px);opacity:1;transition:opacity .2s ease-in-out}
+        
+        .header-actions{position:relative;z-index:20;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:12px}
+        .wrap{position:relative}
+        .lb{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);height:36px;width:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#38bdf8;text-decoration:none;transition:.2s}
+        .lb:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)}
+        .menu{display:none;position:absolute;top:42px;background:#0f172a;border:1px solid rgba(255,255,255,.2);border-radius:8px;width:max-content;padding:5px;z-index:999;box-shadow:0 8px 25px rgba(0,0,0,.8)}
+        [dir="rtl"] .wrap .menu{left:0}[dir="ltr"] .wrap .menu{right:0}
+        .menu.show{display:block!important}
+        .mi{padding:6px 12px;font-size:12px;color:#cbd5e1;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;text-decoration:none;white-space:nowrap;transition:.2s}
+        .mi:hover,.mi.active{background:rgba(56,189,248,.15);color:#38bdf8!important;font-weight:700}
+        
+        .logo{text-align:center;margin-bottom:20px}
+        .logo-header{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
+        .logo-icon{width:46px;height:46px;background:linear-gradient(135deg,#0ea5e9,#9333ea);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;font-style:italic;transform:skewX(-6deg);box-shadow:0 0 18px rgba(14,165,233,.45)}
+        .logo-text{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;letter-spacing:3px;font-style:italic;transform:skewX(-6deg);background:linear-gradient(135deg,#38bdf8,#c084fc,#f43f5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(56,189,248,.4)}
+        .logo p{color:#94a3b8;font-size:12px;margin-top:4px}
+        
+        .group{margin-bottom:14px}
+        .group label{display:block;margin-bottom:6px;font-size:12px;color:#cbd5e1}
+        .req{color:#ef4444;font-weight:700;margin-inline-start:3px}
+        .wrap-input{position:relative;display:flex;align-items:center}
+        .wrap-input i.f-icon{position:absolute;color:#64748b;font-size:14px;z-index:2}
+        html[dir="rtl"] .wrap-input i.f-icon{right:14px}
+        html[dir="ltr"] .wrap-input i.f-icon{left:14px}
+        .eye-btn{position:absolute;background:none;border:none;color:#64748b;cursor:pointer;font-size:14px;padding:4px;z-index:2}
+        html[dir="rtl"] .eye-btn{left:12px}
+        html[dir="ltr"] .eye-btn{right:12px}
+        .group input{width:100%;padding:12px 14px;background:rgba(10,15,30,.7)!important;border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff!important;font-size:13px;outline:0;-webkit-text-fill-color:#fff!important;transition:background-color 5000s ease-in-out 0s}
+        html[dir="rtl"] .group input{padding-right:40px;padding-left:40px}
+        html[dir="ltr"] .group input{padding-left:40px;padding-right:40px}
+        .group input:-webkit-autofill,.group input:-webkit-autofill:hover,.group input:-webkit-autofill:focus,.group input:-webkit-autofill:active{-webkit-box-shadow:0 0 0 30px rgba(10,15,30,.95) inset!important;-webkit-text-fill-color:#fff!important;caret-color:#fff}
+        #user::placeholder,#pass::placeholder{color:#9ca3af;opacity:1}
+        .group input:focus{border-color:#38bdf8;box-shadow:0 0 10px rgba(56,189,248,.2)}
+
+        ::spelling-error {
+            text-decoration: none !important;
+            -webkit-text-decoration: none !important;
+            text-decoration-line: none !important;
+            -webkit-text-decoration-line: none !important;
+            background: transparent !important;
+        }
+        ::grammar-error {
+            text-decoration: none !important;
+            -webkit-text-decoration: none !important;
+            text-decoration-line: none !important;
+            -webkit-text-decoration-line: none !important;
+            background: transparent !important;
+        }
+        #user,
+        #pass,
+        .group input,
+        .group input:hover,
+        .group input:focus,
+        .group input:active,
+        .group input:valid,
+        .group input:invalid,
+        .group input:placeholder-shown,
+        .group input:-webkit-autofill {
+            text-decoration: none !important;
+            -webkit-text-decoration: none !important;
+            text-decoration-line: none !important;
+            -webkit-text-decoration-line: none !important;
+            text-decoration-style: none !important;
+            text-decoration-color: transparent !important;
+            -webkit-text-decorations-in-effect: none !important;
+            border-bottom: none !important;
+            outline: none;
+        }
+        
+        .extra-links{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:11px}
+        .extra-links a{color:#38bdf8;text-decoration:none}
+        .extra-links a:hover{text-decoration:underline}
+        .btn{width:100%;padding:12px;background:linear-gradient(135deg,#0284c7,#9333ea);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;transition:all .3s ease}
+        .btn:disabled{background:rgba(255,255,255,.1);color:#64748b;cursor:not-allowed;box-shadow:none}
+        .footer{text-align:center;margin-top:16px;font-size:12px;color:#94a3b8}
+        .footer a{color:#38bdf8;text-decoration:none;font-weight:700}
+        #msg{margin-top:12px;font-size:12px;text-align:center;font-weight:500;padding:12px;border-radius:12px;display:none}
+        #msg.show{display:block}
+        .err{color:#f87171;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3)}
+        .succ{color:#4ade80;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3)}
+        @media (max-width: 768px) { input { font-size: 16px !important; } }
+    </style>
+</head>
+<body>
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+    <div class="auth-card" id="auth-card">
+        <div class="header-actions">
+            <a href="support.html" onclick="window.location.href='support.html';return false;" class="lb" id="btn-support"><i class="fas fa-headset" style="color:#a855f7"></i></a>
+            <div class="wrap">
+                <button type="button" class="lb" id="lang-btn"><i class="fas fa-globe" style="color:#22c55e"></i></button>
+                <div class="menu" id="lang-menu">
+                    <div class="mi" data-lang="en">English</div>
+                    <div class="mi" data-lang="fa">فارسی</div>
+                    <div class="mi" data-lang="ar">العربية</div>
+                    <div class="mi" data-lang="tr">Türkçe</div>
+                    <div class="mi" data-lang="ru">Русский</div>
+                    <div class="mi" data-lang="es">Español</div>
+                    <div class="mi" data-lang="fr">Français</div>
+                    <div class="mi" data-lang="de">Deutsch</div>
+                </div>
+            </div>
+        </div>
+        <div class="logo">
+            <div class="logo-header">
+                <div class="logo-icon">Z</div>
+                <div class="logo-text">ZENIX</div>
+            </div>
+            <p id="t-wel"></p>
+        </div>
+        <form id="form" novalidate spellcheck="false" autocomplete="off">
+            <div class="group">
+                <label id="l-user"><i class="fas fa-envelope"></i> <span id="txt-user"></span> <span class="req">*</span></label>
+                <div class="wrap-input">
+                    <i class="fas fa-envelope f-icon"></i>
+                    <input
+                        type="text"
+                        id="user"
+                        inputmode="email"
+                        pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+                        aria-label="Email address"
+                        autocomplete="email"
+                        autocorrect="off"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        lang="en"
+                        data-lpignore="true"
+                        data-form-type="other"
+                        required>
+                </div>
+            </div>
+            <div class="group">
+                <label id="l-pass"><i class="fas fa-lock"></i> <span id="txt-pass"></span> <span class="req">*</span></label>
+                <div class="wrap-input">
+                    <i class="fas fa-key f-icon"></i>
+                    <input
+                        type="password"
+                        id="pass"
+                        aria-label="Password"
+                        autocomplete="current-password"
+                        autocorrect="off"
+                        autocapitalize="none"
+                        spellcheck="false"
+                        lang="en"
+                        data-lpignore="true"
+                        required>
+                    <button type="button" class="eye-btn" id="eye-btn" aria-label="Toggle password visibility" onclick="togglePassword('pass',this)"><i class="fas fa-eye"></i></button>
+                </div>
+            </div>
+            
+            <div class="group" style="display:flex; justify-content:center; margin-bottom:14px;">
+                <div class="cf-turnstile"
+                     data-sitekey="0x4AAAAAAFaU1RVZfnTURKOc"
+                     data-theme="dark"
+                     data-callback="onCaptchaSuccess"
+                     data-expired-callback="onCaptchaExpired"
+                     data-error-callback="onCaptchaError"></div>
+            </div>
+
+            <div class="extra-links">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#cbd5e1;">
+                    <input type="checkbox" id="remember-me" checked style="accent-color:#38bdf8;cursor:pointer;">
+                    <span id="t-remember"></span>
+                </label>
+                <a href="forgot-password.html" id="t-forgot"></a>
+            </div>
+
+            <button type="submit" id="t-btn" class="btn" disabled></button>
+        </form>
+        <div id="msg"></div>
+        <div class="footer">
+            <p id="t-foot"></p>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(id,btn){
+            const input=document.getElementById(id);
+            if(input.type==='password'){input.type='text';btn.innerHTML='<i class="fas fa-eye-slash"></i>';}
+            else{input.type='password';btn.innerHTML='<i class="fas fa-eye"></i>';}
+        }
+    </script>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdmirror.com/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = "https://ujyenmqdgivuxvxptwyl.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_tRJPNKN0KUFfcta6I3xsNw_icShZQhO";
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const langData = {
+            en:{dir:'ltr',wel:'Login to Your Account',user:'Email',userP:'Email address',pass:'Password',passP:'Password',forgot:'Forgot password?',remember:'Remember me',btn:'Login',noAcc:"Don't have an account?",reg:'Register',supTitle:'Support',langTitle:'Change Language',errEmail:'Please enter a valid email address!',errNoUser:'Invalid credentials or account does not exist.',errTooMany:'Too many failed attempts. Account temporarily locked.',errDisabled:'Your account has been disabled by administrator.',errNet:'Please check your internet connection!',errCaptcha:'Please complete the security check.',succ:'Successfully logged in! Redirecting...'},
+            fa:{dir:'rtl',wel:'ورود به حساب کاربری',user:'ایمیل',userP:'آدرس ایمیل',pass:'رمز عبور',passP:'رمز عبور',forgot:'فراموشی رمز عبور؟',remember:'مرا به خاطر بسپار',btn:'ورود به حساب',noAcc:'حساب کاربری ندارید؟',reg:'ثبت‌نام کنید',supTitle:'پشتیبانی',langTitle:'تغییر زبان',errEmail:'لطفاً یک آدرس ایمیل معتبر وارد کنید!',errNoUser:'اطلاعات ورود نادرست است یا حساب کاربری وجود ندارد.',errTooMany:'به دلیل تلاش‌های ناموفق متعدد، حساب شما موقتاً قفل شده است.',errDisabled:'حساب کاربری شما توسط مدیریت مسدود شده است.',errNet:'اتصال اینترنت خود را بررسی کنید!',errCaptcha:'لطفاً بررسی امنیتی را کامل کنید.',succ:'با موفقیت وارد شدید! در حال انتقال...'},
+            ar:{dir:'rtl',wel:'تسجيل الدخول إلى حسابك',user:'البريد الإلكتروني',userP:'عنوان البريد الإلكتروني',pass:'كلمة المرور',passP:'كلمة المرور',forgot:'نسيت كلمة المرور؟',remember:'تذكرني',btn:'تسجيل الدخول',noAcc:'ليس لديك حساب؟',reg:'سجل الآن',supTitle:'الدعم الفني',langTitle:'تغيير اللغة',errEmail:'يرجى إدخال بريد إلكتروني صالح!',errNoUser:'بيانات الدخول غير صحيحة أو الحساب غير موجود.',errTooMany:'محاولات كثيرة خاطئة. تم قفل الحساب مؤقتاً.',errDisabled:'تم تعطيل حسابك من قبل الإدارة.',errNet:'يرجى التحقق من اتصالك بالإنترنت!',errCaptcha:'يرجى إكمال التحقق الأمني.',succ:'تم تسجيل الدخول بنجاح! جاري التوجيه...'},
+            tr:{dir:'ltr',wel:'Hesabınıza Giriş Yapın',user:'E-posta',userP:'E-posta adresi',pass:'Şifre',passP:'Şifre',forgot:'Şifrenizi mi unuttunuz?',remember:'Beni hatırla',btn:'Giriş Yap',noAcc:'Hesabınız yok mu?',reg:'Kayıt Olun',supTitle:'Destek',langTitle:'Dil Değiştir',errEmail:'Lütfen geçerli bir e-posta adresi girin!',errNoUser:'Hatalı e-posta/şifre veya hesap bulunamadı.',errTooMany:'Çok fazla hatalı deneme. Hesap geçici olarak kilitlendi.',errDisabled:'Hesabınız yönetici tarafından askıya alındı.',errNet:'Lütfen internet bağlantınızı kontrol edin!',errCaptcha:'Lütfen güvenlik kontrolünü tamamlayın.',succ:'Giriş başarılı! Yönlendiriliyorsunuz...'},
+            ru:{dir:'ltr',wel:'Вход в аккаунт',user:'Email',userP:'Адрес Email',pass:'Пароль',passP:'Пароль',forgot:'Забыли пароль?',remember:'Запомнить меня',btn:'Войти',noAcc:'Нет аккаунта?',reg:'Зарегистрироваться',supTitle:'Поддержка',langTitle:'Сменить язык',errEmail:'Пожалуйста, введите правильный адрес электронной почты!',errNoUser:'Неверные данные для входа или аккаунт не существует.',errTooMany:'Слишком много неудачных попыток. Аккаунт заблокирован.',errDisabled:'Ваш аккаунт заблокирован администратором.',errNet:'Пожалуйста, проверьте интернет-соединение!',errCaptcha:'Пожалуйста, пройдите проверку безопасности.',succ:'Успешный вход! Перенаправление...'},
+            es:{dir:'ltr',wel:'Iniciar sesión en su cuenta',user:'Correo electrónico',userP:'Dirección de correo',pass:'Contraseña',passP:'Contraseña',forgot:'¿Olvidaste tu contraseña?',remember:'Recordarme',btn:'Iniciar sesión',noAcc:'¿No tienes una cuenta?',reg:'Regístrate',supTitle:'Soporte',langTitle:'Cambiar idioma',errEmail:'¡Por favor ingrese un correo electrónico válido!',errNoUser:'Credenciales inválidas o cuenta inexistente.',errTooMany:'Demasiados intentos fallidos. Cuenta bloqueada temporalmente.',errDisabled:'Su cuenta ha sido deshabilitada por el administrador.',errNet:'¡Por favor verifique su conexión a internet!',errCaptcha:'Por favor complete la verificación de seguridad.',succ:'¡Inicio de sesión exitoso! Redirigiendo...'},
+            fr:{dir:'ltr',wel:'Connexion à votre compte',user:'E-mail',userP:'Adresse e-mail',pass:'Mot de passe',passP:'Mot de passe',forgot:'Mot de passe oublié ?',remember:'Se souvenir de moi',btn:'Se connecter',noAcc:"Vous n'avez pas de compte ?",reg:'Inscrivez-vous',supTitle:'Support',langTitle:'Changer de langue',errEmail:'Veuillez entrer une adresse e-mail valide !',errNoUser:'Identifiants invalides ou compte inexistant.',errTooMany:'Trop de tentatives échouées. Compte verrouillé.',errDisabled:'Votre compte a été désactivé par l\'administrateur.',errNet:'Veuillez vérifier votre connexion Internet !',errCaptcha:'Veuillez compléter la vérification de sécurité.',succ:'Connexion réussie ! Redirection...'},
+            de:{dir:'ltr',wel:'Anmeldung bei Ihrem Konto',user:'E-Mail',userP:'E-Mail-Adresse',pass:'Passwort',passP:'Passwort',forgot:'Passwort vergessen?',remember:'Angemeldet bleiben',btn:'Anmelden',noAcc:'Noch kein Konto?',reg:'Registrieren',supTitle:'Support',langTitle:'Sprache ändern',errEmail:'Bitte geben Sie eine gültige E-Mail-Adresse ein!',errNoUser:'Ungültige Anmeldedaten oder Konto existiert nicht.',errTooMany:'Zu viele fehlgeschlagene Versuche. Konto temporär gesperrt.',errDisabled:'Ihr Konto wurde vom Administrator deaktiviert.',errNet:'Bitte überprüfen Sie Ihre Internetverbindung!',errCaptcha:'Bitte schließen Sie die Sicherheitsüberprüfung ab.',succ:'Erfolgreich angemeldet! Weiterleitung...'}
+        };
+
+        let currentLang = localStorage.getItem('zenix_lang') || 'en';
+        let submitCounter = 0;
+        let isSubmitting = false;
+
+        const langBtn = document.getElementById('lang-btn'),
+              langMenu = document.getElementById('lang-menu'),
+              userIn = document.getElementById('user'),
+              passIn = document.getElementById('pass'),
+              submitBtn = document.getElementById('t-btn'),
+              msg = document.getElementById('msg'),
+              form = document.getElementById('form'),
+              authCard = document.getElementById('auth-card');
+
+        function hardDisableSpellcheck(el) {
+            if (!el) return;
+            try {
+                el.spellcheck = false;
+                el.setAttribute('spellcheck', 'false');
+                el.setAttribute('autocorrect', 'off');
+                el.setAttribute('autocapitalize', 'none');
+                el.setAttribute('data-gramm', 'false');
+                el.setAttribute('data-gramm_editor', 'false');
+                el.setAttribute('data-enable-grammarly', 'false');
+            } catch (e) {}
+        }
+        hardDisableSpellcheck(userIn);
+        hardDisableSpellcheck(passIn);
+
+        function getCaptchaToken() {
+            const domToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
+            return domToken || window.__cfToken || null;
+        }
+
+        // ★★★ اصلاح شده: چک status + بازگشت 'BANNED' برای کاربران مسدود
+        async function getTargetPage(userId) {
+            try {
+                const { data } = await supabaseClient
+                    .from('users')
+                    .select('phone, status')
+                    .eq('id', userId)
+                    .maybeSingle();
+
+                // اگر کاربر مسدود است، علامت BANNED برگردان
+                if (data && (data.status === 'cancelled' || data.status === 'banned')) {
+                    return 'BANNED';
+                }
+
+                if (!data || !data.phone || data.phone.trim() === '') return 'profile.html';
+                return 'dashboard.html';
+            } catch (e) { return 'dashboard.html'; }
+        }
+
+        langBtn?.addEventListener('click', e => { e.stopPropagation(); langMenu?.classList.toggle('show'); });
+        document.addEventListener('click', e => { if (!e.target.closest('.menu') && !e.target.closest('#lang-btn')) langMenu?.classList.remove('show'); });
+
+        function setLang(l) {
+            submitCounter++;
+            currentLang = l;
+            localStorage.setItem('zenix_lang', l);
+            langMenu?.classList.remove('show');
+            const t = langData[l] || langData.en;
+            document.documentElement.setAttribute('dir', t.dir);
+            document.documentElement.setAttribute('lang', l);
+            document.getElementById('t-wel').textContent = t.wel;
+            document.getElementById('txt-user').textContent = t.user;
+            userIn.placeholder = t.userP;
+            document.getElementById('txt-pass').textContent = t.pass;
+            passIn.placeholder = t.passP;
+            document.getElementById('t-remember').textContent = t.remember;
+            document.getElementById('t-forgot').textContent = t.forgot;
+            submitBtn.textContent = t.btn;
+            document.getElementById('t-foot').innerHTML = `${t.noAcc} <a href="register.html">${t.reg}</a>`;
+            document.getElementById('btn-support').setAttribute('title', t.supTitle);
+            langBtn.setAttribute('title', t.langTitle);
+            document.querySelectorAll('#lang-menu .mi').forEach(i => i.classList.toggle('active', i.dataset.lang === l));
+            authCard.classList.add('ready');
+            hardDisableSpellcheck(userIn);
+            hardDisableSpellcheck(passIn);
+        }
+
+        document.querySelectorAll('#lang-menu .mi').forEach(i => i.addEventListener('click', () => { setLang(i.dataset.lang); clearError(); }));
+        function clearError() { if (msg) { msg.innerHTML = ''; msg.className = ''; } }
+
+        function isValidEmail(email) {
+            if (!email) return false;
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function checkInputs() {
+            if (isSubmitting) return;
+            const emailOk = isValidEmail(userIn.value.trim());
+            const passOk = passIn.value.length >= 6;
+            const capOk = !!getCaptchaToken();
+            submitBtn.disabled = !(emailOk && passOk && capOk);
+        }
+
+        document.addEventListener('cf-token-ready', () => { checkInputs(); });
+
+        let lastKnownToken = null;
+        setInterval(() => {
+            if (isSubmitting) return;
+            const token = getCaptchaToken();
+            if (token !== lastKnownToken) {
+                lastKnownToken = token;
+                checkInputs();
+            }
+        }, 400);
+
+        userIn.addEventListener('focus', clearError);
+        userIn.addEventListener('input', () => { clearError(); checkInputs(); });
+        passIn.addEventListener('focus', clearError);
+        passIn.addEventListener('input', checkInputs);
+
+        function showError(errKey) {
+            const t = langData[currentLang] || langData.en;
+            msg.innerHTML = `<div>${t[errKey] || errKey}</div>`;
+            msg.className = 'err show';
+            checkInputs();
+        }
+
+        // ★★★ نمایش پیام مسدود بودن با آیکون واضح
+        function showBanned() {
+            const t = langData[currentLang] || langData.en;
+            msg.innerHTML = `<div><i class="fas fa-ban" style="margin-inline-end:6px;"></i>${t.errDisabled}</div>`;
+            msg.className = 'err show';
+            submitBtn.disabled = false;
+            isSubmitting = false;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const emailVal = userIn.value.trim().toLowerCase();
+            const passVal = passIn.value.trim();
+
+            if (!isValidEmail(emailVal)) return showError('errEmail');
+            const captchaToken = getCaptchaToken();
+            if (!captchaToken) return showError('errCaptcha');
+
+            const currentSubmit = ++submitCounter;
+            isSubmitting = true;
+            submitBtn.disabled = true;
+            clearError();
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: emailVal,
+                    password: passVal,
+                    options: { captchaToken: captchaToken }
+                });
+
+                if (currentSubmit !== submitCounter) { isSubmitting = false; return; }
+                if (error) throw error;
+
+                const targetPage = await getTargetPage(data.user.id);
+                if (currentSubmit !== submitCounter) { isSubmitting = false; return; }
+
+                // ★★★ چک مسدود بودن: اگر BANNED بود، خارج شو + پیام بده
+                if (targetPage === 'BANNED') {
+                    try { await supabaseClient.auth.signOut(); } catch (_) {}
+                    try { if (window.turnstile) window.turnstile.reset(); } catch(e) {}
+                    showBanned();
+                    return;
+                }
+
+                const t = langData[currentLang] || langData.en;
+                msg.innerHTML = `<div>${t.succ}</div>`;
+                msg.className = 'succ show';
+                setTimeout(() => { window.location.href = targetPage; }, 1000);
+            } catch (error) {
+                if (currentSubmit !== submitCounter) { isSubmitting = false; return; }
+                console.error('Login Error:', error);
+                isSubmitting = false;
+                submitBtn.disabled = false;
+
+                try { if (window.turnstile) window.turnstile.reset(); } catch(e) {}
+
+                if (error.status === 429 || (error.message && error.message.toLowerCase().includes('too many requests'))) {
+                    const t = langData[currentLang] || langData.en;
+                    msg.innerHTML = `<div>${t.errTooMany}</div>`;
+                    msg.className = 'err show';
+                } else {
+                    showError('errNoUser');
+                }
+                checkInputs();
+            }
+        });
+
+        window.addEventListener('pageshow', () => { clearError(); checkInputs(); });
+        setLang(currentLang);
+    </script>
+</body>
+</html>
