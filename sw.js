@@ -1,45 +1,112 @@
-const CACHE_NAME = 'zenix-v1';
-const ASSETS_TO_CACHE = [
-  './',
-  './dashboard.html',
-  './team-members.html',
-  './transactions.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Vazirmatn:wght@400;500;700&display=swap'
+// ==========================================
+// Zenix Service Worker — نسخه‌ی Aggressive Update
+// نسخه: zenix-v5.1
+// استراتژی:
+//   - HTML و dashboard.js و sw.js: Network-First + no-store
+//   - بقیه assets: Stale-While-Revalidate
+// ==========================================
+
+const CACHE_VERSION = 'zenix-v5.1';
+const STATIC_CACHE  = CACHE_VERSION + '-static';
+const HTML_CACHE    = CACHE_VERSION + '-html';
+
+const PRECACHE_URLS = [
+    './',
+    './index.html',
+    './dashboard.html'
 ];
 
-// نصب سرویس ورکر و ذخیره فایل‌های اولیه
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
+// ── INSTALL: skipWaiting فوری ──
+self.addEventListener('install', (event) => {
+    event.waitUntil(
+        caches.open(STATIC_CACHE)
+            .then((cache) => cache.addAll(PRECACHE_URLS).catch(() => {}))
+            .then(() => self.skipWaiting())
+    );
 });
 
-// فعال‌سازی و پاک‌‌سازی کش‌های قدیمی
-self.addEventListener('activate', (e) => {
-  e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
+// ── ACTIVATE: پاک‌سازی کامل کش‌های قدیمی + claim فوری ──
+self.addEventListener('activate', (event) => {
+    event.waitUntil(
+        caches.keys()
+            .then((keys) => Promise.all(
+                keys
+                    .filter((k) => k.indexOf(CACHE_VERSION) !== 0)
+                    .map((k) => caches.delete(k))
+            ))
+            .then(() => self.clients.claim())
+    );
+});
+
+// ── پیام skipWaiting از سمت کلاینت ──
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+});
+
+// ── FETCH ──
+self.addEventListener('fetch', (event) => {
+    const req = event.request;
+    if (req.method !== 'GET') return;
+
+    const url = new URL(req.url);
+    if (url.origin !== self.location.origin) return;
+
+    const accept = req.headers.get('accept') || '';
+    const isHTML = req.mode === 'navigate' || accept.indexOf('text/html') !== -1;
+
+    // ★★ HTML: همیشه از شبکه، بدون HTTP Cache ★★
+    if (isHTML) {
+        event.respondWith(
+            fetch(req, { cache: 'no-store' })
+                .then((res) => {
+                    const copy = res.clone();
+                    caches.open(HTML_CACHE).then((c) => c.put(req, copy));
+                    return res;
+                })
+                .catch(() =>
+                    caches.match(req).then((cached) =>
+                        cached || caches.match('./index.html')
+                    )
+                )
+        );
+        return;
+    }
+
+    // ★★ فایل‌های حیاتی: Network-First + no-store ★★
+    const isCriticalJS =
+        url.pathname.endsWith('/dashboard.js') ||
+        url.pathname.endsWith('/dashboard.html');
+
+    if (isCriticalJS) {
+        event.respondWith(
+            fetch(req, { cache: 'no-store' })
+                .then((res) => {
+                    if (res && res.ok && res.status === 200) {
+                        const copy = res.clone();
+                        caches.open(STATIC_CACHE).then((c) => c.put(req, copy));
+                    }
+                    return res;
+                })
+                .catch(() => caches.match(req))
+        );
+        return;
+    }
+
+    // ── بقیه assets: Stale-While-Revalidate ──
+    event.respondWith(
+        caches.match(req).then((cached) => {
+            const networkFetch = fetch(req)
+                .then((res) => {
+                    if (res && res.ok && res.status === 200) {
+                        const copy = res.clone();
+                        caches.open(STATIC_CACHE).then((c) => c.put(req, copy));
+                    }
+                    return res;
+                })
+                .catch(() => cached);
+            return cached || networkFetch;
         })
-      );
-    })
-  );
-});
-
-// مدیریت درخواست‌ها و پاسخ‌دهی از کش
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      return cachedResponse || fetch(e.request);
-    })
-  );
+    );
 });

@@ -3,83 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenix - پشتیبانی هوشمند پلتفرم</title>
+    <title>Zenix - Support</title>
     <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
+        *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,'Vazirmatn',sans-serif}
         body{background:#030712;min-height:100vh;color:#f8fafc;display:flex;flex-direction:column}
+        
+        .identity-msg { display: none !important; }
+
         header{background:rgba(15,23,42,.9);border-bottom:1px solid rgba(255,255,255,.1);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
         .logo h2{font-size:18px;color:#38bdf8;font-weight:800}
         .header-actions{display:flex;gap:8px;align-items:center}
-        .back-btn, .mode-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);height:36px;padding:0 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;color:#38bdf8;text-decoration:none;font-family:inherit}
-        .mode-btn.admin-mode{color:#22c55e;border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.1)}
-        .mode-btn.ai-mode{color:#a855f7;border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.1)}
-        .c{max-width:700px;width:100%;margin:20px auto;padding:0 12px;flex:1;display:flex;flex-direction:column}
-        .chat-box{background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.1);border-radius:16px;display:flex;flex-direction:column;height:600px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.8)}
-        .chat-header{background:rgba(30,41,59,.9);padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
-        .chat-avatar{width:36px;height:36px;background:rgba(56,189,248,.2);border:1px solid #38bdf8;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#38bdf8;font-size:16px}
-        .chat-avatar.admin{border-color:#22c55e;background:rgba(34,197,94,.2);color:#22c55e}
-        .chat-title h3{font-size:14px;color:#f8fafc}
-        .chat-title p{font-size:10px;color:#22c55e;display:flex;align-items:center;gap:4px}
-        .chat-body{flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
-        .msg{max-width:85%;padding:10px 14px;border-radius:12px;font-size:12px;line-height:1.7;word-wrap:break-word}
+        .wrap{position:relative}
+        .lang-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);height:36px;width:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#22c55e;font-family:inherit}
+        .lang-menu{display:none;position:absolute;top:42px;background:#0f172a;border:1px solid rgba(56,189,248,.3);border-radius:10px;min-width:150px;padding:6px;z-index:999;box-shadow:0 10px 30px rgba(0,0,0,.9)}
+        [dir="rtl"] .wrap .lang-menu{left:0}
+        [dir="ltr"] .wrap .lang-menu{right:0}
+        .lang-menu.show{display:block}
+        .lang-item{padding:8px 12px;font-size:12px;color:#cbd5e1;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;white-space:nowrap}
+        .lang-item:hover,.lang-item.active{background:rgba(56,189,248,.15);color:#38bdf8;font-weight:700}
+        .back-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);height:36px;padding:0 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;color:#38bdf8;text-decoration:none;font-family:inherit;white-space:nowrap}
+        .c{max-width:700px;width:100%;margin:20px auto;padding:0 12px;flex:1;display:flex;flex-direction:column;gap:12px}
+        .view-section{display:flex;flex-direction:column;gap:12px}
+        .topics-section{background:linear-gradient(135deg,rgba(15,23,42,.95),rgba(30,41,59,.85));border:1px solid rgba(56,189,248,.25);border-radius:20px;padding:22px 18px;box-shadow:0 10px 40px rgba(0,0,0,.9)}
+        .topics-intro{text-align:center;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.08)}
+        .topics-intro .welcome-icon{width:64px;height:64px;background:linear-gradient(135deg,#38bdf8,#a855f7);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px;color:#fff;margin-bottom:14px;box-shadow:0 8px 25px rgba(56,189,248,.4)}
+        .topics-intro h2{font-size:18px;font-weight:900;margin-bottom:8px;background:linear-gradient(135deg,#38bdf8,#c084fc,#f43f5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .topics-intro p{font-size:12.5px;color:#cbd5e1;line-height:1.8;max-width:480px;margin:0 auto}
+        .topics-title{font-size:13px;color:#38bdf8;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .topics-title small{color:#94a3b8;font-weight:500;font-size:11px;margin-inline-start:auto}
+        .topics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+        .topic-card{background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.08);border-radius:14px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#cbd5e1;cursor:pointer;transition:all .3s ease;min-height:110px;font-family:inherit}
+        .topic-card:hover{background:rgba(56,189,248,.08);border-color:rgba(56,189,248,.5);transform:translateY(-3px);color:#38bdf8}
+        .topic-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+        .topic-label{font-size:12px;font-weight:700;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+        .topic-desc{font-size:9.5px;color:#64748b;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+        .ni-blue{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3)}
+        .ni-purple{background:rgba(168,85,247,.15);color:#c084fc;border:1px solid rgba(168,85,247,.3)}
+        .ni-green{background:rgba(34,197,94,.15);color:#22c55e;border:1px solid rgba(34,197,94,.3)}
+        .ni-yellow{background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+        .ni-pink{background:rgba(236,72,153,.15);color:#ec4899;border:1px solid rgba(236,72,153,.3)}
+        .ni-cyan{background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3)}
+        .ni-rose{background:rgba(244,63,94,.15);color:#f43f5e;border:1px solid rgba(244,63,94,.3)}
+        .ni-emerald{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3)}
+        .ni-amber{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3)}
+        .chat-view-header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+        .close-chat-btn{background:linear-gradient(135deg,#ef4444,#dc2626);border:1px solid rgba(239,68,68,.5);color:#fff;padding:9px 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 15px rgba(239,68,68,.3)}
+        .conversation-id-badge{background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(168,85,247,.15));border:1px solid rgba(56,189,248,.4);color:#38bdf8;padding:9px 14px;border-radius:10px;font-size:11.5px;display:flex;align-items:center;gap:6px;font-weight:600}
+        .conversation-id-badge i{color:#fbbf24}
+        .conversation-id-badge strong{font-family:'Courier New',monospace;font-weight:900;letter-spacing:1.5px;font-size:13px;color:#fff;background:rgba(15,23,42,.6);padding:3px 8px;border-radius:5px;border:1px solid rgba(56,189,248,.3)}
+        .chat-box{background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.1);border-radius:16px;display:flex;flex-direction:column;height:520px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.8)}
+        .chat-header{background:rgba(30,41,59,.9);padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
+        .chat-avatar{width:44px;height:44px;background:rgba(56,189,248,.15);border:2px solid #38bdf8;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#38bdf8;font-size:17px;flex-shrink:0;overflow:hidden}
+        .chat-avatar.expert{border-color:#22c55e;box-shadow:0 0 15px rgba(34,197,94,.3)}
+        .chat-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+        .chat-title{flex:1;min-width:0}
+        .chat-title h3{font-size:14px;color:#f8fafc;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+        .chat-title h3 .expert-name{font-weight:900;color:#22c55e}
+        .chat-title h3 .expert-role{font-size:11px;color:#94a3b8;font-weight:500}
+        .chat-title p{font-size:10.5px;display:flex;align-items:center;gap:5px}
+        .chat-body{flex:1;padding:14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+        .msg{max-width:85%;padding:9px 13px;border-radius:12px;font-size:12px;line-height:1.7;word-wrap:break-word}
         .msg.system{background:rgba(148,163,184,.12);border:1px solid rgba(148,163,184,.25);color:#cbd5e1;align-self:center;text-align:center;font-size:11px;max-width:90%}
-        .msg.bot{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#cbd5e1;align-self:flex-start;border-top-right-radius:2px}
-        .msg.admin{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;align-self:flex-start;border-top-right-radius:2px}
-        .msg.user{background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:#38bdf8;align-self:flex-end;border-top-left-radius:2px}
+        .msg.system.code-msg{background:rgba(168,85,247,.15);border:1.5px solid rgba(168,85,247,.5);color:#e0c7ff;font-size:13px;max-width:95%;white-space:pre-line;line-height:1.9;min-width:220px}
+        .msg.system.identity-msg{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(168,85,247,.08));border:1.5px solid rgba(56,189,248,.4);color:#cbd5e1;font-size:12px;max-width:95%;padding:14px;text-align:start;line-height:1.9}
+        .identity-header{display:flex;align-items:center;justify-content:center;gap:8px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px dashed rgba(56,189,248,.3);color:#38bdf8;font-weight:800;font-size:13px}
+        .identity-header i{font-size:16px}
+        .identity-row{padding:4px 0;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+        .identity-row strong{color:#94a3b8;font-weight:600;font-size:11.5px}
+        .identity-row .val{color:#f8fafc;font-weight:700;font-size:12px}
+        .identity-row .code-val{font-family:'Courier New',monospace;color:#38bdf8;font-weight:900;letter-spacing:1.5px;background:rgba(15,23,42,.6);padding:2px 8px;border-radius:5px;border:1px solid rgba(56,189,248,.3);font-size:12.5px}
+        .identity-row .email-val{font-family:'Courier New',monospace;color:#c084fc;font-size:11.5px;direction:ltr;text-align:left;word-break:break-all}
+        .otp-code-display{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0}
+        .otp-code-text{font-size:24px;font-weight:900;letter-spacing:4px;color:#fff;font-family:'Courier New',monospace;direction:ltr}
+        .copy-otp-btn{background:rgba(168,85,247,.35);border:1px solid rgba(168,85,247,.7);color:#e0c7ff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;min-width:34px;height:34px}
+        .copy-otp-btn.copied{background:rgba(34,197,94,.4);border-color:rgba(34,197,94,.7)}
+        .otp-timer-row{font-size:11px;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px}
+        .otp-timer-val{color:#fbbf24;font-weight:bold;font-family:monospace}
+        .msg.bot{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#cbd5e1;align-self:flex-start}
+        .msg.admin{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#4ade80;align-self:flex-start}
+        .msg.user{background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);color:#38bdf8;align-self:flex-end}
         .msg-meta{font-size:9px;opacity:0.6;margin-top:4px;display:block}
-        .msg-sender{font-size:9px;opacity:0.7;margin-bottom:2px;font-weight:700}
+        .msg-sender{font-size:9px;opacity:0.8;margin-bottom:3px;font-weight:700;color:#22c55e}
         .typing-indicator{display:flex;gap:4px;padding:4px 8px;align-items:center}
         .typing-dot{width:6px;height:6px;background:#38bdf8;border-radius:50%;animation:bounce 1.4s infinite ease-in-out both}
         .typing-dot:nth-child(1){animation-delay:-0.32s}.typing-dot:nth-child(2){animation-delay:-0.16s}
         @keyframes bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1.0)}}
         .quick-replies{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;justify-content:flex-end}
-        .quick-reply-btn{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);color:#38bdf8;padding:7px 11px;border-radius:8px;font-size:11px;cursor:pointer;transition:all .2s;font-family:inherit;white-space:nowrap}
-        .quick-reply-btn:hover{background:rgba(56,189,248,.25);border-color:#38bdf8}
+        .quick-reply-btn{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);color:#38bdf8;padding:7px 11px;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap}
         .quick-reply-btn.admin-link{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:#f87171}
-        .quick-reply-btn.admin-link:hover{background:rgba(239,68,68,.25)}
-        .chat-footer{padding:12px;border-top:1px solid rgba(255,255,255,.1);background:rgba(15,23,42,.9);display:flex;gap:8px}
+        .chat-footer{padding:10px 12px;border-top:1px solid rgba(255,255,255,.1);background:rgba(15,23,42,.9);display:flex;gap:8px}
         .chat-input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;color:#fff;font-size:12px;outline:none}
         .chat-input:focus{border-color:#38bdf8}
+        .chat-input:disabled{opacity:.5;cursor:not-allowed}
         .send-btn{background:#38bdf8;color:#030712;border:none;border-radius:10px;width:40px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
         .send-btn:disabled{background:#475569;cursor:not-allowed}
-        .error-banner{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;padding:12px;border-radius:10px;margin-bottom:12px;font-size:12px;display:none}
+        .error-banner{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#f87171;padding:12px;border-radius:10px;font-size:12px;display:none}
         .error-banner.show{display:block}
         footer{text-align:center;padding:12px;font-size:11px;color:#64748b;border-top:1px solid rgba(255,255,255,.05);margin-top:auto}
+        .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(2,6,23,.85);backdrop-filter:blur(8px);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+        .modal-overlay.show{display:flex}
+        .modal-box{background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid rgba(239,68,68,.4);border-radius:18px;width:100%;max-width:400px;padding:24px;text-align:center}
+        .modal-box .modal-icon{width:60px;height:60px;background:rgba(239,68,68,.15);border:2px solid #ef4444;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:26px;color:#ef4444;margin-bottom:14px}
+        .modal-box h3{font-size:16px;color:#f8fafc;font-weight:800;margin-bottom:8px}
+        .modal-box p{font-size:12.5px;color:#94a3b8;line-height:1.7;margin-bottom:20px}
+        .modal-box .modal-actions{display:flex;gap:8px}
+        .modal-box .modal-actions button{flex:1;padding:11px;border-radius:9px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;border:none}
+        .modal-box .btn-cancel{background:rgba(148,163,184,.15);border:1px solid rgba(148,163,184,.3);color:#cbd5e1}
+        .modal-box .btn-confirm{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+        @media (max-width: 480px) {
+            .chat-box{height:460px}
+            .chat-avatar{width:40px;height:40px}
+            .topics-section{padding:16px 12px}
+            .topics-intro .welcome-icon{width:52px;height:52px;font-size:22px}
+            .topics-intro h2{font-size:15px}
+            .topics-intro p{font-size:11px}
+            .topics-grid{gap:7px}
+            .topic-card{padding:10px 5px;min-height:82px;gap:5px}
+            .topic-icon{width:34px;height:34px;font-size:15px}
+            .topic-label{font-size:9.5px}
+            .topic-desc{display:none}
+            .back-btn{font-size:11px;padding:0 9px;height:33px}
+            .lang-btn{width:33px;height:33px}
+        }
+        @media (max-width: 360px) {
+            .topics-grid{grid-template-columns:repeat(2,1fr)}
+            .topic-card{min-height:76px}
+            .topic-label{font-size:9px}
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="logo"><h2>ZENIX SUPPORT</h2></div>
         <div class="header-actions">
-            <button id="mode-toggle-btn" class="mode-btn admin-mode" style="display:none;" onclick="toggleMode()">
-                <i class="fas fa-headset"></i> <span id="mode-btn-text">اتصال به ادمین</span>
-            </button>
-            <a href="#" class="back-btn" onclick="goBack(event)"><i class="fas fa-arrow-right"></i> بازگشت</a>
+            <div class="wrap">
+                <button class="lang-btn" id="lang-btn" title="Language"><i class="fas fa-globe"></i></button>
+                <div class="lang-menu" id="lang-menu">
+                    <div class="lang-item" data-lang="fa">🇮🇷 فارسی</div>
+                    <div class="lang-item" data-lang="en">🇬🇧 English</div>
+                    <div class="lang-item" data-lang="ar">🇸🇦 العربية</div>
+                    <div class="lang-item" data-lang="tr">🇹🇷 Türkçe</div>
+                    <div class="lang-item" data-lang="ru">🇷🇺 Русский</div>
+                    <div class="lang-item" data-lang="es">🇪🇸 Español</div>
+                    <div class="lang-item" data-lang="fr">🇫🇷 Français</div>
+                    <div class="lang-item" data-lang="de">🇩🇪 Deutsch</div>
+                </div>
+            </div>
+            <a href="#" class="back-btn" onclick="goBack(event)"><i class="fas fa-arrow-right" id="back-icon"></i> <span id="back-btn-text">بازگشت</span></a>
         </div>
     </header>
     <div class="c">
         <div id="error-banner" class="error-banner"></div>
-        <div class="chat-box">
-            <div class="chat-header">
-                <div class="chat-avatar" id="chat-avatar-el"><i class="fas fa-robot" id="chat-avatar-icon"></i></div>
-                <div class="chat-title">
-                    <h3 id="support-status-title">پشتیبانی آنلاین زنیکس</h3>
-                    <p><i class="fas fa-circle" style="font-size:6px;"></i> <span id="support-status-sub">در حال اتصال...</span></p>
+        <div id="view-topics" class="view-section">
+            <div class="topics-section">
+                <div class="topics-intro">
+                    <div class="welcome-icon"><i class="fas fa-headset"></i></div>
+                    <h2 id="welcome-title">به پشتیبانی زنیکس خوش آمدید 🌹</h2>
+                    <p id="welcome-text">تیم کارشناسان متخصص ما به صورت ۲۴ ساعته آماده کمک به شما هستند. کافیست موضوع سوال خود را از بین گزینه‌های زیر انتخاب کنید.</p>
+                </div>
+                <div class="topics-title">
+                    <i class="fas fa-list-check"></i>
+                    <span id="topics-title-text">موضوعات پشتیبانی</span>
+                    <small id="topics-hint">برای شروع، یک موضوع انتخاب کنید</small>
+                </div>
+                <div class="topics-grid" id="topics-grid"></div>
+            </div>
+        </div>
+        <div id="view-chat" class="view-section" style="display:none;">
+            <div class="chat-view-header">
+                <button class="close-chat-btn" onclick="window.requestCloseChat()">
+                    <i class="fas fa-times-circle"></i> <span id="close-chat-text">بستن گفتگو</span>
+                </button>
+                <div class="conversation-id-badge">
+                    <i class="fas fa-ticket-alt"></i>
+                    <span id="conv-id-label">شناسه گفتگو:</span>
+                    <strong id="conversation-id">ZE-000000</strong>
                 </div>
             </div>
-            <div class="chat-body" id="chat-body"></div>
-            <div class="chat-footer">
-                <input type="text" class="chat-input" id="user-input" placeholder="سوال خود را بنویسید..." disabled>
-                <button class="send-btn" id="send-msg-btn" disabled><i class="fas fa-paper-plane"></i></button>
+            <div class="chat-box">
+                <div class="chat-header">
+                    <div class="chat-avatar expert" id="chat-avatar-el">
+                        <img id="chat-avatar-img" src="" alt="" style="display:none;">
+                        <i class="fas fa-user-tie" id="chat-avatar-icon"></i>
+                    </div>
+                    <div class="chat-title">
+                        <h3 id="chat-title-h3"></h3>
+                        <p id="chat-title-p"></p>
+                    </div>
+                </div>
+                <div class="chat-body" id="chat-body"></div>
+                <div class="chat-footer">
+                    <input type="text" class="chat-input" id="user-input" placeholder="" disabled>
+                    <button class="send-btn" id="send-msg-btn" disabled><i class="fas fa-paper-plane"></i></button>
+                </div>
             </div>
         </div>
     </div>
     <footer><p>&copy; 2026 Zenix. All rights reserved.</p></footer>
+    <div class="modal-overlay" id="close-modal">
+        <div class="modal-box">
+            <div class="modal-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3 id="close-modal-title">بستن گفتگو</h3>
+            <p id="close-modal-text">آیا از بستن این گفتگو مطمئن هستید؟</p>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="window.cancelCloseChat()" id="close-cancel">انصراف</button>
+                <button class="btn-confirm" onclick="window.confirmCloseChat()" id="close-confirm">بله، بستن</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { createClient } from 'https://cdn.jsdmirror.com/npm/@supabase/supabase-js@2/+esm';
-
         const SUPABASE_URL = 'https://ujyenmqdgivuxvxptwyl.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_tRJPNKN0KUFfcta6I3xsNw_icShZQhO';
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -88,48 +223,908 @@
         const userInput = document.getElementById('user-input');
         const sendBtn = document.getElementById('send-msg-btn');
         const errorBanner = document.getElementById('error-banner');
-        const modeBtn = document.getElementById('mode-toggle-btn');
-        const modeBtnText = document.getElementById('mode-btn-text');
+        const topicsGrid = document.getElementById('topics-grid');
+        const viewTopics = document.getElementById('view-topics');
+        const viewChat = document.getElementById('view-chat');
+        const conversationIdEl = document.getElementById('conversation-id');
+        const chatTitleH3 = document.getElementById('chat-title-h3');
+        const chatTitleP = document.getElementById('chat-title-p');
+        const chatAvatarEl = document.getElementById('chat-avatar-el');
+        const chatAvatarIcon = document.getElementById('chat-avatar-icon');
+        const chatAvatarImg = document.getElementById('chat-avatar-img');
+        const closeModal = document.getElementById('close-modal');
+        const backBtnText = document.getElementById('back-btn-text');
+        const langBtn = document.getElementById('lang-btn');
+        const langMenu = document.getElementById('lang-menu');
 
         let currentUser = null;
         let currentChatId = null;
+        let currentView = 'topics';
+        let currentTopic = null;
+        let currentConversationId = null;
         let aiMode = true;
         let realtimeChannel = null;
         let isSending = false;
+        let chatIsOpen = false;
+        let isProcessingTopicClick = false;
+        let currentLang = 'fa';
 
-        function escapeHtml(value) {
-            return String(value == null ? '' : value)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+        const OTP_EXPIRY_MS = 2 * 60 * 1000;
+        const IS_MOBILE = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+        function generateUIDDigits(userId) {
+            let hash = 5381;
+            for (let i = 0; i < userId.length; i++) hash = ((hash << 5) + hash) + userId.charCodeAt(i);
+            return (Math.abs(hash % 900000) + 100000).toString();
         }
 
+        const EXPERT_IMAGES = {
+            dashboard: 'https://randomuser.me/api/portraits/women/44.jpg',
+            quantification: 'https://randomuser.me/api/portraits/women/68.jpg',
+            deposit: 'https://randomuser.me/api/portraits/women/21.jpg',
+            withdraw: 'https://randomuser.me/api/portraits/women/45.jpg',
+            team: 'https://randomuser.me/api/portraits/women/33.jpg',
+            transactions: 'https://randomuser.me/api/portraits/women/79.jpg',
+            profile: 'https://randomuser.me/api/portraits/women/90.jpg',
+            login: 'https://randomuser.me/api/portraits/women/65.jpg',
+            register: 'https://randomuser.me/api/portraits/women/56.jpg'
+        };
+
+        const TOPIC_ICONS = {
+            dashboard: { icon: 'fa-home', color: 'ni-blue' },
+            quantification: { icon: 'fa-robot', color: 'ni-purple' },
+            deposit: { icon: 'fa-arrow-down', color: 'ni-green' },
+            withdraw: { icon: 'fa-arrow-up', color: 'ni-yellow' },
+            team: { icon: 'fa-users', color: 'ni-pink' },
+            transactions: { icon: 'fa-history', color: 'ni-cyan' },
+            profile: { icon: 'fa-user-cog', color: 'ni-rose' },
+            login: { icon: 'fa-sign-in-alt', color: 'ni-emerald' },
+            register: { icon: 'fa-user-plus', color: 'ni-amber' }
+        };
+
+        const EXPERT_NAMES = { dashboard: 'Sophia', quantification: 'Isabella', deposit: 'Emma', withdraw: 'Olivia', team: 'Mia', transactions: 'Ava', profile: 'Chloe', login: 'Lily', register: 'Grace' };
+        
+        const LD = {
+            fa: {
+                dir: 'rtl',
+                ui: { back: 'بازگشت', backToTopics: 'بازگشت به موضوعات', welcomeTitle: 'به پشتیبانی زنیکس خوش آمدید 🌹', welcomeText: 'تیم کارشناسان متخصص ما به صورت ۲۴ ساعته آماده کمک به شما هستند. کافیست موضوع سوال خود را از بین گزینه‌های زیر انتخاب کنید.', topicsTitle: 'موضوعات پشتیبانی', topicsHint: 'برای شروع، یک موضوع انتخاب کنید', closeChat: 'بستن گفتگو', conversationId: 'شناسه گفتگو:', online: 'آنلاین', connected: 'متصل', closeModalTitle: 'بستن گفتگو', closeModalText: 'آیا از بستن این گفتگو مطمئن هستید؟ پس از بستن، می‌توانید موضوع دیگری انتخاب کنید.', cancel: 'انصراف', confirm: 'بله، بستن', adminView: 'پشتیبانی انسانی', adminRole: 'ادمین زنیکس', inputDefault: 'سوال خود را بنویسید...', inputAbout: 'سوال خود را درباره', inputAboutSuffix: 'بنویسید...', mustSelectTopic: 'لطفاً ابتدا یک موضوع انتخاب کنید.', activeChatError: '⚠️ شما در حال حاضر یک گفتگوی فعال دارید. ابتدا آن را ببندید.', noInfoFound: 'متأسفم، در این مورد اطلاعاتی ندارم.', switchingToAdmin: 'باشه، شما را به پشتیبان انسانی وصل می‌کنم...', sendError: 'خطا در ارسال پیام:', noMessages: 'هنوز پیامی در این گفتگو وجود ندارد.', copySuccess: 'کد کپی شد، در حال بازگشت...', switchToAdminBtn: '💬 اتصال به ادمین', userInfoHeader: 'اطلاعات کاربر', userIdLabel: 'شناسه کاربر', userNameLabel: 'نام', userEmailLabel: 'ایمیل' },
+                roles: { dashboard: 'کارشناس داشبورد', quantification: 'کارشناس ربات معامله‌گر', deposit: 'کارشناس واریز', withdraw: 'کارشناس برداشت', team: 'کارشناس تیم و رفرال', transactions: 'کارشناس تراکنش‌ها', profile: 'کارشناس امنیت حساب', login: 'کارشناس ورود', register: 'کارشناس ثبت‌نام' },
+                smallTalk: {
+                    greeting: { kw: ['سلام', 'درود', 'hi', 'hello', 'hey', 'salam'], r: 'سلام! 🌸 خوشحالم که اینجایی. من {name} هستم، {role}. چطور می‌تونم امروز کمکت کنم؟' },
+                    howAreYou: { kw: ['چطوری', 'چطورید', 'خوبی', 'حالت چطوره', 'how are you'], r: 'من عالی‌ام، ممنون که پرسیدی! 😊 تو چطوری؟ هر سوالی داری بپرس.' },
+                    goodMorning: { kw: ['صبح بخیر', 'good morning'], r: 'صبح بخیر! ☀️ چه شروع خوبی برای روز. چطور می‌تونم کمکت کنم؟' },
+                    goodNight: { kw: ['شب بخیر', 'good night'], r: 'شب بخیر! 🌙 امیدوارم روز خوبی داشته باشی.' },
+                    thanks: { kw: ['ممنون', 'مرسی', 'متشکرم', 'تشکر', 'thank', 'thanks'], r: 'خواهش می‌کنم! 🌷 خوشحالم که تونستم کمک کنم. چیز دیگه‌ای هست؟' },
+                    bye: { kw: ['خداحافظ', 'خدافظ', 'bye', 'goodbye'], r: 'خداحافظ! 🌸 هر وقت سوالی داشتی، من اینجام.' },
+                    whoAreYou: { kw: ['تو کی هستی', 'کی هستی', 'اسمت چیه', 'who are you'], r: 'من {name} هستم، {role} تیم پشتیبانی زنیکس 🌸 اینجام تا به هر سوالی درباره‌ی داشبورد و پلتفرم کمکت کنم.' },
+                    whatCanYouDo: { kw: ['چیکار میتونی', 'چه کاری میتونی', 'چی میتونی بکنی', 'what can you do'], r: 'من می‌تونم درباره موجودی، زیرمجموعه، اعلان‌ها، صندوق پیام، میانبرها، بازار ارز، تنظیمات زبان، منو، کازینو، درباره پلتفرم، خروج و همه‌ی بخش‌های داشبورد راهنمایی‌ت کنم. فقط بپرس! 🌸' }
+                },
+                topics: {
+                    dashboard: {
+                        label: 'داشبورد', desc: 'موجودی و آمار',
+                        welcome: 'سلام و درود! 🌸<br>من <strong>Sophia</strong> هستم، کارشناس داشبورد.<br>درباره موجودی، آمار، اعلان‌ها، پیام‌ها، میانبرها و هر بخش دیگری از داشبورد می‌تونم راهنمایی‌ت کنم. چی می‌خوای بدونی؟',
+                        knowledge: [
+                            { kw: ['موجودی','بالانس','چقدر','پول','حساب','دلار','usdt'], r: 'موجودی کل حساب به دلار (USDT) در بالای صفحه داشبورد، در کارت آبی «موجودی» نمایش داده می‌شه و با هر تراکنش خودکار به‌روز می‌شه.' },
+                            { kw: ['زیرمجموعه','تعداد','تیم','رفرال','زیرشاخه','دعوت'], r: 'تعداد کل زیرمجموعه‌های شما (سطوح ۱ تا ۳) در کارت بنفش «زیرمجموعه» کنار موجودی نمایش داده می‌شه.' },
+                            { kw: ['بازار','قیمت','ارز','بیتکوین','بیت‌کوین','اتریوم','کریپتو','رمزارز','تتر','sol','btc','eth'], r: 'بخش «بازار ارزهای دیجیتال» قیمت ۳ ارز برتر (BTC، ETH، SOL) رو زنده و هر ۳۰ ثانیه به‌روز می‌کنه. سبز یعنی رشد، قرمز یعنی کاهش در ۲۴ ساعت گذشته.' },
+                            { kw: ['میانبر','دسترسی','شورتکات','کارت','لینک سریع'], r: 'شش میانبر اصلی وسط صفحه: کوانتیفیکیشن (معاملات هوشمند)، واریز، برداشت، تیم، تراکنش‌ها، پروفایل.' },
+                            { kw: ['اعلان','پیام','نوتیفیکیشن','زنگوله','bell','بج','badge'], r: 'با کلیک روی آیکون زنگوله در هدر، صندوق پیام‌ها باز می‌شه. تعداد پیام‌های نخوانده به‌صورت بَج قرمز روی آیکون زنگوله نمایش داده می‌شه.' },
+                            { kw: ['صندوق پیام','لیست پیام','تب','فیلتر','tab'], r: 'در صندوق پیام‌ها چهار تب وجود داره: همه، تایید درخواست، لغو درخواست، پیام مدیریت. با کلیک روی هر پیام، متن کامل در پنجره‌ی جداگانه باز می‌شه.' },
+                            { kw: ['خوانده','نخوانده','جدید','unread','علامت','ردیف'], r: 'پیام‌های نخوانده با پس‌زمینه‌ی آبی، نوار ضخیم کناری و برچسب «جدید» مشخص می‌شن. بعد از باز کردن، خودکار خوانده علامت می‌خورن.' },
+                            { kw: ['تایید','approved','موفق','تایید شد','قبول'], r: 'پیام‌های تایید درخواست (واریز/برداشت) با آیکون سبز و در تب «تایید درخواست» قابل مشاهده‌ست.' },
+                            { kw: ['لغو','رد','rejected','کنسل','ناموفق','رد شد'], r: 'پیام‌های لغو درخواست با آیکون قرمز در تب «لغو درخواست» نمایش داده می‌شن. برای پیام‌های رد برداشت، متن راهنما و دکمه‌ی «ارتباط با پشتیبانی» پایین پیام ظاهر می‌شه.' },
+                            { kw: ['مدیریت','ادمین','پیام مدیر','اطلاعیه','bullhorn'], r: 'پیام‌های مدیریتی (اطلاعیه، اخبار) در تب «پیام مدیریت» با آیکون آبی نمایش داده می‌شن.' },
+                            { kw: ['راهنما','help','آموزش','سوال','علامت سوال','؟'], r: 'با کلیک روی آیکون علامت سوال (؟) در هدر، راهنمای جامع داشبورد باز می‌شه شامل ۶ بخش: آمار و موجودی، دسترسی سریع، بازار ارز، اعلان‌ها، کازینو و نکات امنیتی.' },
+                            { kw: ['زبان','language','تغییر زبان','فارسی','انگلیسی','عربی','ترجمه'], r: 'با کلیک روی آیکون کره (🌐) در هدر، بین ۸ زبان جابه‌جا می‌شید: فارسی، انگلیسی، عربی، ترکی، روسی، اسپانیایی، فرانسه، آلمانی.' },
+                            { kw: ['منو','همبرگر','منوی کناری','ناوبری','سه خط','hamburger'], r: 'با کلیک روی آیکون سه خط (≡) در هدر، منوی ناوبری باز می‌شه: صفحه اصلی، کوانتیفیکیشن، واریز، برداشت، تیم من، تراکنش، پروفایل، پشتیبانی، درباره پلتفرم، خروج.' },
+                            { kw: ['کازینو','بازی','روت','رولت','پلینکو','شانس','تاس','dice'], r: 'دکمه‌ی شناور گوشه‌ی صفحه (تاس بنفش) بخش بازی‌های کازینو رو باز می‌کنه: رولت آنلاین و پلینکو. این بازی‌ها دمو و با موجودی مجزا هستن.' },
+                            { kw: ['درباره','پلتفرم','زنیکس','zenix','کی هستید','چیست','استراتژی','هدف'], r: 'بخش «درباره پلتفرم» پایین داشبورد، توضیح کاملی درباره‌ی زنیکس، اهداف و استراتژی پلتفرم داره. با دکمه‌ی «مشاهده بیشتر» متن کامل باز می‌شه.' },
+                            { kw: ['پشتیبانی','تماس','هدست','کمک','ارتباط','support'], r: 'از طریق آیکون هدست در هدر یا گزینه‌ی پشتیبانی در منو، به بخش پشتیبانی می‌رید و با کارشناس مربوطه چت می‌کنید.' },
+                            { kw: ['خروج','logout','بیرون','ترک'], r: 'برای خروج از حساب، از منوی ناوبری گزینه‌ی «خروج» رو انتخاب کنید. از حساب خارج شده و به صفحه‌ی ورود منتقل می‌شید.' },
+                            { kw: ['تایید شده','verified','احراز','فعال','سبز'], r: 'نشان سبز «تایید شده» بالای داشبورد نشون‌دهنده‌ی فعال بودن حساب شماست.' },
+                            { kw: ['بنر','تصویر','banner','تبلیغ','عکس'], r: 'بنر تبلیغاتی در وسط داشبورد نمایش داده می‌شه و هر چند وقت یک‌بار به‌روز می‌شه.' },
+                            { kw: ['باز نمیشه','لود','ورود','لاگین','داشبورد','نمایش'], r: 'اگر داشبورد باز نمی‌شه، ابتدا مطمئن بشید وارد حساب شدید. اگر وارد نشده بودید، خودکار به صفحه‌ی ورود منتقل می‌شوید. اگر وارد شده‌اید ولی صفحه بارگذاری نمی‌شه، اینترنت و کش مرورگر رو بررسی کنید.' },
+                            { kw: ['رد برداشت','دلیل لغو','چرا برداشت','لغو برداشت'], r: 'اگر برداشتتون رد شده، در صندوق پیام‌ها، تب «لغو درخواست» رو باز کنید و پیام مربوطه رو بزنید. متن توضیحی و دکمه‌ی «ارتباط با پشتیبانی» اونجاست که مستقیم به چت با کارشناس برداشت وصل می‌شید.' },
+                            { kw: ['برداشت','withdraw','تسویه'], r: 'برای برداشت، از میانبر «برداشت» استفاده کنید. تأیید ادمین ۱ تا ۲۴ ساعت کاری طول می‌کشه و کارمزد ۰.۹ دلاره. حداقل برداشت بر اساس سطح شما متفاوته.' },
+                            { kw: ['واریز','deposit','شارژ'], r: 'برای واریز، از میانبر «واریز» استفاده کنید. دو شبکه TRC20 و BEP20 پشتیبانی می‌شن. حداقل ۱۰ دلار و تأیید ۵ تا ۱۵ دقیقه بعد از ارسال TxID.' },
+                            { kw: ['کوانتیفیکیشن','ربات','سود','معامله','quantification'], r: 'برای فعال‌سازی ربات معامله‌گر، از میانبر «کوانتیفیکیشن» استفاده کنید. حداقل موجودی ۲۰ دلار و نرخ سود بر اساس سطح VIP از ۱.۵٪ تا ۴٪ روزانه.' },
+                            { kw: ['تراکنش','تاریخچه','transactions','سابقه'], r: 'برای مشاهده‌ی تاریخچه‌ی کامل واریز، برداشت و پاداش‌ها، از میانبر «تراکنش‌ها» استفاده کنید.' },
+                            { kw: ['پروفایل','امنیت','تنظیمات','profile','رمز'], r: 'برای مدیریت امنیت حساب، تغییر رمز عبور و تنظیمات، از میانبر «پروفایل» استفاده کنید.' },
+                            { kw: ['تیم','زیرمجموعه','team','کمیسیون'], r: 'برای مشاهده‌ی اعضای زیرمجموعه (سطوح ۱ تا ۳) و لینک دعوت اختصاصی، از میانبر «تیم» استفاده کنید.' }
+                        ]
+                    },
+                    quantification: { label: 'کوانتیفیکیشن', desc: 'ربات و سود', welcome: 'سلام و وقت بخیر! 🌺<br>من <strong>Isabella</strong> هستم، کارشناس ربات معامله‌گر.<br>درباره کوانتیفیکیشن و سود روزانه چه سوالی داری؟', knowledge: [{ kw: ['چیه', 'چیست', 'کار', 'ربات'], r: 'ربات معامله‌گر هوشمند که با آربیتراژ و AI سود می‌سازه.' }, { kw: ['چطور فعال', 'شروع', 'روشن'], r: 'حداقل موجودی برای فعال‌سازی ربات: ۲۰ دلار.' }, { kw: ['چند بار', '۴', 'چهار', 'روزانه'], r: 'هر روز ۴ معامله ۱۰ ثانیه‌ای. سود روزانه به ۴ قسمت تقسیم می‌شه.' }, { kw: ['سود', 'درصد', 'چقدر'], r: 'نرخ سود: VIP1=1.5٪ | VIP2=2٪ | VIP3=2.5٪ | VIP4=3٪ | VIP5=3.5٪ | VIP6=4٪' }, { kw: ['ریست', 'نیویورک', 'ساعت'], r: 'ریست روزانه طبق ساعت نیویورک (NY Time) انجام می‌شه.' }] },
+                    deposit: { label: 'واریز', desc: 'شارژ حساب', welcome: 'درود بر شما! 🌷<br>من <strong>Emma</strong> هستم، کارشناس واریز.<br>درباره شارژ حساب و مراحل واریز چه سوالی داری؟', knowledge: [{ kw: ['چطور', 'روش', 'مراحل'], r: '۱) بخش واریز ۲) انتخاب شبکه ۳) وارد کردن مبلغ ۴) کپی آدرس ۵) ارسال از کیف پول ۶) ثبت TxID' }, { kw: ['حداقل', 'مبلغ'], r: 'حداقل ۱۰ دلار، حداکثر ۱۰۰,۰۰۰ دلار.' }, { kw: ['شبکه', 'trc20', 'bep20'], r: 'دو شبکه: TRC20 (ترون) و BEP20 (BSC). آدرس هر شبکه متفاوته.' }, { kw: ['زمان', 'کی', 'تایید'], r: 'تأیید واریز معمولاً ۵ تا ۱۵ دقیقه بعد از ارسال TxID.' }, { kw: ['txid', 'هش'], r: 'کد ۶۴ کاراکتره که بعد از ارسال تراکنش از کیف پولت دریافت می‌کنی.' }] },
+                    withdraw: { label: 'برداشت', desc: 'تسویه', welcome: 'سلام دوست عزیز! 🌹<br>من <strong>Olivia</strong> هستم، کارشناس برداشت.<br>درباره درخواست برداشت چه سوالی داری؟', knowledge: [{ kw: ['چطور', 'مراحل'], r: '۱) بخش برداشت ۲) شبکه ۳) آدرس مقصد ۴) مبلغ (خودکار) ۵) رمز تراکنش ۶) ثبت.' }, { kw: ['حداقل', 'مبلغ'], r: 'بر اساس سطح: س۱=۱۰$ | س۲=۵۰$ | س۳=۱۰۰$ | س۴=۲۰۰$ | س۵=۳۰۰$ | س۶=۵۰۰$' }, { kw: ['کارمزد'], r: 'کارمزد ۰.۹ دلار است.' }, { kw: ['زمان', 'کی', 'تایید'], r: 'تأیید ادمین ۱ تا ۲۴ ساعت کاری (به‌جز شنبه و یکشنبه).' }, { kw: ['رمز', 'پسورد'], r: 'رمز تراکنش ۶ رقمی برای تأیید برداشت.' }, { kw: ['رد', 'لغو', 'چرا'], r: 'اگر برداشت شما رد شده، می‌توانید دلیل آن را از پیام‌های داشبورد یا همین چت پیگیری کنید. لطفاً شناسه درخواست یا اطلاعات تراکنش را بفرستید تا بررسی کنیم.' }] },
+                    team: { label: 'تیم', desc: 'زیرمجموعه', welcome: 'سلام و درود! 🌸<br>من <strong>Mia</strong> هستم، کارشناس تیم.<br>درباره دعوت دوستان و کمیسیون چه سوالی داری؟', knowledge: [{ kw: ['دعوت', 'لینک'], r: 'از بخش «تیم من» لینک اختصاصی خودت رو کپی کن.' }, { kw: ['کمیسیون', 'درصد'], r: 'کمیسیون ۳ سطحی: سطح ۱ بالاترین، سطح ۲ کمتر، سطح ۳ باز کمتر.' }, { kw: ['آمار', 'تعداد'], r: 'در صفحه «تیم من» آمار کامل نمایش داده می‌شه.' }] },
+                    transactions: { label: 'تراکنش', desc: 'تاریخچه مالی', welcome: 'درود بر شما! 🌺<br>من <strong>Ava</strong> هستم، کارشناس تراکنش‌ها.<br>درباره تاریخچه مالی چه سوالی داری؟', knowledge: [{ kw: ['فیلتر', 'نوع'], r: 'فیلترها: همه، واریزها، برداشت‌ها، پاداش‌ها.' }, { kw: ['وضعیت', 'رنگ'], r: '🟢 تأیید شده | 🟡 در حال بررسی | 🔴 لغو شده' }, { kw: ['رد', 'لغو', 'چرا'], r: 'از بخش پیام‌ها یا پشتیبانی پیگیری کن.' }] },
+                    profile: { label: 'پروفایل', desc: 'تنظیمات امنیتی', welcome: 'سلام! 🌷<br>من <strong>Chloe</strong> هستم، کارشناس امنیت.<br>درباره تغییر رمز یا آدرس کیف پول چه سوالی داری؟', knowledge: [{ kw: ['تغییر', 'عوض', 'رمز'], r: 'از بخش پروفایل، کارت مورد نظر رو باز کن و روی «دریافت کد از پشتیبانی» بزن.' }, { kw: ['رمز تراکنش'], r: 'برای تغییر، کارت «تغییر رمز تراکنش» رو باز کن.' }, { kw: ['ایمیل'], r: 'کارت «تغییر ایمیل» + عکس سلفی. زمان بررسی: ۱ تا ۷۲ ساعت.' }, { kw: ['آدرس', 'کیف پول'], r: 'آدرس‌ها بعد از ثبت قفل می‌شن. برای تغییر، از چت کد بگیر.' }, { kw: ['کد'], r: 'همه کدهای تأیید از چت پشتیبانی میان.' }] },
+                    login: { label: 'ورود', desc: 'مشکل ورود', welcome: 'درود! 🌸<br>من <strong>Lily</strong> هستم، کارشناس ورود.<br>اگر مشکلی در ورود داری بگو.', knowledge: [{ kw: ['وارد', 'لاگین', 'نمیشه'], r: 'ایمیل/رمز صحیح، Caps Lock خاموش، کپچا دقیق.' }, { kw: ['فراموش', 'یادم رفته'], r: 'روی «فراموشی رمز عبور» کلیک کن.' }, { kw: ['قفل', 'بلاک'], r: 'بعد از ۵ بار رمز اشتباه، ۱۵ دقیقه قفل.' }, { kw: ['کپچا'], r: 'روی دکمه چرخش کنار تصویر کلیک کن.' }] },
+                    register: { label: 'ثبت‌نام', desc: 'حساب جدید', welcome: 'سلام و خوش آمدید! 🌺<br>من <strong>Grace</strong> هستم، کارشناس ثبت‌نام.<br>درباره ساخت حساب جدید چه سوالی داری؟', knowledge: [{ kw: ['چطور', 'مراحل'], r: 'نام، ایمیل، رمز، کپچا، تأیید ایمیل، شماره موبایل.' }, { kw: ['ایمیل', 'تایید'], r: 'پوشه Spam رو چک کن.' }, { kw: ['شماره', 'موبایل'], r: 'کد کشور + شماره بدون صفر اول.' }, { kw: ['سن'], r: 'حداقل ۱۸ سال.' }] }
+                }
+            },
+                        en: {
+                dir: 'ltr',
+                ui: { back: 'Back', backToTopics: 'Back to topics', welcomeTitle: 'Welcome to Zenix Support 🌹', welcomeText: 'Our team of expert specialists is available 24/7 to help you. Just select a topic below to get started.', topicsTitle: 'Support Topics', topicsHint: 'Select a topic to begin', closeChat: 'Close Chat', conversationId: 'Conversation ID:', online: 'Online', connected: 'Connected', closeModalTitle: 'Close Conversation', closeModalText: 'Are you sure you want to close this conversation?', cancel: 'Cancel', confirm: 'Yes, close', adminView: 'Human Support', adminRole: 'Zenix Admin', inputDefault: 'Type your message...', inputAbout: 'Type your question about', inputAboutSuffix: '...', mustSelectTopic: 'Please select a topic first.', activeChatError: '⚠️ You already have an active conversation. Please close it first.', noInfoFound: 'Sorry, I do not have information about that.', switchingToAdmin: 'Okay, connecting you to human support...', sendError: 'Error sending message:', noMessages: 'No messages yet.', copySuccess: 'Code copied, returning...', switchToAdminBtn: '💬 Contact Admin', userInfoHeader: 'User Information', userIdLabel: 'User ID', userNameLabel: 'Name', userEmailLabel: 'Email' },
+                roles: { dashboard: 'Dashboard Specialist', quantification: 'Trading Bot Specialist', deposit: 'Deposit Specialist', withdraw: 'Withdrawal Specialist', team: 'Team & Referral Specialist', transactions: 'Transactions Specialist', profile: 'Security Specialist', login: 'Login Specialist', register: 'Registration Specialist' },
+                smallTalk: {
+                    greeting: { kw: ['hi', 'hello', 'hey', 'greetings'], r: 'Hi there! 🌸 Great to see you. I am {name}, {role}. How can I help you today?' },
+                    howAreYou: { kw: ['how are you', "how's it going", 'how are you doing'], r: 'I am doing great, thanks for asking! 😊 How about you? Feel free to ask me anything.' },
+                    goodMorning: { kw: ['good morning'], r: 'Good morning! ☀️ What a nice start to the day. How can I help?' },
+                    goodNight: { kw: ['good night', 'goodnight'], r: 'Good night! 🌙 Hope you had a good day.' },
+                    thanks: { kw: ['thank', 'thanks', 'thx'], r: "You're welcome! 🌷 Glad I could help. Anything else?" },
+                    bye: { kw: ['bye', 'goodbye', 'farewell'], r: 'Goodbye! 🌸 Come back anytime you have a question.' },
+                    whoAreYou: { kw: ['who are you', 'what is your name'], r: 'I am {name}, {role} on the Zenix support team 🌸 I am here to help with any question about the dashboard and platform.' },
+                    whatCanYouDo: { kw: ['what can you do', 'how can you help'], r: 'I can guide you through balance, referrals, notifications, message box, shortcuts, crypto market, language settings, menu, casino, about platform, logout and every section of the dashboard. Just ask! 🌸' }
+                },
+                topics: {
+                    dashboard: {
+                        label: 'Dashboard', desc: 'Balance & Stats',
+                        welcome: 'Hello there! 🌸<br>I am <strong>Sophia</strong>, your Dashboard Specialist.<br>Ask me about balance, stats, notifications, messages, shortcuts, or any other dashboard feature. What would you like to know?',
+                        knowledge: [
+                            { kw: ['balance','money','how much','account','wallet','usdt'], r: 'Your total balance in USDT is shown at the top of the dashboard in the blue "Balance" card. It updates automatically with each transaction.' },
+                            { kw: ['referral','team','count','downline','invite'], r: 'Total referrals (levels 1-3) are shown in the purple "Referrals" card next to your balance.' },
+                            { kw: ['market','price','crypto','bitcoin','btc','eth','ethereum','coin','tether','sol'], r: 'The "Crypto Market" section shows top 3 coins (BTC, ETH, SOL) live, updated every 30 seconds. Green = growth, red = 24h decline.' },
+                            { kw: ['shortcut','access','quick','card','link'], r: 'Six main shortcuts at the center: Quantification, Deposit, Withdraw, Team, Transactions, Profile.' },
+                            { kw: ['notification','bell','alert','message','badge'], r: 'Click the bell icon in the header to open the message box. Unread count appears as a red badge on the bell.' },
+                            { kw: ['inbox','message list','tab','filter'], r: 'The message box has 4 tabs: All, Approved, Rejected, Admin Msg. Click any message to view its full content in a separate window.' },
+                            { kw: ['read','unread','new','mark'], r: 'Unread messages have a blue background, side bar and "NEW" badge. Opening a message marks it as read automatically.' },
+                            { kw: ['approved','success','confirmed'], r: 'Approved requests (deposit/withdraw) have a green icon and appear under the "Approved" tab.' },
+                            { kw: ['rejected','cancel','failed','declined'], r: 'Rejected requests appear with a red icon under the "Rejected" tab. For withdrawal rejections, a helper text and "Contact Support" button appear at the bottom.' },
+                            { kw: ['admin','management','announcement','bullhorn'], r: 'Admin messages (announcements, news) appear in the "Admin Msg" tab with a blue icon.' },
+                            { kw: ['help','guide','tutorial','question'], r: 'Click the question mark (?) icon in the header to open the full dashboard guide with 6 sections: stats, shortcuts, market, notifications, casino, security notes.' },
+                            { kw: ['language','change language','translate','english','arabic'], r: 'Click the globe icon (🌐) in the header to switch between 8 languages: Persian, English, Arabic, Turkish, Russian, Spanish, French, German.' },
+                            { kw: ['menu','hamburger','nav','navigation','three lines'], r: 'Click the three-line icon (≡) in the header to open the navigation menu: Home, Quantification, Deposit, Withdraw, My Team, Transactions, Profile, Support, About, Logout.' },
+                            { kw: ['casino','game','roulette','plinko','bet','dice'], r: 'The floating dice button in the corner opens casino games: online roulette and plinko. These are demo games with separate balance.' },
+                            { kw: ['about','platform','zenix','who','what is'], r: 'The "About Platform" section at the bottom of the dashboard explains Zenix, its goals and strategy. Click "Show more" to expand the full text.' },
+                            { kw: ['support','contact','headset','help me'], r: 'Use the headset icon in the header or the Support option in the menu to reach the support section and chat with the relevant expert.' },
+                            { kw: ['logout','sign out','exit'], r: 'To log out, select "Logout" from the navigation menu. You will be signed out and redirected to the login page.' },
+                            { kw: ['verified','confirmed','badge'], r: 'The green "Verified" badge at the top of the dashboard means your account is active.' },
+                            { kw: ['banner','image','ad','promotion'], r: 'A promotional banner is shown in the middle of the dashboard and updates periodically.' },
+                            { kw: ['not opening','load','login','dashboard'], r: 'If the dashboard does not open, first make sure you are logged in. If not, you will be redirected to the login page. If logged in but the page does not load, check your internet and clear browser cache.' },
+                            { kw: ['withdraw rejection','why rejected','cancel reason','withdrawal cancelled'], r: 'If your withdrawal was cancelled, open the related message in the "Rejected" tab of the message box. You will see an explanation and a "Contact Support" button that connects you directly to the withdrawal expert.' },
+                            { kw: ['withdraw','withdrawal'], r: 'Use the "Withdraw" shortcut. Admin approval takes 1-24 business hours and the fee is $0.9. Minimum withdrawal depends on your level.' },
+                            { kw: ['deposit','fund'], r: 'Use the "Deposit" shortcut. Two networks are supported: TRC20 and BEP20. Minimum $10 and confirmation 5-15 minutes after TxID submission.' },
+                            { kw: ['quantification','bot','profit','trade'], r: 'To activate the trading bot, use the "Quantification" shortcut. Minimum balance $20 and daily profit rate from 1.5% to 4% based on VIP level.' },
+                            { kw: ['transactions','history','record'], r: 'To see the full history of deposits, withdrawals and rewards, use the "Transactions" shortcut.' },
+                            { kw: ['profile','security','settings','password'], r: 'To manage account security, change password and settings, use the "Profile" shortcut.' },
+                            { kw: ['team','referral','commission'], r: 'To view your team (levels 1-3) and get your referral link, use the "Team" shortcut.' }
+                        ]
+                    },
+                    quantification: { label: 'Quantification', desc: 'Bot & Profits', welcome: 'Hi! 🌺<br>I am <strong>Isabella</strong>, Trading Bot Specialist.<br>Ask me about the trading bot and daily profits.', knowledge: [{ kw: ['what', 'how', 'bot'], r: 'Smart trading bot using arbitrage and AI to generate profits.' }, { kw: ['activate', 'start', 'enable'], r: 'Minimum balance to activate the bot is $20.' }, { kw: ['how many', '4', 'daily', 'limit'], r: '4 trades per day, each 10 seconds.' }, { kw: ['profit', 'percent', 'rate'], r: 'Rates: VIP1=1.5% | VIP2=2% | VIP3=2.5% | VIP4=3% | VIP5=3.5% | VIP6=4%' }, { kw: ['reset', 'new york', 'time'], r: 'Daily reset follows New York Time.' }] },
+                    deposit: { label: 'Deposit', desc: 'Fund Account', welcome: 'Hello! 🌷<br>I am <strong>Emma</strong>, Deposit Specialist.<br>Ask me about funding your account.', knowledge: [{ kw: ['how', 'steps', 'process'], r: '1) Deposit 2) Network 3) Amount 4) Copy address 5) Send 6) Submit TxID' }, { kw: ['minimum', 'amount'], r: 'Minimum $10, maximum $100,000.' }, { kw: ['network', 'trc20', 'bep20'], r: 'Two networks: TRC20 and BEP20.' }, { kw: ['time', 'when', 'confirm'], r: 'Deposit confirmed 5-15 minutes after TxID submission.' }, { kw: ['txid', 'hash'], r: 'A 64-character code received after sending the transaction.' }] },
+                    withdraw: { label: 'Withdraw', desc: 'Cash Out', welcome: 'Hi! 🌹<br>I am <strong>Olivia</strong>, Withdrawal Specialist.<br>Ask me about withdrawals.', knowledge: [{ kw: ['how', 'steps'], r: '1) Withdraw 2) Network 3) Address 4) Amount 5) Password 6) Submit.' }, { kw: ['minimum', 'amount'], r: 'By level: L1=$10 | L2=$50 | L3=$100 | L4=$200 | L5=$300 | L6=$500' }, { kw: ['fee'], r: 'Withdrawal fee is $0.9.' }, { kw: ['time', 'when', 'confirm'], r: 'Admin approval takes 1-24 business hours.' }, { kw: ['password'], r: '6-digit transaction password is required.' }, { kw: ['rejected', 'cancel', 'why'], r: 'If your withdrawal was cancelled, you can check the dashboard messages or ask here. Please share the request ID or transaction info so we can check.' }] },
+                    team: { label: 'Team', desc: 'Referrals', welcome: 'Hello! 🌸<br>I am <strong>Mia</strong>, Team Specialist.<br>Ask me about referrals and commissions.', knowledge: [{ kw: ['invite', 'link'], r: 'Copy your personal link from the "My Team" page.' }, { kw: ['commission', 'percent'], r: '3-level commissions.' }, { kw: ['stats', 'count'], r: 'Full stats are shown on the "My Team" page.' }] },
+                    transactions: { label: 'Transactions', desc: 'Financial History', welcome: 'Hello! 🌺<br>I am <strong>Ava</strong>, Transactions Specialist.<br>Ask me about your financial history.', knowledge: [{ kw: ['filter', 'type'], r: 'Filters: All, Deposits, Withdrawals, Rewards.' }, { kw: ['status', 'color'], r: '🟢 Approved | 🟡 Pending | 🔴 Rejected' }, { kw: ['rejected', 'why'], r: 'Check the Messages section or contact support.' }] },
+                    profile: { label: 'Profile', desc: 'Security Settings', welcome: 'Hi! 🌷<br>I am <strong>Chloe</strong>, Security Specialist.<br>Ask me about changing password or wallet address.', knowledge: [{ kw: ['change', 'password'], r: 'From profile, open the relevant card and click "Get code from support".' }, { kw: ['transaction password'], r: 'Open "Change Transaction Password" card.' }, { kw: ['email'], r: 'Use "Change Email" card + selfie photo.' }, { kw: ['address', 'wallet'], r: 'Addresses are locked after first save.' }, { kw: ['code'], r: 'All verification codes come from the support chat.' }] },
+                    login: { label: 'Login', desc: 'Login Issues', welcome: 'Hello! 🌸<br>I am <strong>Lily</strong>, Login Specialist.<br>What login issue are you facing?', knowledge: [{ kw: ['login', 'sign in', 'error'], r: 'Check email/password, Caps Lock off, captcha correct.' }, { kw: ['forgot', 'reset'], r: 'Click "Forgot Password" on the login page.' }, { kw: ['locked', 'blocked'], r: 'After 5 wrong attempts, locked for 15 minutes.' }, { kw: ['captcha'], r: 'Click the refresh button next to the image.' }] },
+                    register: { label: 'Register', desc: 'New Account', welcome: 'Welcome! 🌺<br>I am <strong>Grace</strong>, Registration Specialist.<br>Ask me about creating a new account.', knowledge: [{ kw: ['how', 'steps'], r: 'Name, email, password, captcha, email verify, phone.' }, { kw: ['email', 'verify'], r: 'Check the Spam folder.' }, { kw: ['phone', 'mobile'], r: 'Country code + number without leading zero.' }, { kw: ['age'], r: 'Minimum 18 years old.' }] }
+                }
+            },
+            ar: {
+                dir: 'rtl',
+                ui: { back: 'رجوع', backToTopics: 'العودة للمواضيع', welcomeTitle: 'مرحباً بك في دعم زينيكس 🌹', welcomeText: 'فريق خبرائنا متاح 24/7 لمساعدتك. اختر موضوعاً من الأسفل.', topicsTitle: 'مواضيع الدعم', topicsHint: 'اختر موضوعاً للبدء', closeChat: 'إغلاق المحادثة', conversationId: 'معرف المحادثة:', online: 'متصل', connected: 'متصل', closeModalTitle: 'إغلاق المحادثة', closeModalText: 'هل أنت متأكد من إغلاق هذه المحادثة؟', cancel: 'إلغاء', confirm: 'نعم، إغلاق', adminView: 'الدعم البشري', adminRole: 'مدير زينيكس', inputDefault: 'اكتب رسالتك...', inputAbout: 'اكتب سؤالك حول', inputAboutSuffix: '...', mustSelectTopic: 'يرجى اختيار موضوع أولاً.', activeChatError: '⚠️ لديك محادثة نشطة. أغلقها أولاً.', noInfoFound: 'عذراً، لا أملك معلومات حول ذلك.', switchingToAdmin: 'حسناً، جارٍ تحويلك للدعم البشري...', sendError: 'خطأ في الإرسال:', noMessages: 'لا رسائل بعد.', copySuccess: 'تم نسخ الرمز، جارٍ العودة...', switchToAdminBtn: '💬 تواصل مع الإدارة', userInfoHeader: 'معلومات المستخدم', userIdLabel: 'معرف المستخدم', userNameLabel: 'الاسم', userEmailLabel: 'البريد' },
+                roles: { dashboard: 'أخصائي لوحة التحكم', quantification: 'أخصائي بوت التداول', deposit: 'أخصائي الإيداع', withdraw: 'أخصائي السحب', team: 'أخصائي الفريق', transactions: 'أخصائي المعاملات', profile: 'أخصائي الأمان', login: 'أخصائي تسجيل الدخول', register: 'أخصائي التسجيل' },
+                smallTalk: {
+                    greeting: { kw: ['مرحبا', 'أهلا', 'اهلا', 'السلام', 'hi', 'hello', 'salam'], r: 'مرحباً! 🌸 سعيد بلقائك. أنا {name}، {role}. كيف يمكنني مساعدتك؟' },
+                    howAreYou: { kw: ['كيف حالك', 'كيفك', 'how are you'], r: 'أنا بخير، شكراً لسؤالك! 😊 وأنت كيف حالك؟ اسألني أي شيء.' },
+                    goodMorning: { kw: ['صباح الخير', 'good morning'], r: 'صباح الخير! ☀️ كيف يمكنني مساعدتك؟' },
+                    goodNight: { kw: ['مساء الخير', 'تصبح على خير', 'good night'], r: 'مساء الخير! 🌙 أتمنى لك يوماً جيداً.' },
+                    thanks: { kw: ['شكرا', 'شكراً', 'مشكور', 'thank', 'thanks'], r: 'العفو! 🌷 سعيد بمساعدتك. هل هناك شيء آخر؟' },
+                    bye: { kw: ['مع السلامة', 'وداعا', 'bye', 'goodbye'], r: 'مع السلامة! 🌸 عد في أي وقت.' },
+                    whoAreYou: { kw: ['من أنت', 'ما اسمك', 'who are you'], r: 'أنا {name}، {role} في فريق دعم زينيكس 🌸 أنا هنا لمساعدتك في أي سؤال.' },
+                    whatCanYouDo: { kw: ['ماذا يمكنك أن تفعل', 'how can you help'], r: 'يمكنني إرشادك حول الرصيد، الإحالات، الإشعارات، صندوق الرسائل، الاختصارات، السوق، إعدادات اللغة، القائمة، الكازينو، والأقسام الأخرى. اسأل فقط! 🌸' }
+                },
+                topics: {
+                    dashboard: {
+                        label: 'لوحة التحكم', desc: 'الرصيد والإحصاءات',
+                        welcome: 'مرحباً! 🌸<br>أنا <strong>Sophia</strong>، أخصائية لوحة التحكم.<br>اسأليني عن الرصيد، الإحالات، الإشعارات، الرسائل، الاختصارات أو أي ميزة في اللوحة. ماذا تريد أن تعرف؟',
+                        knowledge: [
+                            { kw: ['رصيد','مال','حساب','دولار','usdt'], r: 'إجمالي الرصيد (USDT) يظهر في أعلى اللوحة في بطاقة «الرصيد» الزرقاء، ويتحدّث تلقائياً مع كل معاملة.' },
+                            { kw: ['إحالات','فريق','عدد','دعوة','شبكة'], r: 'إجمالي الإحالات (المستويات 1-3) يظهر في بطاقة «الإحالات» البنفسجية بجانب الرصيد.' },
+                            { kw: ['سوق','سعر','عملة','بيتكوين','إيثيريوم','كريبتو','تتر'], r: 'قسم «سوق العملات الرقمية» يعرض أسعار أفضل 3 عملات (BTC, ETH, SOL) مباشرة ويُحدّث كل 30 ثانية. الأخضر = نمو، الأحمر = انخفاض 24 ساعة.' },
+                            { kw: ['اختصار','وصول','سريع','بطاقة','رابط'], r: 'ستة اختصارات رئيسية في منتصف الصفحة: التكميم، الإيداع، السحب، الفريق، المعاملات، الملف الشخصي.' },
+                            { kw: ['إشعار','جرس','تنبيه','رسالة','شارة'], r: 'انقر على أيقونة الجرس في الترويسة لفتح صندوق الرسائل. عدد الرسائل غير المقروءة يظهر كشارة حمراء على الجرس.' },
+                            { kw: ['صندوق','قائمة الرسائل','تبويب','فلتر'], r: 'صندوق الرسائل يحتوي على 4 تبويبات: الكل، طلبات مقبولة، طلبات مرفوضة، رسائل الإدارة. انقر على أي رسالة لعرض النص الكامل في نافذة منفصلة.' },
+                            { kw: ['مقروء','غير مقروء','جديد','علامة'], r: 'الرسائل غير المقروءة لها خلفية زرقاء وشريط جانبي وشارة «جديد». عند فتح الرسالة تُعلَّم مقروءة تلقائياً.' },
+                            { kw: ['مقبول','موافق','نجاح','تم'], r: 'طلبات الإيداع/السحب المقبولة تظهر بأيقونة خضراء في تبويب «طلبات مقبولة».' },
+                            { kw: ['مرفوض','ملغى','فشل','إلغاء'], r: 'الطلبات المرفوضة تظهر بأيقونة حمراء في تبويب «طلبات مرفوضة». لرفض السحب يظهر نص إرشادي وزر «تواصل مع الدعم» أسفل الرسالة.' },
+                            { kw: ['إدارة','مشرف','إعلان','رسائل الإدارة'], r: 'رسائل الإدارة (الإعلانات، الأخبار) تظهر في تبويب «رسائل الإدارة» بأيقونة زرقاء.' },
+                            { kw: ['مساعدة','دليل','شرح','سؤال'], r: 'انقر على أيقونة علامة الاستفهام (؟) في الترويسة لفتح دليل اللوحة الشامل بـ6 أقسام: الإحصاءات، الاختصارات، السوق، الإشعارات، الكازينو، الأمان.' },
+                            { kw: ['لغة','تغيير اللغة','عربي','إنجليزي','ترجمة'], r: 'انقر على أيقونة الكرة الأرضية (🌐) في الترويسة للتبديل بين 8 لغات: الفارسية، الإنجليزية، العربية، التركية، الروسية، الإسبانية، الفرنسية، الألمانية.' },
+                            { kw: ['قائمة','همبرغر','تنقل','ثلاثة خطوط'], r: 'انقر على أيقونة الخطوط الثلاثة (≡) في الترويسة لفتح قائمة التنقل: الرئيسية، التكميم، الإيداع، السحب، فريقي، المعاملات، الملف الشخصي، الدعم، حول المنصة، تسجيل الخروج.' },
+                            { kw: ['كازينو','لعبة','روليت','بلينكو','حظ','نرد'], r: 'الزر العائم في زاوية الصفحة (النرد البنفسجي) يفتح ألعاب الكازينو: الروليت والبلينكو. ألعاب تجريبية برصيد منفصل.' },
+                            { kw: ['حول','منصة','زنيكس','zenix','ما هو'], r: 'قسم «حول المنصة» أسفل اللوحة يشرح زينيكس وأهدافها واستراتيجيتها. انقر على «عرض المزيد» لتوسيع النص الكامل.' },
+                            { kw: ['دعم','تواصل','سماعة','مساعدة'], r: 'استخدم أيقونة السماعة في الترويسة أو خيار الدعم في القائمة للوصول إلى قسم الدعم والدردشة مع الأخصائي المختص.' },
+                            { kw: ['خروج','تسجيل خروج','إنهاء'], r: 'لتسجيل الخروج، اختر «خروج» من قائمة التنقل. ستُسجَّل الخروج وتعود إلى صفحة الدخول.' },
+                            { kw: ['موثق','مؤكد','شعار','نشط'], r: 'شارة «موثق» الخضراء أعلى اللوحة تعني أن حسابك نشط.' },
+                            { kw: ['بنر','صورة','إعلان'], r: 'بنر ترويجي يظهر في منتصف اللوحة ويُحدَّث دورياً.' },
+                            { kw: ['لا يفتح','تحميل','دخول','لوحة'], r: 'إذا لم تُفتح اللوحة، تأكد أولاً من تسجيل الدخول. إن لم تكن مسجلاً ستُنقل إلى صفحة الدخول. إن كنت مسجلاً ولم تُحمّل الصفحة، تحقق من الإنترنت وامسح ذاكرة التخزين المؤقت.' },
+                            { kw: ['رفض السحب','سبب الإلغاء','لماذا السحب','إلغاء السحب'], r: 'إذا أُلغي سحبك، افتح الرسالة المتعلقة في تبويب «طلبات مرفوضة» بجانب رسالة توضيحية وزر «تواصل مع الدعم» يوصلك مباشرة بأخصائي السحب.' },
+                            { kw: ['سحب','withdraw'], r: 'للسحب، استخدم اختصار «سحب». موافقة الإدارة تستغرق 1-24 ساعة عمل والرسوم 0.9$. الحد الأدنى للسحب يعتمد على مستواك.' },
+                            { kw: ['إيداع','deposit'], r: 'للإيداع، استخدم اختصار «إيداع». شبكتان مدعومتان: TRC20 و BEP20. الحد الأدنى 10$ والتأكيد 5-15 دقيقة بعد إرسال TxID.' },
+                            { kw: ['تكميم','بوت','ربح','تداول'], r: 'لتفعيل بوت التداول، استخدم اختصار «التكميم». الحد الأدنى للرصيد 20$ ونسبة الربح اليومي من 1.5% إلى 4% حسب مستوى VIP.' },
+                            { kw: ['معاملات','سجل','تاريخ'], r: 'لعرض السجل الكامل للإيداعات والسحوبات والمكافآت، استخدم اختصار «المعاملات».' },
+                            { kw: ['ملف شخصي','أمان','إعدادات','كلمة مرور'], r: 'لإدارة أمان الحساب وتغيير كلمة المرور والإعدادات، استخدم اختيار «الملف الشخصي».' },
+                            { kw: ['فريق','إحالة','عمولة'], r: 'لعرض فريقك (المستويات 1-3) والحصول على رابط الإحالة، استخدم اختصار «الفريق».' }
+                        ]
+                    },
+                    quantification: { label: 'التداول الكمي', desc: 'البوت والأرباح', welcome: 'أهلاً! 🌺<br>أنا <strong>Isabella</strong>، أخصائية بوت التداول.<br>اسأليني عن البوت والأرباح.', knowledge: [{ kw: ['بوت', 'كيف'], r: 'بوت تداول ذكي يستخدم المراجحة والذكاء الاصطناعي.' }, { kw: ['تفعيل'], r: 'الحد الأدنى للتفعيل: 20 دولاراً.' }, { kw: ['أرباح', 'نسبة'], r: 'VIP1=1.5% | VIP2=2% | VIP3=2.5% | VIP4=3% | VIP5=3.5% | VIP6=4%' }] },
+                    deposit: { label: 'إيداع', desc: 'شحن الحساب', welcome: 'مرحباً! 🌷<br>أنا <strong>Emma</strong>، أخصائية الإيداع.<br>اسأليني عن شحن الحساب.', knowledge: [{ kw: ['كيف', 'خطوات'], r: '1) الإيداع 2) الشبكة 3) المبلغ 4) نسخ العنوان 5) إرسال 6) TXID' }, { kw: ['حد أدنى'], r: 'الحد الأدنى 10$، الأقصى 100,000$.' }, { kw: ['شبكة', 'trc20', 'bep20'], r: 'شبكتان: TRC20 و BEP20.' }] },
+                    withdraw: { label: 'سحب', desc: 'الدفع', welcome: 'أهلاً! 🌹<br>أنا <strong>Olivia</strong>، أخصائية السحب.<br>اسأليني عن السحب.', knowledge: [{ kw: ['كيف', 'خطوات'], r: '1) السحب 2) الشبكة 3) العنوان 4) المبلغ 5) كلمة المرور 6) إرسال.' }, { kw: ['حد أدنى'], r: 'حسب المستوى: م1=10$ | م2=50$ | م3=100$ | م4=200$ | م5=300$ | م6=500$' }, { kw: ['رسوم'], r: 'رسوم السحب 0.9$.' }, { kw: ['رفض', 'إلغاء', 'لماذا'], r: 'إذا تم إلغاء طلب السحب، يمكنك التحقق من رسائل لوحة التحكم أو السؤال هنا. أرسل معرف الطلب أو معلومات المعاملة لنتمكن من المراجعة.' }] },
+                    team: { label: 'الفريق', desc: 'الإحالات', welcome: 'مرحباً! 🌸<br>أنا <strong>Mia</strong>، أخصائية الفريق.<br>اسأليني عن الإحالات.', knowledge: [{ kw: ['دعوة', 'رابط'], r: 'انسخ رابطك من صفحة "فريقي".' }, { kw: ['عمولة'], r: 'عمولات 3 مستويات.' }] },
+                    transactions: { label: 'المعاملات', desc: 'السجل المالي', welcome: 'أهلاً! 🌺<br>أنا <strong>Ava</strong>، أخصائية المعاملات.<br>اسأليني عن سجلك المالي.', knowledge: [{ kw: ['فلتر'], r: 'الفلاتر: الكل، إيداعات، سحوبات، مكافآت.' }, { kw: ['حالة'], r: '🟢 مقبول | 🟡 قيد المراجعة | 🔴 مرفوض' }] },
+                    profile: { label: 'الملف الشخصي', desc: 'إعدادات الأمان', welcome: 'مرحباً! 🌷<br>أنا <strong>Chloe</strong>، أخصائية الأمان.<br>اسأليني عن تغيير كلمة المرور.', knowledge: [{ kw: ['تغيير', 'كلمة'], r: 'من الملف الشخصي، افتح البطاقة واضغط "الحصول على رمز من الدعم".' }, { kw: ['بريد'], r: 'بطاقة "تغيير البريد" + صورة شخصية.' }, { kw: ['محفظة'], r: 'العناوين مقفلة بعد أول حفظ.' }] },
+                    login: { label: 'تسجيل الدخول', desc: 'مشاكل الدخول', welcome: 'مرحباً! 🌸<br>أنا <strong>Lily</strong>، أخصائية الدخول.<br>ما مشكلتك؟', knowledge: [{ kw: ['دخول', 'خطأ'], r: 'تحقق من البريد وكلمة المرور والكابتشا.' }, { kw: ['نسيت'], r: 'اضغط "نسيت كلمة المرور".' }, { kw: ['مقفل'], r: 'بعد 5 محاولات خاطئة، قفل 15 دقيقة.' }] },
+                    register: { label: 'التسجيل', desc: 'حساب جديد', welcome: 'أهلاً! 🌺<br>أنا <strong>Grace</strong>، أخصائية التسجيل.<br>اسأليني عن إنشاء حساب جديد.', knowledge: [{ kw: ['كيف'], r: 'الاسم، البريد، كلمة المرور، الكابتشا، تأكيد البريد، الهاتف.' }, { kw: ['بريد'], r: 'تحقق من مجلد Spam.' }, { kw: ['هاتف'], r: 'رمز الدولة + الرقم بدون صفر أول.' }] }
+                }
+            },
+                        tr: {
+                dir: 'ltr',
+                ui: { back: 'Geri', backToTopics: 'Konulara dön', welcomeTitle: "Zenix Desteğe Hoş Geldiniz 🌹", welcomeText: 'Uzman ekibimiz size yardımcı olmak için 24/7 hazır. Aşağıdan bir konu seçin.', topicsTitle: 'Destek Konuları', topicsHint: 'Başlamak için bir konu seçin', closeChat: 'Sohbeti Kapat', conversationId: 'Sohbet Kimliği:', online: 'Çevrimiçi', connected: 'Bağlandı', closeModalTitle: 'Sohbeti Kapat', closeModalText: 'Bu sohbeti kapatmak istediğinizden emin misiniz?', cancel: 'İptal', confirm: 'Evet, kapat', adminView: 'İnsan Desteği', adminRole: 'Zenix Yöneticisi', inputDefault: 'Mesajınızı yazın...', inputAbout: 'Sorunuzu şu konuda yazın:', inputAboutSuffix: '...', mustSelectTopic: 'Lütfen önce bir konu seçin.', activeChatError: '⚠️ Zaten aktif bir sohbetiniz var. Önce onu kapatın.', noInfoFound: 'Üzgünüm, bu konuda bilgim yok.', switchingToAdmin: 'İnsan desteğe bağlıyorum...', sendError: 'Mesaj gönderme hatası:', noMessages: 'Henüz mesaj yok.', copySuccess: 'Kod kopyalandı, dönülüyor...', switchToAdminBtn: '💬 Yöneticiyle İletişim', userInfoHeader: 'Kullanıcı Bilgileri', userIdLabel: 'Kullanıcı ID', userNameLabel: 'Ad', userEmailLabel: 'E-posta' },
+                roles: { dashboard: 'Panel Uzmanı', quantification: 'İşlem Botu Uzmanı', deposit: 'Yatırım Uzmanı', withdraw: 'Çekim Uzmanı', team: 'Ekip Uzmanı', transactions: 'İşlemler Uzmanı', profile: 'Güvenlik Uzmanı', login: 'Giriş Uzmanı', register: 'Kayıt Uzmanı' },
+                smallTalk: {
+                    greeting: { kw: ['merhaba', 'selam', 'hi', 'hello'], r: 'Merhaba! 🌸 Seni görmek güzel. Ben {name}, {role}. Nasıl yardımcı olabilirim?' },
+                    howAreYou: { kw: ['nasılsın', 'naber', 'how are you'], r: 'Harikayım, sorduğun için teşekkürler! 😊 Sen nasılsın? Her şeyi sorabilirsin.' },
+                    goodMorning: { kw: ['günaydın', 'good morning'], r: 'Günaydın! ☀️ Nasıl yardımcı olabilirim?' },
+                    goodNight: { kw: ['iyi geceler', 'good night'], r: 'İyi geceler! 🌙 İyi bir gün geçirmen dileğiyle.' },
+                    thanks: { kw: ['teşekkür', 'sağol', 'thank', 'thanks'], r: 'Rica ederim! 🌷 Yardımcı olabildiğim için mutluyum. Başka bir şey var mı?' },
+                    bye: { kw: ['görüşürüz', 'hoşçakal', 'bye', 'goodbye'], r: 'Hoşçakal! 🌸 Ne zaman sorun olursa buradayım.' },
+                    whoAreYou: { kw: ['sen kimsin', 'adın ne', 'who are you'], r: 'Ben {name}, Zenix destek ekibinde {role} 🌸 Her soruda sana yardımcı olmak için buradayım.' },
+                    whatCanYouDo: { kw: ['ne yapabilirsin', 'how can you help'], r: 'Bakiye, referanslar, bildirimler, mesaj kutusu, kısayollar, piyasa, dil ayarları, menü, casino ve panelin tüm bölümleri hakkında rehberlik edebilirim. Sadece sor! 🌸' }
+                },
+                topics: {
+                    dashboard: {
+                        label: 'Panel', desc: 'Bakiye ve İstatistikler',
+                        welcome: 'Merhaba! 🌸<br>Ben <strong>Sophia</strong>, Panel Uzmanıyım.<br>Bakiye, istatistik, bildirim, mesaj, kısayollar veya panelin herhangi bir özelliği hakkında sorabilirsiniz. Ne bilmek istersiniz?',
+                        knowledge: [
+                            { kw: ['bakiye','para','hesap','dolar','usdt'], r: 'Toplam bakiye (USDT) panelin üst kısmındaki mavi "Bakiye" kartında gösterilir ve her işlemde otomatik güncellenir.' },
+                            { kw: ['referans','ekip','sayı','davet'], r: 'Toplam referanslar (seviye 1-3) bakiyenin yanındaki mor "Referanslar" kartında gösterilir.' },
+                            { kw: ['piyasa','fiyat','kripto','bitcoin','ethereum','coin','tether'], r: '"Kripto Piyasası" bölümü en iyi 3 coini (BTC, ETH, SOL) canlı olarak her 30 saniyede günceller. Yeşil = büyüme, kırmızı = 24s düşüş.' },
+                            { kw: ['kısayol','erişim','hızlı','kart','link'], r: 'Ortada altı ana kısayol: Kuantifikasyon, Yatırım, Çekim, Ekip, İşlemler, Profil.' },
+                            { kw: ['bildirim','zil','uyarı','mesaj','rozet'], r: 'Başlıktaki zil simgesine tıklayarak mesaj kutusunu açın. Okunmamış sayısı zilde kırmızı rozet olarak görünür.' },
+                            { kw: ['gelen kutusu','mesaj listesi','sekme','filtre'], r: 'Mesaj kutusunda 4 sekme var: Tümü, Onaylanan, Reddedilen, Yönetici. Herhangi bir mesaja tıklayarak tam metni ayrı pencerede görün.' },
+                            { kw: ['okundu','okunmadı','yeni','işaret'], r: 'Okunmamış mesajlar mavi arka plan, yan çubuk ve "YENİ" rozetine sahiptir. Açtığınızda otomatik okundu işaretlenir.' },
+                            { kw: ['onaylandı','başarılı','tamamlandı'], r: 'Onaylanan yatırım/çekim talepleri yeşil simgeyle "Onaylanan" sekmesinde görünür.' },
+                            { kw: ['reddedildi','iptal','başarısız'], r: 'Reddedilen talepler kırmızı simgeyle "Reddedilen" sekmesinde görünür. Çekim reddi için altta yardım metni ve "Destek ile İletişim" düğmesi çıkar.' },
+                            { kw: ['yönetici','duyuru','admin'], r: 'Yönetici mesajları (duyurular, haberler) mavi simgeyle "Yönetici" sekmesinde görünür.' },
+                            { kw: ['yardım','kılavuz','eğitim','soru'], r: 'Başlıktaki soru işareti (?) simgesine tıklayarak 6 bölümlü kapsamlı panel kılavuzunu açın: istatistikler, kısayollar, piyasa, bildirimler, casino, güvenlik.' },
+                            { kw: ['dil','dil değiştir','çeviri','türkçe','ingilizce'], r: 'Başlıktaki dünya (🌐) simgesine tıklayarak 8 dil arasında geçiş yapın: Farsça, İngilizce, Arapça, Türkçe, Rusça, İspanyolca, Fransızca, Almanca.' },
+                            { kw: ['menü','hamburger','gezinme','üç çizgi'], r: 'Başlıktaki üç çizgi (≡) simgesine tıklayarak gezinme menüsünü açın: Ana Sayfa, Kuantifikasyon, Yatırım, Çekim, Ekibim, İşlemler, Profil, Destek, Hakkında, Çıkış.' },
+                            { kw: ['casino','oyun','rulet','plinko','şans','zar'], r: 'Köşedeki yüzen zar düğmesi casino oyunlarını açar: rulet ve plinko. Bunlar demo oyunlardır ve ayrı bakiyeyle çalışır.' },
+                            { kw: ['hakkında','platform','zenix','nedir'], r: 'Panelin alt kısmındaki "Platform Hakkında" bölümü Zenix\'i, hedeflerini ve stratejisini anlatır. "Daha fazla göster"e tıklayarak tam metni açın.' },
+                            { kw: ['destek','iletişim','kulaklık','yardım'], r: 'Başlıktaki kulaklık simgesini veya menüdeki Destek seçeneğini kullanarak destek bölümüne gidin ve ilgili uzmanla sohbet edin.' },
+                            { kw: ['çıkış','oturum kapat'], r: 'Çıkmak için gezinme menüsünden "Çıkış"ı seçin. Oturumunuz kapatılır ve giriş sayfasına yönlendirilirsiniz.' },
+                            { kw: ['doğrulandı','onaylı','rozet','aktif'], r: 'Panelin üst kısmındaki yeşil "Doğrulandı" rozeti hesabınızın aktif olduğunu gösterir.' },
+                            { kw: ['banner','resim','reklam'], r: 'Panelin ortasında tanıtım banner\'ı gösterilir ve periyodik olarak güncellenir.' },
+                            { kw: ['açılmıyor','yükleme','giriş','panel'], r: 'Panel açılmıyorsa önce giriş yaptığınızdan emin olun. Giriş yapmadıysanız giriş sayfasına yönlendirilirsiniz. Giriş yaptıysanız ama sayfa yüklenmiyorsa internetinizi ve tarayıcı önbelleğini kontrol edin.' },
+                            { kw: ['çekim reddi','neden reddedildi','iptal nedeni'], r: 'Çekiminiz iptal edildiyse mesaj kutusunun "Reddedilen" sekmesinde ilgili mesajı açın. Altında bir açıklama ve sizi doğrudan çekim uzmanına bağlayan "Destek ile İletişim" düğmesi göreceksiniz.' },
+                            { kw: ['çekim','withdraw'], r: 'Çekim için "Çekim" kısayolunu kullanın. Yönetici onayı 1-24 iş saati sürer ve ücret 0.9$. Minimum çekim seviyenize bağlıdır.' },
+                            { kw: ['yatırım','deposit'], r: 'Yatırım için "Yatırım" kısayolunu kullanın. İki ağ desteklenir: TRC20 ve BEP20. Minimum 10$ ve TxID gönderiminden 5-15 dakika sonra onay.' },
+                            { kw: ['kuantifikasyon','bot','kâr','işlem'], r: 'İşlem botunu etkinleştirmek için "Kuantifikasyon" kısayolunu kullanın. Minimum bakiye 20$ ve VIP seviyesine göre günlük %1.5 - %4 kâr oranı.' },
+                            { kw: ['işlemler','geçmiş','kayıt'], r: 'Yatırım, çekim ve ödüllerin tam geçmişini görmek için "İşlemler" kısayolunu kullanın.' },
+                            { kw: ['profil','güvenlik','ayarlar','şifre'], r: 'Hesap güvenliğini yönetmek, şifre ve ayarları değiştirmek için "Profil" kısayolunu kullanın.' },
+                            { kw: ['ekip','referans','komisyon'], r: 'Ekibinizi (seviye 1-3) görmek ve referans linkinizi almak için "Ekip" kısayolunu kullanın.' }
+                        ]
+                    },
+                    quantification: { label: 'Kuantifikasyon', desc: 'Bot ve Kâr', welcome: 'Selam! 🌺<br>Ben <strong>Isabella</strong>, İşlem Botu Uzmanıyım.<br>Bot ve kârlar hakkında sorun.', knowledge: [{ kw: ['bot', 'nasıl'], r: 'Arbitraj ve AI kullanan akıllı işlem botu.' }, { kw: ['aktif'], r: 'Aktivasyon için minimum 20$.' }, { kw: ['kâr', 'yüzde'], r: 'VIP1=1.5% | VIP2=2% | VIP3=2.5% | VIP4=3% | VIP5=3.5% | VIP6=4%' }] },
+                    deposit: { label: 'Yatırım', desc: 'Hesap Yükleme', welcome: 'Merhaba! 🌷<br>Ben <strong>Emma</strong>, Yatırım Uzmanıyım.<br>Hesap yükleme hakkında sorun.', knowledge: [{ kw: ['nasıl', 'adımlar'], r: '1) Yatırım 2) Ağ 3) Tutar 4) Adres kopyala 5) Gönder 6) TXID' }, { kw: ['minimum'], r: 'Minimum 10$, maksimum 100.000$.' }, { kw: ['ağ', 'trc20', 'bep20'], r: 'İki ağ: TRC20 ve BEP20.' }] },
+                    withdraw: { label: 'Çekim', desc: 'Para Çekme', welcome: 'Selam! 🌹<br>Ben <strong>Olivia</strong>, Çekim Uzmanıyım.<br>Çekim hakkında sorun.', knowledge: [{ kw: ['nasıl'], r: '1) Çekim 2) Ağ 3) Adres 4) Tutar 5) Şifre 6) Gönder.' }, { kw: ['minimum'], r: 'Seviyeye göre: S1=10$ | S2=50$ | S3=100$ | S4=200$ | S5=300$ | S6=500$' }, { kw: ['ücret'], r: 'Çekim ücreti 0.9$.' }, { kw: ['reddedildi', 'iptal', 'neden'], r: 'Çekiminiz iptal edildiyse, panel mesajlarını kontrol edebilir veya buradan sorabilirsiniz. Talep kimliğini veya işlem bilgilerini paylaşın.' }] },
+                    team: { label: 'Ekip', desc: 'Referanslar', welcome: 'Merhaba! 🌸<br>Ben <strong>Mia</strong>, Ekip Uzmanıyım.<br>Referanslar hakkında sorun.', knowledge: [{ kw: ['davet', 'link'], r: 'Ekibim sayfasından kişisel linkinizi kopyalayın.' }, { kw: ['komisyon'], r: '3 seviyeli komisyon.' }] },
+                    transactions: { label: 'İşlemler', desc: 'Finansal Geçmiş', welcome: 'Selam! 🌺<br>Ben <strong>Ava</strong>, İşlemler Uzmanıyım.<br>Geçmişiniz hakkında sorun.', knowledge: [{ kw: ['filtre'], r: 'Filtreler: Tümü, Yatırımlar, Çekimler, Ödüller.' }, { kw: ['durum'], r: '🟢 Onaylandı | 🟡 Beklemede | 🔴 Reddedildi' }] },
+                    profile: { label: 'Profil', desc: 'Güvenlik Ayarları', welcome: 'Merhaba! 🌷<br>Ben <strong>Chloe</strong>, Güvenlik Uzmanıyım.<br>Şifre değişikliği hakkında sorun.', knowledge: [{ kw: ['değiştir', 'şifre'], r: 'Profilden kartı açın, "Desteden kod al"a tıklayın.' }, { kw: ['email'], r: '"Email Değiştir" kartı + selfie.' }, { kw: ['cüzdan'], r: 'Adresler ilk kayıttan sonra kilitlenir.' }] },
+                    login: { label: 'Giriş', desc: 'Giriş Sorunları', welcome: 'Merhaba! 🌸<br>Ben <strong>Lily</strong>, Giriş Uzmanıyım.<br>Sorununuz nedir?', knowledge: [{ kw: ['giriş', 'hata'], r: 'Email/şifre kontrol, Caps Lock kapalı, captcha doğru.' }, { kw: ['unuttum'], r: '"Şifremi Unuttum"a tıklayın.' }, { kw: ['kilitli'], r: '5 yanlış denemeden sonra 15 dakika kilit.' }] },
+                    register: { label: 'Kayıt', desc: 'Yeni Hesap', welcome: 'Selam! 🌺<br>Ben <strong>Grace</strong>, Kayıt Uzmanıyım.<br>Yeni hesap hakkında sorun.', knowledge: [{ kw: ['nasıl'], r: 'Ad, email, şifre, captcha, email doğrulama, telefon.' }, { kw: ['email'], r: 'Spam klasörünü kontrol edin.' }, { kw: ['telefon'], r: 'Ülke kodu + başında sıfır olmadan numara.' }] }
+                }
+            },
+            ru: {
+                dir: 'ltr',
+                ui: { back: 'Назад', backToTopics: 'К темам', welcomeTitle: 'Добро пожаловать в поддержку Zenix 🌹', welcomeText: 'Наша команда экспертов доступна 24/7. Выберите тему ниже.', topicsTitle: 'Темы поддержки', topicsHint: 'Выберите тему', closeChat: 'Закрыть чат', conversationId: 'ID беседы:', online: 'Онлайн', connected: 'Подключено', closeModalTitle: 'Закрыть беседу', closeModalText: 'Вы уверены, что хотите закрыть эту беседу?', cancel: 'Отмена', confirm: 'Да, закрыть', adminView: 'Живая поддержка', adminRole: 'Админ Zenix', inputDefault: 'Введите сообщение...', inputAbout: 'Введите вопрос о', inputAboutSuffix: '...', mustSelectTopic: 'Пожалуйста, выберите тему.', activeChatError: '⚠️ У вас есть активная беседа. Сначала закройте её.', noInfoFound: 'Извините, у меня нет информации об этом.', switchingToAdmin: 'Подключаю к живой поддержке...', sendError: 'Ошибка отправки:', noMessages: 'Пока нет сообщений.', copySuccess: 'Код скопирован, возврат...', switchToAdminBtn: '💬 Связаться с админом', userInfoHeader: 'Информация о пользователе', userIdLabel: 'ID пользователя', userNameLabel: 'Имя', userEmailLabel: 'Email' },
+                roles: { dashboard: 'Специалист панели', quantification: 'Специалист бота', deposit: 'Специалист депозитов', withdraw: 'Специалист выводов', team: 'Специалист команды', transactions: 'Специалист транзакций', profile: 'Специалист безопасности', login: 'Специалист входа', register: 'Специалист регистрации' },
+                smallTalk: {
+                    greeting: { kw: ['привет', 'здравствуйте', 'здравствуй', 'hi', 'hello'], r: 'Привет! 🌸 Рада тебя видеть. Я {name}, {role}. Чем могу помочь?' },
+                    howAreYou: { kw: ['как дела', 'как ты', 'how are you'], r: 'У меня всё отлично, спасибо что спросил! 😊 А у тебя как? Спрашивай что угодно.' },
+                    goodMorning: { kw: ['доброе утро', 'good morning'], r: 'Доброе утро! ☀️ Чем могу помочь?' },
+                    goodNight: { kw: ['спокойной ночи', 'доброй ночи', 'good night'], r: 'Спокойной ночи! 🌙 Хорошего дня.' },
+                    thanks: { kw: ['спасибо', 'благодарю', 'thank', 'thanks'], r: 'Пожалуйста! 🌷 Рада помочь. Что-то ещё?' },
+                    bye: { kw: ['пока', 'до свидания', 'bye', 'goodbye'], r: 'Пока! 🌸 Возвращайся, если будут вопросы.' },
+                    whoAreYou: { kw: ['кто ты', 'как тебя зовут', 'who are you'], r: 'Я {name}, {role} в команде поддержки Zenix 🌸 Я здесь, чтобы помочь с любым вопросом.' },
+                    whatCanYouDo: { kw: ['что ты умеешь', 'how can you help'], r: 'Я могу подсказать про баланс, рефералов, уведомления, почтовый ящик, ярлыки, рынок, настройки языка, меню, казино и все разделы панели. Просто спроси! 🌸' }
+                },
+                topics: {
+                    dashboard: {
+                        label: 'Панель', desc: 'Баланс и статистика',
+                        welcome: 'Привет! 🌸<br>Я <strong>Sophia</strong>, специалист панели.<br>Спрашивайте о балансе, статистике, уведомлениях, сообщениях, ярлыках или любой другой функции панели. Что хотите узнать?',
+                        knowledge: [
+                            { kw: ['баланс','деньги','счет','доллар','usdt'], r: 'Общий баланс в USDT показан вверху панели в синей карточке «Баланс» и обновляется при каждой транзакции.' },
+                            { kw: ['рефералы','команда','количество','приглашение'], r: 'Общее число рефералов (уровни 1-3) отображается в фиолетовой карточке «Рефералы» рядом с балансом.' },
+                            { kw: ['рынок','цена','крипто','биткоин','эфириум','монета','tether'], r: 'Раздел «Криптовалютный рынок» показывает топ-3 монеты (BTC, ETH, SOL) в реальном времени каждые 30 секунд. Зелёный = рост, красный = падение за 24 часа.' },
+                            { kw: ['ярлык','доступ','быстрый','карточка','ссылка'], r: 'Шесть основных ярлыков в центре: Квантификация, Депозит, Вывод, Команда, Транзакции, Профиль.' },
+                            { kw: ['уведомление','колокольчик','оповещение','сообщение','бейдж'], r: 'Нажмите на иконку колокольчика в шапке, чтобы открыть почтовый ящик. Число непрочитанных отображается красным бейджем на колокольчике.' },
+                            { kw: ['входящие','список','вкладка','фильтр'], r: 'В почтовом ящике 4 вкладки: Все, Одобрено, Отклонено, Сообщения админа. Нажмите на сообщение, чтобы открыть полный текст в отдельном окне.' },
+                            { kw: ['прочитано','непрочитано','новое','метка'], r: 'Непрочитанные сообщения имеют синий фон, боковую полосу и метку «НОВОЕ». После открытия автоматически помечаются как прочитанные.' },
+                            { kw: ['одобрено','успех','подтверждено'], r: 'Одобренные запросы (депозит/вывод) с зелёной иконкой отображаются во вкладке «Одобрено».' },
+                            { kw: ['отклонено','отмена','неудача'], r: 'Отклонённые запросы отображаются с красной иконкой во вкладке «Отклонено». Для отказа в выводе появляется пояснение и кнопка «Связаться с поддержкой».' },
+                            { kw: ['админ','менеджер','объявление'], r: 'Сообщения администратора (объявления, новости) отображаются с синей иконкой во вкладке «Сообщения админа».' },
+                            { kw: ['помощь','руководство','обучение','вопрос'], r: 'Нажмите иконку вопросительного знака (?) в шапке, чтобы открыть полное руководство по панели из 6 разделов: статистика, ярлыки, рынок, уведомления, казино, безопасность.' },
+                            { kw: ['язык','сменить язык','перевод','русский','английский'], r: 'Нажмите иконку глобуса (🌐) в шапке, чтобы переключиться между 8 языками: персидский, английский, арабский, турецкий, русский, испанский, французский, немецкий.' },
+                            { kw: ['меню','гамбургер','навигация','три линии'], r: 'Нажмите иконку трёх линий (≡) в шапке, чтобы открыть меню: Главная, Квантификация, Депозит, Вывод, Команда, Транзакции, Профиль, Поддержка, О платформе, Выход.' },
+                            { kw: ['казино','игра','рулетка','плинко','удача','кости'], r: 'Плавающая кнопка с костями в углу открывает игры казино: рулетку и плинко. Это демо-игры с отдельным балансом.' },
+                            { kw: ['о платформе','платформа','zenix','что это'], r: 'Раздел «О платформе» внизу панели описывает Zenix, его цели и стратегию. Нажмите «Показать больше», чтобы раскрыть полный текст.' },
+                            { kw: ['поддержка','связаться','наушники','помогите'], r: 'Через иконку наушников в шапке или опцию «Поддержка» в меню перейдите в раздел поддержки и общайтесь с нужным специалистом.' },
+                            { kw: ['выход','выйти'], r: 'Чтобы выйти, выберите «Выход» в меню навигации. Сессия завершится, и вы будете перенаправлены на страницу входа.' },
+                            { kw: ['подтверждено','проверено','бейдж','активен'], r: 'Зелёный бейдж «Подтверждено» вверху панели означает, что ваш аккаунт активен.' },
+                            { kw: ['баннер','изображение','реклама'], r: 'Рекламный баннер отображается в центре панели и периодически обновляется.' },
+                            { kw: ['не открывается','загрузка','вход','панель'], r: 'Если панель не открывается, сначала убедитесь, что вы вошли. Если не вошли, вас перенаправит на страницу входа. Если вошли, но страница не загружается, проверьте интернет и очистите кэш браузера.' },
+                            { kw: ['отказ вывода','причина','почему отклонено'], r: 'Если ваш вывод был отменён, откройте связанное сообщение во вкладке «Отклонено». Внизу будет пояснение и кнопка «Связаться с поддержкой», которая напрямую соединит вас со специалистом по выводам.' },
+                            { kw: ['вывод','withdraw'], r: 'Для вывода используйте ярлык «Вывод». Одобрение администратора занимает 1-24 рабочих часа, комиссия 0.9$. Минимум зависит от вашего уровня.' },
+                            { kw: ['депозит','deposit'], r: 'Для депозита используйте ярлык «Депозит». Поддерживаются две сети: TRC20 и BEP20. Минимум 10$, подтверждение через 5-15 минут после отправки TxID.' },
+                            { kw: ['квантификация','бот','прибыль','торговля'], r: 'Для активации торгового бота используйте ярлык «Квантификация». Минимум 20$, дневная прибыль от 1.5% до 4% в зависимости от уровня VIP.' },
+                            { kw: ['транзакции','история','запись'], r: 'Чтобы увидеть полную историю депозитов, выводов и наград, используйте ярлык «Транзакции».' },
+                            { kw: ['профиль','безопасность','настройки','пароль'], r: 'Для управления безопасностью аккаунта, смены пароля и настроек используйте ярлык «Профиль».' },
+                            { kw: ['команда','реферал','комиссия'], r: 'Чтобы просмотреть команду (уровни 1-3) и получить реферальную ссылку, используйте ярлык «Команда».' }
+                        ]
+                    },
+                    quantification: { label: 'Квантификация', desc: 'Бот и прибыль', welcome: 'Привет! 🌺<br>Я <strong>Isabella</strong>, специалист бота.<br>Спрашивайте о боте.', knowledge: [{ kw: ['бот'], r: 'Умный бот с арбитражем и ИИ.' }, { kw: ['активация'], r: 'Минимум для активации: 20$.' }, { kw: ['прибыль'], r: 'VIP1=1.5% | VIP2=2% | VIP3=2.5% | VIP4=3% | VIP5=3.5% | VIP6=4%' }] },
+                    deposit: { label: 'Депозит', desc: 'Пополнение', welcome: 'Привет! 🌷<br>Я <strong>Emma</strong>, специалист депозитов.', knowledge: [{ kw: ['как'], r: '1) Депозит 2) Сеть 3) Сумма 4) Копировать адрес 5) Отправить 6) TXID' }, { kw: ['минимум'], r: 'Минимум 10$, максимум 100000$.' }, { kw: ['сеть'], r: 'TRC20 и BEP20.' }] },
+                    withdraw: { label: 'Вывод', desc: 'Обналичивание', welcome: 'Привет! 🌹<br>Я <strong>Olivia</strong>, специалист выводов.', knowledge: [{ kw: ['как'], r: '1) Вывод 2) Сеть 3) Адрес 4) Сумма 5) Пароль 6) Отправить.' }, { kw: ['минимум'], r: 'По уровню: У1=10$ | У2=50$ | У3=100$ | У4=200$ | У5=300$ | У6=500$' }, { kw: ['комиссия'], r: 'Комиссия 0.9$.' }, { kw: ['отклонен', 'отмена', 'почему'], r: 'Если ваш вывод был отменён, проверьте сообщения панели или спросите здесь. Укажите ID запроса или данные транзакции.' }] },
+                    team: { label: 'Команда', desc: 'Рефералы', welcome: 'Привет! 🌸<br>Я <strong>Mia</strong>, специалист команды.', knowledge: [{ kw: ['приглашение'], r: 'Скопируйте ссылку со страницы "Моя команда".' }, { kw: ['комиссия'], r: '3 уровня комиссий.' }] },
+                    transactions: { label: 'Транзакции', desc: 'Финансовая история', welcome: 'Привет! 🌺<br>Я <strong>Ava</strong>, специалист транзакций.', knowledge: [{ kw: ['фильтр'], r: 'Фильтры: Все, Депозиты, Выводы, Награды.' }, { kw: ['статус'], r: '🟢 Одобрено | 🟡 На проверке | 🔴 Отклонено' }] },
+                    profile: { label: 'Профиль', desc: 'Безопасность', welcome: 'Привет! 🌷<br>Я <strong>Chloe</strong>, специалист безопасности.', knowledge: [{ kw: ['пароль'], r: 'Откройте карточку и нажмите "Получить код".' }, { kw: ['email'], r: 'Карточка "Сменить email" + селфи.' }, { kw: ['кошелёк'], r: 'Адреса блокируются после первого сохранения.' }] },
+                    login: { label: 'Вход', desc: 'Проблемы со входом', welcome: 'Привет! 🌸<br>Я <strong>Lily</strong>, специалист входа.', knowledge: [{ kw: ['вход'], r: 'Проверьте email/пароль, Caps Lock, капчу.' }, { kw: ['забыл'], r: 'Нажмите "Забыли пароль".' }, { kw: ['заблокирован'], r: 'После 5 ошибок блокировка 15 минут.' }] },
+                    register: { label: 'Регистрация', desc: 'Новый аккаунт', welcome: 'Привет! 🌺<br>Я <strong>Grace</strong>, специалист регистрации.', knowledge: [{ kw: ['как'], r: 'Имя, email, пароль, капча, подтверждение email, телефон.' }, { kw: ['email'], r: 'Проверьте папку Spam.' }, { kw: ['телефон'], r: 'Код страны + номер без нуля.' }] }
+                }
+            },
+            es: {
+                dir: 'ltr',
+                ui: { back: 'Atrás', backToTopics: 'Volver a temas', welcomeTitle: 'Bienvenido a Soporte Zenix 🌹', welcomeText: 'Nuestro equipo de expertos está disponible 24/7. Selecciona un tema abajo.', topicsTitle: 'Temas de Soporte', topicsHint: 'Selecciona un tema', closeChat: 'Cerrar Chat', conversationId: 'ID de conversación:', online: 'En línea', connected: 'Conectado', closeModalTitle: 'Cerrar Conversación', closeModalText: '¿Seguro que quieres cerrar esta conversación?', cancel: 'Cancelar', confirm: 'Sí, cerrar', adminView: 'Soporte Humano', adminRole: 'Admin Zenix', inputDefault: 'Escribe tu mensaje...', inputAbout: 'Escribe tu pregunta sobre', inputAboutSuffix: '...', mustSelectTopic: 'Por favor, selecciona un tema primero.', activeChatError: '⚠️ Ya tienes una conversación activa. Ciérrala primero.', noInfoFound: 'Lo siento, no tengo información sobre eso.', switchingToAdmin: 'Conectándote con soporte humano...', sendError: 'Error al enviar:', noMessages: 'Aún no hay mensajes.', copySuccess: 'Código copiado, volviendo...', switchToAdminBtn: '💬 Contactar Admin', userInfoHeader: 'Información del Usuario', userIdLabel: 'ID de Usuario', userNameLabel: 'Nombre', userEmailLabel: 'Email' },
+                roles: { dashboard: 'Especialista del Panel', quantification: 'Especialista del Bot', deposit: 'Especialista de Depósitos', withdraw: 'Especialista de Retiros', team: 'Especialista de Equipo', transactions: 'Especialista de Transacciones', profile: 'Especialista de Seguridad', login: 'Especialista de Acceso', register: 'Especialista de Registro' },
+                smallTalk: {
+                    greeting: { kw: ['hola', 'hi', 'hello'], r: '¡Hola! 🌸 Qué gusto verte. Soy {name}, {role}. ¿Cómo puedo ayudarte?' },
+                    howAreYou: { kw: ['cómo estás', 'como estas', 'qué tal', 'how are you'], r: '¡Estoy genial, gracias por preguntar! 😊 ¿Y tú? Pregúntame lo que quieras.' },
+                    goodMorning: { kw: ['buenos días', 'good morning'], r: '¡Buenos días! ☀️ ¿Cómo puedo ayudarte?' },
+                    goodNight: { kw: ['buenas noches', 'good night'], r: '¡Buenas noches! 🌙 Que tengas un buen día.' },
+                    thanks: { kw: ['gracias', 'thank', 'thanks'], r: '¡De nada! 🌷 Me alegra poder ayudarte. ¿Algo más?' },
+                    bye: { kw: ['adiós', 'hasta luego', 'bye', 'goodbye'], r: '¡Adiós! 🌸 Vuelve cuando tengas alguna pregunta.' },
+                    whoAreYou: { kw: ['quién eres', 'cómo te llamas', 'who are you'], r: 'Soy {name}, {role} del equipo de soporte de Zenix 🌸 Estoy aquí para ayudarte con cualquier pregunta.' },
+                    whatCanYouDo: { kw: ['qué puedes hacer', 'how can you help'], r: 'Puedo guiarte sobre saldo, referidos, notificaciones, bandeja de mensajes, accesos rápidos, mercado, idioma, menú, casino y todas las secciones del panel. ¡Solo pregunta! 🌸' }
+                },
+                topics: {
+                    dashboard: {
+                        label: 'Panel', desc: 'Saldo y Estadísticas',
+                        welcome: '¡Hola! 🌸<br>Soy <strong>Sophia</strong>, Especialista del Panel.<br>Pregúntame sobre saldo, estadísticas, notificaciones, mensajes, accesos rápidos o cualquier función del panel. ¿Qué quieres saber?',
+                        knowledge: [
+                            { kw: ['saldo','dinero','cuenta','dólar','usdt'], r: 'El saldo total en USDT se muestra en la parte superior del panel en la tarjeta azul "Saldo" y se actualiza con cada transacción.' },
+                            { kw: ['referidos','equipo','cantidad','invitar'], r: 'El total de referidos (niveles 1-3) se muestra en la tarjeta morada "Referidos" junto al saldo.' },
+                            { kw: ['mercado','precio','cripto','bitcoin','ethereum','moneda','tether'], r: 'La sección "Mercado Cripto" muestra las 3 principales monedas (BTC, ETH, SOL) en vivo cada 30 segundos. Verde = crecimiento, rojo = caída 24h.' },
+                            { kw: ['acceso','rápido','atajo','tarjeta','enlace'], r: 'Seis accesos rápidos en el centro: Cuantificación, Depósito, Retiro, Equipo, Transacciones, Perfil.' },
+                            { kw: ['notificación','campana','alerta','mensaje','insignia'], r: 'Haz clic en la campana del encabezado para abrir la bandeja de mensajes. El número de no leídos aparece como insignia roja en la campana.' },
+                            { kw: ['bandeja','lista','pestaña','filtro'], r: 'La bandeja tiene 4 pestañas: Todo, Aprobado, Rechazado, Admin. Haz clic en cualquier mensaje para ver el texto completo en una ventana separada.' },
+                            { kw: ['leído','no leído','nuevo','marca'], r: 'Los mensajes no leídos tienen fondo azul, barra lateral e insignia "NUEVO". Al abrirlos se marcan automáticamente como leídos.' },
+                            { kw: ['aprobado','éxito','confirmado'], r: 'Las solicitudes aprobadas (depósito/retiro) tienen icono verde y aparecen en la pestaña "Aprobado".' },
+                            { kw: ['rechazado','cancelado','fallido'], r: 'Las solicitudes rechazadas aparecen con icono rojo en la pestaña "Rechazado". Para rechazos de retiro aparece un texto explicativo y un botón "Contactar con soporte" abajo.' },
+                            { kw: ['admin','administración','anuncio'], r: 'Los mensajes de administración (anuncios, noticias) aparecen con icono azul en la pestaña "Admin".' },
+                            { kw: ['ayuda','guía','tutorial','pregunta'], r: 'Haz clic en el icono de interrogación (?) del encabezado para abrir la guía completa del panel con 6 secciones: estadísticas, accesos, mercado, notificaciones, casino, seguridad.' },
+                            { kw: ['idioma','cambiar idioma','traducir','español','inglés'], r: 'Haz clic en el icono del globo (🌐) del encabezado para cambiar entre 8 idiomas: persa, inglés, árabe, turco, ruso, español, francés, alemán.' },
+                            { kw: ['menú','hamburguesa','navegación','tres líneas'], r: 'Haz clic en el icono de tres líneas (≡) del encabezado para abrir el menú: Inicio, Cuantificación, Depósito, Retiro, Mi Equipo, Transacciones, Perfil, Soporte, Acerca de, Cerrar sesión.' },
+                            { kw: ['casino','juego','ruleta','plinko','suerte','dado'], r: 'El botón flotante con dado en la esquina abre los juegos de casino: ruleta y plinko. Son juegos demo con saldo separado.' },
+                            { kw: ['acerca','plataforma','zenix','qué es'], r: 'La sección "Acerca de la plataforma" al pie del panel explica Zenix, sus objetivos y estrategia. Haz clic en "Ver más" para expandir el texto completo.' },
+                            { kw: ['soporte','contacto','auriculares','ayuda'], r: 'Usa el icono de auriculares del encabezado o la opción Soporte del menú para ir al soporte y chatear con el especialista correspondiente.' },
+                            { kw: ['cerrar sesión','salir'], r: 'Para cerrar sesión, selecciona "Cerrar sesión" en el menú. Se cerrará tu sesión y serás redirigido a la página de inicio.' },
+                            { kw: ['verificado','confirmado','insignia','activo'], r: 'La insignia verde "Verificado" en la parte superior del panel indica que tu cuenta está activa.' },
+                            { kw: ['banner','imagen','publicidad'], r: 'Se muestra un banner promocional en el centro del panel y se actualiza periódicamente.' },
+                            { kw: ['no abre','carga','inicio','panel'], r: 'Si el panel no se abre, primero asegúrate de haber iniciado sesión. Si no, serás redirigido a la página de inicio. Si ya iniciaste sesión pero la página no carga, revisa tu internet y limpia la caché del navegador.' },
+                            { kw: ['rechazo de retiro','por qué rechazado','motivo cancelación'], r: 'Si tu retiro fue cancelado, abre el mensaje relacionado en la pestaña "Rechazado" de la bandeja. Verás una explicación y un botón "Contactar con soporte" que te conecta directamente con el especialista de retiros.' },
+                            { kw: ['retiro','withdraw'], r: 'Para retirar, usa el acceso rápido "Retiro". La aprobación del administrador tarda 1-24 horas hábiles y la comisión es de $0.9. El mínimo depende de tu nivel.' },
+                            { kw: ['depósito','deposit'], r: 'Para depositar, usa el acceso rápido "Depósito". Se admiten dos redes: TRC20 y BEP20. Mínimo $10 y confirmación 5-15 minutos después del TxID.' },
+                            { kw: ['cuantificación','bot','ganancia','comercio'], r: 'Para activar el bot de trading, usa el acceso rápido "Cuantificación". Saldo mínimo $20 y tasa de ganancia diaria del 1.5% al 4% según el nivel VIP.' },
+                            { kw: ['transacciones','historial','registro'], r: 'Para ver el historial completo de depósitos, retiros y recompensas, usa el acceso rápido "Transacciones".' },
+                            { kw: ['perfil','seguridad','ajustes','contraseña'], r: 'Para gestionar la seguridad de la cuenta, cambiar contraseña y ajustes, usa el acceso rápido "Perfil".' },
+                            { kw: ['equipo','referido','comisión'], r: 'Para ver tu equipo (niveles 1-3) y obtener tu enlace de referido, usa el acceso rápido "Equipo".' }
+                        ]
+                    },
+                    quantification: { label: 'Cuantificación', desc: 'Bot y Ganancias', welcome: '¡Hola! 🌺<br>Soy <strong>Isabella</strong>, Especialista del Bot.', knowledge: [{ kw: ['bot'], r: 'Bot inteligente con arbitraje e IA.' }, { kw: ['activar'], r: 'Mínimo para activar: $20.' }, { kw: ['ganancia'], r: 'VIP1=1.5% | VIP2=2% | VIP3=2.5% | VIP4=3% | VIP5=3.5% | VIP6=4%' }] },
+                    deposit: { label: 'Depósito', desc: 'Recargar Cuenta', welcome: '¡Hola! 🌷<br>Soy <strong>Emma</strong>, Especialista de Depósitos.', knowledge: [{ kw: ['cómo'], r: '1) Depósito 2) Red 3) Monto 4) Copiar dirección 5) Enviar 6) TXID' }, { kw: ['mínimo'], r: 'Mínimo $10, máximo $100,000.' }, { kw: ['red'], r: 'TRC20 y BEP20.' }] },
+                    withdraw: { label: 'Retiro', desc: 'Retirar Efectivo', welcome: '¡Hola! 🌹<br>Soy <strong>Olivia</strong>, Especialista de Retiros.', knowledge: [{ kw: ['cómo'], r: '1) Retiro 2) Red 3) Dirección 4) Monto 5) Contraseña 6) Enviar.' }, { kw: ['mínimo'], r: 'Por nivel: N1=$10 | N2=$50 | N3=$100 | N4=$200 | N5=$300 | N6=$500' }, { kw: ['comisión'], r: 'Comisión de retiro: $0.9.' }, { kw: ['rechazado', 'cancelado', 'por qué'], r: 'Si tu retiro fue cancelado, revisa los mensajes del panel o pregunta aquí. Comparte el ID de la solicitud o la info de la transacción.' }] },
+                    team: { label: 'Equipo', desc: 'Referidos', welcome: '¡Hola! 🌸<br>Soy <strong>Mia</strong>, Especialista de Equipo.', knowledge: [{ kw: ['invitar'], r: 'Copia tu enlace desde "Mi Equipo".' }, { kw: ['comisión'], r: 'Comisiones de 3 niveles.' }] },
+                    transactions: { label: 'Transacciones', desc: 'Historial', welcome: '¡Hola! 🌺<br>Soy <strong>Ava</strong>, Especialista de Transacciones.', knowledge: [{ kw: ['filtro'], r: 'Filtros: Todos, Depósitos, Retiros, Recompensas.' }, { kw: ['estado'], r: '🟢 Aprobado | 🟡 Pendiente | 🔴 Rechazado' }] },
+                    profile: { label: 'Perfil', desc: 'Seguridad', welcome: '¡Hola! 🌷<br>Soy <strong>Chloe</strong>, Especialista de Seguridad.', knowledge: [{ kw: ['cambiar'], r: 'Abre la tarjeta y haz clic en "Obtener código".' }, { kw: ['email'], r: 'Tarjeta "Cambiar Email" + selfie.' }, { kw: ['billetera'], r: 'Las direcciones se bloquean tras guardar.' }] },
+                    login: { label: 'Acceso', desc: 'Problemas de Acceso', welcome: '¡Hola! 🌸<br>Soy <strong>Lily</strong>, Especialista de Acceso.', knowledge: [{ kw: ['error'], r: 'Verifica email/contraseña, Caps Lock, captcha.' }, { kw: ['olvidé'], r: 'Haz clic en "Olvidé contraseña".' }, { kw: ['bloqueado'], r: 'Después de 5 errores, bloqueo 15 min.' }] },
+                    register: { label: 'Registro', desc: 'Nueva Cuenta', welcome: '¡Hola! 🌺<br>Soy <strong>Grace</strong>, Especialista de Registro.', knowledge: [{ kw: ['cómo'], r: 'Nombre, email, contraseña, captcha, verificar email, teléfono.' }, { kw: ['email'], r: 'Revisa la carpeta Spam.' }, { kw: ['teléfono'], r: 'Código de país + número sin cero inicial.' }] }
+                }
+            },
+            fr: {
+                dir: 'ltr',
+                ui: { back: 'Retour', backToTopics: 'Retour aux sujets', welcomeTitle: 'Bienvenue au Support Zenix 🌹', welcomeText: 'Notre équipe est disponible 24/7. Sélectionnez un sujet ci-dessous.', topicsTitle: 'Sujets de Support', topicsHint: 'Sélectionnez un sujet', closeChat: 'Fermer le Chat', conversationId: 'ID de conversation:', online: 'En ligne', connected: 'Connecté', closeModalTitle: 'Fermer la Conversation', closeModalText: 'Voulez-vous vraiment fermer cette conversation ?', cancel: 'Annuler', confirm: 'Oui, fermer', adminView: 'Support Humain', adminRole: 'Admin Zenix', inputDefault: 'Écrivez votre message...', inputAbout: 'Écrivez votre question sur', inputAboutSuffix: '...', mustSelectTopic: 'Veuillez sélectionner un sujet.', activeChatError: '⚠️ Vous avez déjà une conversation active. Fermez-la d\'abord.', noInfoFound: 'Désolé, je n\'ai pas d\'information là-dessus.', switchingToAdmin: 'Connexion au support humain...', sendError: 'Erreur d\'envoi:', noMessages: 'Aucun message pour le moment.', copySuccess: 'Code copié, retour...', switchToAdminBtn: '💬 Contacter Admin', userInfoHeader: 'Informations Utilisateur', userIdLabel: 'ID Utilisateur', userNameLabel: 'Nom', userEmailLabel: 'Email' },
+                roles: { dashboard: 'Spécialiste du Tableau', quantification: 'Spécialiste du Bot', deposit: 'Spécialiste des Dépôts', withdraw: 'Spécialiste des Retraits', team: 'Spécialiste d\'Équipe', transactions: 'Spécialiste des Transactions', profile: 'Spécialiste de Sécurité', login: 'Spécialiste de Connexion', register: 'Spécialiste d\'Inscription' },
+                smallTalk: {
+                    greeting: { kw: ['bonjour', 'salut', 'hi', 'hello'], r: 'Bonjour ! 🌸 Ravi de te voir. Je suis {name}, {role}. Comment puis-je t\'aider ?' },
+                    howAreYou: { kw: ['comment vas-tu', 'ça va', 'how are you'], r: 'Je vais très bien, merci de demander ! 😊 Et toi ? Pose-moi toutes tes questions.' },
+                    goodMorning: { kw: ['bonjour matin', 'good morning'], r: 'Bonjour ! ☀️ Comment puis-je t\'aider ?' },
+                    goodNight: { kw: ['bonne nuit', 'good night'], r: 'Bonne nuit ! 🌙 Passe une bonne journée.' },
+                    thanks: { kw: ['merci', 'thank', 'thanks'], r: 'De rien ! 🌷 Content d\'avoir pu aider. Autre chose ?' },
+                    bye: { kw: ['au revoir', 'bye', 'goodbye'], r: 'Au revoir ! 🌸 Reviens quand tu veux.' },
+                    whoAreYou: { kw: ['qui es-tu', 'comment tu t\'appelles', 'who are you'], r: 'Je suis {name}, {role} dans l\'équipe support de Zenix 🌸 Je suis là pour t\'aider avec toute question.' },
+                    whatCanYouDo: { kw: ['que peux-tu faire', 'how can you help'], r: 'Je peux t\'orienter sur le solde, les parrainages, les notifications, la boîte de messages, les raccourcis, le marché, la langue, le menu, le casino et toutes les sections du panneau. Demande-moi ! 🌸' }
+                },
+                topics: {
+                    dashboard: {
+                        label: 'Tableau', desc: 'Solde et Stats',
+                        welcome: 'Salut ! 🌸<br>Je suis <strong>Sophia</strong>, Spécialiste du Tableau.<br>Posez-moi des questions sur le solde, les statistiques, les notifications, les messages, les raccourcis ou toute autre fonctionnalité. Que voulez-vous savoir ?',
+                        knowledge: [
+                            { kw: ['solde','argent','compte','dollar','usdt'], r: 'Le solde total en USDT est affiché en haut du tableau dans la carte bleue "Solde" et se met à jour automatiquement à chaque transaction.' },
+                            { kw: ['parrainage','équipe','nombre','inviter'], r: 'Le total des parrainages (niveaux 1-3) s\'affiche dans la carte violette "Parrainages" à côté du solde.' },
+                            { kw: ['marché','prix','crypto','bitcoin','ethereum','pièce','tether'], r: 'La section "Marché des cryptos" affiche les 3 principales pièces (BTC, ETH, SOL) en direct toutes les 30 secondes. Vert = croissance, rouge = baisse sur 24h.' },
+                            { kw: ['raccourci','accès','rapide','carte','lien'], r: 'Six raccourcis principaux au centre : Quantification, Dépôt, Retrait, Équipe, Transactions, Profil.' },
+                            { kw: ['notification','cloche','alerte','message','badge'], r: 'Cliquez sur l\'icône cloche dans l\'en-tête pour ouvrir la boîte de messages. Le nombre non lus apparaît en badge rouge sur la cloche.' },
+                            { kw: ['boîte','liste','onglet','filtre'], r: 'La boîte de messages a 4 onglets : Tout, Approuvé, Rejeté, Admin. Cliquez sur un message pour voir le texte complet dans une fenêtre séparée.' },
+                            { kw: ['lu','non lu','nouveau','marque'], r: 'Les messages non lus ont un fond bleu, une barre latérale et un badge "NOUVEAU". À l\'ouverture, ils sont marqués comme lus automatiquement.' },
+                            { kw: ['approuvé','succès','confirmé'], r: 'Les demandes approuvées (dépôt/retrait) ont une icône verte et apparaissent dans l\'onglet "Approuvé".' },
+                            { kw: ['rejeté','annulé','échec'], r: 'Les demandes rejetées apparaissent avec une icône rouge dans l\'onglet "Rejeté". Pour un rejet de retrait, un texte d\'aide et un bouton "Contacter le support" apparaissent en bas.' },
+                            { kw: ['admin','administration','annonce'], r: 'Les messages admin (annonces, actualités) apparaissent avec une icône bleue dans l\'onglet "Admin".' },
+                            { kw: ['aide','guide','tutoriel','question'], r: 'Cliquez sur l\'icône point d\'interrogation (?) de l\'en-tête pour ouvrir le guide complet du tableau en 6 sections : stats, raccourcis, marché, notifications, casino, sécurité.' },
+                            { kw: ['langue','changer langue','traduire','français','anglais'], r: 'Cliquez sur l\'icône globe (🌐) de l\'en-tête pour basculer entre 8 langues : persan, anglais, arabe, turc, russe, espagnol, français, allemand.' },
+                            { kw: ['menu','hamburger','navigation','trois lignes'], r: 'Cliquez sur l\'icône trois lignes (≡) de l\'en-tête pour ouvrir le menu : Accueil, Quantification, Dépôt, Retrait, Mon Équipe, Transactions, Profil, Support, À propos, Déconnexion.' },
+                            { kw: ['casino','jeu','roulette','plinko','chance','dé'], r: 'Le bouton flottant en forme de dé dans le coin ouvre les jeux de casino : roulette et plinko. Ce sont des jeux démo avec solde séparé.' },
+                            { kw: ['à propos','plateforme','zenix','qu\'est-ce'], r: 'La section "À propos de la plateforme" en bas du tableau explique Zenix, ses objectifs et sa stratégie. Cliquez sur "Voir plus" pour afficher le texte complet.' },
+                            { kw: ['support','contact','casque','aide'], r: 'Utilisez l\'icône casque dans l\'en-tête ou l\'option Support du menu pour accéder au support et discuter avec le spécialiste concerné.' },
+                            { kw: ['déconnexion','sortir'], r: 'Pour vous déconnecter, sélectionnez "Déconnexion" dans le menu. Vous serez déconnecté et redirigé vers la page de connexion.' },
+                            { kw: ['vérifié','confirmé','badge','actif'], r: 'Le badge vert "Vérifié" en haut du tableau signifie que votre compte est actif.' },
+                            { kw: ['bannière','image','publicité'], r: 'Une bannière promotionnelle est affichée au milieu du tableau et est mise à jour périodiquement.' },
+                            { kw: ['ne s\'ouvre pas','chargement','connexion','tableau'], r: 'Si le tableau ne s\'ouvre pas, vérifiez d\'abord que vous êtes connecté. Sinon vous serez redirigé vers la page de connexion. Si vous êtes connecté mais que la page ne charge pas, vérifiez votre connexion et videz le cache du navigateur.' },
+                            { kw: ['rejet de retrait','pourquoi rejeté','motif annulation'], r: 'Si votre retrait a été annulé, ouvrez le message concerné dans l\'onglet "Rejeté". Vous verrez une explication et un bouton "Contacter le support" qui vous connecte directement au spécialiste des retraits.' },
+                            { kw: ['retrait','withdraw'], r: 'Pour retirer, utilisez le raccourci "Retrait". L\'approbation admin prend 1-24 heures ouvrables et les frais sont de 0.9$. Le minimum dépend de votre niveau.' },
+                            { kw: ['dépôt','deposit'], r: 'Pour déposer, utilisez le raccourci "Dépôt". Deux réseaux sont supportés : TRC20 et BEP20. Minimum 10$ et confirmation 5-15 minutes après TxID.' },
+                            { kw: ['quantification','bot','profit','trading'], r: 'Pour activer le bot de trading, utilisez le raccourci "Quantification". Solde minimum 20$ et taux de profit quotidien de 1.5% à 4% selon le niveau VIP.' },
+                            { kw: ['transactions','historique','enregistrement'], r: 'Pour voir l\'historique complet des dépôts, retraits et récompenses, utilisez le raccourci "Transactions".' },
+                            { kw: ['profil','sécurité','paramètres','mot de passe'], r: 'Pour gérer la sécurité du compte, changer le mot de passe et les paramètres, utilisez le raccourci "Profil".' },
+                            { kw: ['équipe','parrainage','commission'], r: 'Pour voir votre équipe (niveaux 1-3) et obtenir votre lien de parrainage, utilisez le raccourci "Équipe".' }
+                        ]
+                    },
+                    quantification: { label: 'Quantification', desc: 'Bot et Profits', welcome: 'Salut ! 🌺<br>Je suis <strong>Isabella</strong>, Spécialiste du Bot.', knowledge: [{ kw: ['bot'], r: 'Bot intelligent avec arbitrage et IA.' }, { kw: ['activer'], r: 'Minimum pour activer: 20$.' }, { kw: ['profit'], r: 'VIP1=1.5% | VIP2=2% | VIP3=2.5% | VIP4=3% | VIP5=3.5% | VIP6=4%' }] },
+                    deposit: { label: 'Dépôt', desc: 'Recharger', welcome: 'Salut ! 🌷<br>Je suis <strong>Emma</strong>, Spécialiste des Dépôts.', knowledge: [{ kw: ['comment'], r: '1) Dépôt 2) Réseau 3) Montant 4) Copier adresse 5) Envoyer 6) TXID' }, { kw: ['minimum'], r: 'Minimum 10$, maximum 100 000$.' }, { kw: ['réseau'], r: 'TRC20 et BEP20.' }] },
+                    withdraw: { label: 'Retrait', desc: 'Retirer', welcome: 'Salut ! 🌹<br>Je suis <strong>Olivia</strong>, Spécialiste des Retraits.', knowledge: [{ kw: ['comment'], r: '1) Retrait 2) Réseau 3) Adresse 4) Montant 5) Mot de passe 6) Envoyer.' }, { kw: ['minimum'], r: 'Par niveau: N1=10$ | N2=50$ | N3=100$ | N4=200$ | N5=300$ | N6=500$' }, { kw: ['frais'], r: 'Frais de retrait: 0.9$.' }, { kw: ['rejeté', 'annulé', 'pourquoi'], r: 'Si votre retrait a été annulé, consultez les messages du tableau de bord ou demandez ici. Partagez l\'ID de la demande ou les infos de la transaction.' }] },
+                    team: { label: 'Équipe', desc: 'Parrainages', welcome: 'Salut ! 🌸<br>Je suis <strong>Mia</strong>, Spécialiste d\'Équipe.', knowledge: [{ kw: ['inviter'], r: 'Copiez votre lien depuis "Mon Équipe".' }, { kw: ['commission'], r: 'Commissions sur 3 niveaux.' }] },
+                    transactions: { label: 'Transactions', desc: 'Historique', welcome: 'Salut ! 🌺<br>Je suis <strong>Ava</strong>, Spécialiste des Transactions.', knowledge: [{ kw: ['filtre'], r: 'Filtres: Tous, Dépôts, Retraits, Récompenses.' }, { kw: ['statut'], r: '🟢 Approuvé | 🟡 En attente | 🔴 Rejeté' }] },
+                    profile: { label: 'Profil', desc: 'Sécurité', welcome: 'Salut ! 🌷<br>Je suis <strong>Chloe</strong>, Spécialiste de Sécurité.', knowledge: [{ kw: ['changer'], r: 'Ouvrez la carte et cliquez "Obtenir un code".' }, { kw: ['email'], r: 'Carte "Changer Email" + selfie.' }, { kw: ['portefeuille'], r: 'Les adresses sont verrouillées après enregistrement.' }] },
+                    login: { label: 'Connexion', desc: 'Problèmes', welcome: 'Salut ! 🌸<br>Je suis <strong>Lily</strong>, Spécialiste de Connexion.', knowledge: [{ kw: ['erreur'], r: 'Vérifiez email/mot de passe, Caps Lock, captcha.' }, { kw: ['oublié'], r: 'Cliquez sur "Mot de passe oublié".' }, { kw: ['bloqué'], r: 'Après 5 erreurs, blocage 15 min.' }] },
+                    register: { label: 'Inscription', desc: 'Nouveau Compte', welcome: 'Salut ! 🌺<br>Je suis <strong>Grace</strong>, Spécialiste d\'Inscription.', knowledge: [{ kw: ['comment'], r: 'Nom, email, mot de passe, captcha, vérification email, téléphone.' }, { kw: ['email'], r: 'Vérifiez le dossier Spam.' }, { kw: ['téléphone'], r: 'Code pays + numéro sans zéro initial.' }] }
+                }
+            },
+            de: {
+                dir: 'ltr',
+                ui: { back: 'Zurück', backToTopics: 'Zurück zu Themen', welcomeTitle: 'Willkommen beim Zenix Support 🌹', welcomeText: 'Unser Expertenteam ist rund um die Uhr verfügbar. Wählen Sie unten ein Thema.', topicsTitle: 'Support-Themen', topicsHint: 'Wählen Sie ein Thema', closeChat: 'Chat schließen', conversationId: 'Konversations-ID:', online: 'Online', connected: 'Verbunden', closeModalTitle: 'Konversation schließen', closeModalText: 'Sind Sie sicher, dass Sie diese Konversation schließen möchten?', cancel: 'Abbrechen', confirm: 'Ja, schließen', adminView: 'Menschlicher Support', adminRole: 'Zenix Admin', inputDefault: 'Nachricht eingeben...', inputAbout: 'Frage zu', inputAboutSuffix: 'eingeben...', mustSelectTopic: 'Bitte wählen Sie zuerst ein Thema.', activeChatError: '⚠️ Sie haben bereits eine aktive Konversation. Schließen Sie diese zuerst.', noInfoFound: 'Entschuldigung, dazu habe ich keine Informationen.', switchingToAdmin: 'Verbinde mit menschlichem Support...', sendError: 'Sendefehler:', noMessages: 'Noch keine Nachrichten.', copySuccess: 'Code kopiert, zurück...', switchToAdminBtn: '💬 Admin kontaktieren', userInfoHeader: 'Benutzerinformationen', userIdLabel: 'Benutzer-ID', userNameLabel: 'Name', userEmailLabel: 'E-Mail' },
+                roles: { dashboard: 'Dashboard-Spezialist', quantification: 'Trading-Bot-Spezialist', deposit: 'Einzahlungs-Spezialist', withdraw: 'Auszahlungs-Spezialist', team: 'Team-Spezialist', transactions: 'Transaktions-Spezialist', profile: 'Sicherheits-Spezialist', login: 'Login-Spezialist', register: 'Registrierungs-Spezialist' },
+                smallTalk: {
+                    greeting: { kw: ['hallo', 'hi', 'hello', 'servus'], r: 'Hallo! 🌸 Schön dich zu sehen. Ich bin {name}, {role}. Wie kann ich helfen?' },
+                    howAreYou: { kw: ['wie geht es dir', 'wie gehts', 'how are you'], r: 'Mir geht es super, danke der Nachfrage! 😊 Und dir? Frag mich alles.' },
+                    goodMorning: { kw: ['guten morgen', 'good morning'], r: 'Guten Morgen! ☀️ Wie kann ich helfen?' },
+                    goodNight: { kw: ['gute nacht', 'good night'], r: 'Gute Nacht! 🌙 Einen schönen Tag noch.' },
+                    thanks: { kw: ['danke', 'thank', 'thanks'], r: 'Gern geschehen! 🌷 Freut mich, helfen zu können. Noch etwas?' },
+                    bye: { kw: ['tschüss', 'auf wiedersehen', 'bye', 'goodbye'], r: 'Tschüss! 🌸 Komm jederzeit zurück.' },
+                    whoAreYou: { kw: ['wer bist du', 'wie heißt du', 'who are you'], r: 'Ich bin {name}, {role} im Zenix-Support-Team 🌸 Ich bin hier, um dir bei jeder Frage zu helfen.' },
+                    whatCanYouDo: { kw: ['was kannst du', 'how can you help'], r: 'Ich kann dich zu Guthaben, Empfehlungen, Benachrichtigungen, Posteingang, Schnellzugriff, Markt, Sprache, Menü, Casino und allen Bereichen des Dashboards führen. Frag einfach! 🌸' }
+                },
+                topics: {
+                    dashboard: {
+                        label: 'Dashboard', desc: 'Guthaben & Statistiken',
+                        welcome: 'Hallo! 🌸<br>Ich bin <strong>Sophia</strong>, Dashboard-Spezialistin.<br>Fragen Sie mich zu Guthaben, Statistiken, Benachrichtigungen, Nachrichten, Schnellzugriff oder jeder anderen Funktion. Was möchten Sie wissen?',
+                        knowledge: [
+                            { kw: ['guthaben','geld','konto','dollar','usdt'], r: 'Das Gesamtguthaben in USDT wird oben im Dashboard in der blauen "Guthaben"-Karte angezeigt und aktualisiert sich bei jeder Transaktion automatisch.' },
+                            { kw: ['empfehlung','team','anzahl','einladen'], r: 'Die Gesamtzahl der Empfehlungen (Ebenen 1-3) wird in der lila "Empfehlungen"-Karte neben dem Guthaben angezeigt.' },
+                            { kw: ['markt','preis','krypto','bitcoin','ethereum','münze','tether'], r: 'Der Bereich "Krypto-Markt" zeigt die Top-3-Coins (BTC, ETH, SOL) live alle 30 Sekunden. Grün = Wachstum, rot = 24h-Rückgang.' },
+                            { kw: ['schnellzugriff','zugriff','karte','link'], r: 'Sechs Hauptschnellzugriffe in der Mitte: Quantifizierung, Einzahlung, Auszahlung, Team, Transaktionen, Profil.' },
+                            { kw: ['benachrichtigung','glocke','warnung','nachricht','badge'], r: 'Klicken Sie auf das Glockensymbol in der Kopfzeile, um den Posteingang zu öffnen. Die Anzahl ungelesener Nachrichten erscheint als rotes Badge.' },
+                            { kw: ['posteingang','liste','tab','filter'], r: 'Der Posteingang hat 4 Tabs: Alle, Genehmigt, Abgelehnt, Admin. Klicken Sie auf eine Nachricht, um den vollständigen Text in einem separaten Fenster zu sehen.' },
+                            { kw: ['gelesen','ungelesen','neu','markierung'], r: 'Ungelesene Nachrichten haben blauen Hintergrund, Seitenleiste und "NEU"-Badge. Beim Öffnen werden sie automatisch als gelesen markiert.' },
+                            { kw: ['genehmigt','erfolg','bestätigt'], r: 'Genehmigte Anfragen (Einzahlung/Auszahlung) haben ein grünes Symbol und erscheinen im Tab "Genehmigt".' },
+                            { kw: ['abgelehnt','storniert','fehlgeschlagen'], r: 'Abgelehnte Anfragen erscheinen mit rotem Symbol im Tab "Abgelehnt". Bei Auszahlungsablehnung erscheint unten ein Hilfetext und ein "Support kontaktieren"-Button.' },
+                            { kw: ['admin','verwaltung','ankündigung'], r: 'Admin-Nachrichten (Ankündigungen, Neuigkeiten) erscheinen mit blauem Symbol im Tab "Admin".' },
+                            { kw: ['hilfe','anleitung','tutorial','frage'], r: 'Klicken Sie auf das Fragezeichen-Symbol (?) in der Kopfzeile, um die vollständige Dashboard-Anleitung mit 6 Abschnitten zu öffnen: Statistiken, Schnellzugriff, Markt, Benachrichtigungen, Casino, Sicherheit.' },
+                            { kw: ['sprache','sprache ändern','übersetzen','deutsch','englisch'], r: 'Klicken Sie auf das Globus-Symbol (🌐) in der Kopfzeile, um zwischen 8 Sprachen zu wechseln: Persisch, Englisch, Arabisch, Türkisch, Russisch, Spanisch, Französisch, Deutsch.' },
+                            { kw: ['menü','hamburger','navigation','drei linien'], r: 'Klicken Sie auf das Drei-Linien-Symbol (≡) in der Kopfzeile, um das Navigationsmenü zu öffnen: Startseite, Quantifizierung, Einzahlung, Auszahlung, Mein Team, Transaktionen, Profil, Support, Über, Abmelden.' },
+                            { kw: ['casino','spiel','roulette','plinko','glück','würfel'], r: 'Die schwebende Würfel-Schaltfläche in der Ecke öffnet Casino-Spiele: Roulette und Plinko. Dies sind Demo-Spiele mit separatem Guthaben.' },
+                            { kw: ['über','plattform','zenix','was ist'], r: 'Der Bereich "Über die Plattform" unten im Dashboard erklärt Zenix, seine Ziele und Strategie. Klicken Sie auf "Mehr anzeigen", um den vollständigen Text zu erweitern.' },
+                            { kw: ['support','kontakt','headset','hilfe'], r: 'Nutzen Sie das Headset-Symbol in der Kopfzeile oder die Support-Option im Menü, um zum Support zu gelangen und mit dem zuständigen Spezialisten zu chatten.' },
+                            { kw: ['abmelden','logout'], r: 'Um sich abzumelden, wählen Sie "Abmelden" im Navigationsmenü. Sie werden abgemeldet und zur Anmeldeseite weitergeleitet.' },
+                            { kw: ['verifiziert','bestätigt','badge','aktiv'], r: 'Das grüne "Verifiziert"-Badge oben im Dashboard zeigt, dass Ihr Konto aktiv ist.' },
+                            { kw: ['banner','bild','werbung'], r: 'Ein Werbebanner wird in der Mitte des Dashboards angezeigt und regelmäßig aktualisiert.' },
+                            { kw: ['öffnet nicht','laden','anmeldung','dashboard'], r: 'Wenn das Dashboard nicht öffnet, stellen Sie zunächst sicher, dass Sie angemeldet sind. Wenn nicht, werden Sie zur Anmeldeseite weitergeleitet. Wenn Sie angemeldet sind, aber die Seite nicht lädt, prüfen Sie Internet und leeren Sie den Browser-Cache.' },
+                            { kw: ['auszahlungsablehnung','warum abgelehnt','stornierungsgrund'], r: 'Wenn Ihre Auszahlung storniert wurde, öffnen Sie die zugehörige Nachricht im Tab "Abgelehnt" des Posteingangs. Sie sehen eine Erklärung und einen "Support kontaktieren"-Button, der Sie direkt mit dem Auszahlungs-Spezialisten verbindet.' },
+                            { kw: ['auszahlung','withdraw'], r: 'Für Auszahlungen nutzen Sie den Schnellzugriff "Auszahlung". Die Admin-Genehmigung dauert 1-24 Geschäftsstunden und die Gebühr beträgt 0.9$. Das Minimum hängt von Ihrer Stufe ab.' },
+                            { kw: ['einzahlung','deposit'], r: 'Für Einzahlungen nutzen Sie den Schnellzugriff "Einzahlung". Zwei Netzwerke werden unterstützt: TRC20 und BEP20. Minimum 10$ und Bestätigung 5-15 Minuten nach TxID.' },
+                            { kw: ['quantifizierung','bot','gewinn','handel'], r: 'Um den Trading-Bot zu aktivieren, nutzen Sie den Schnellzugriff "Quantifizierung". Mindestguthaben 20$ und tägliche Gewinnrate von 1.5% bis 4% je nach VIP-Stufe.' },
+                            { kw: ['transaktionen','historie','aufzeichnung'], r: 'Um die vollständige Historie von Einzahlungen, Auszahlungen und Belohnungen zu sehen, nutzen Sie den Schnellzugriff "Transaktionen".' },
+                            { kw: ['profil','sicherheit','einstellungen','passwort'], r: 'Um die Kontosicherheit zu verwalten, Passwort und Einstellungen zu ändern, nutzen Sie den Schnellzugriff "Profil".' },
+                            { kw: ['team','empfehlung','provision'], r: 'Um Ihr Team (Ebenen 1-3) anzuzeigen und Ihren Empfehlungslink zu erhalten, nutzen Sie den Schnellzugriff "Team".' }
+                        ]
+                    },
+                    quantification: { label: 'Quantifizierung', desc: 'Bot & Gewinn', welcome: 'Hallo! 🌺<br>Ich bin <strong>Isabella</strong>, Trading-Bot-Spezialistin.', knowledge: [{ kw: ['bot'], r: 'Intelligenter Bot mit Arbitrage und KI.' }, { kw: ['aktivieren'], r: 'Minimum zum Aktivieren: 20$.' }, { kw: ['gewinn'], r: 'VIP1=1.5% | VIP2=2% | VIP3=2.5% | VIP4=3% | VIP5=3.5% | VIP6=4%' }] },
+                    deposit: { label: 'Einzahlung', desc: 'Konto aufladen', welcome: 'Hallo! 🌷<br>Ich bin <strong>Emma</strong>, Einzahlungs-Spezialistin.', knowledge: [{ kw: ['wie'], r: '1) Einzahlung 2) Netzwerk 3) Betrag 4) Adresse kopieren 5) Senden 6) TXID' }, { kw: ['minimum'], r: 'Minimum 10$, Maximum 100.000$.' }, { kw: ['netzwerk'], r: 'TRC20 und BEP20.' }] },
+                    withdraw: { label: 'Auszahlung', desc: 'Geld abheben', welcome: 'Hallo! 🌹<br>Ich bin <strong>Olivia</strong>, Auszahlungs-Spezialistin.', knowledge: [{ kw: ['wie'], r: '1) Auszahlung 2) Netzwerk 3) Adresse 4) Betrag 5) Passwort 6) Senden.' }, { kw: ['minimum'], r: 'Nach Stufe: S1=10$ | S2=50$ | S3=100$ | S4=200$ | S5=300$ | S6=500$' }, { kw: ['gebühr'], r: 'Auszahlungsgebühr: 0.9$.' }, { kw: ['abgelehnt', 'storniert', 'warum'], r: 'Wenn Ihre Auszahlung storniert wurde, prüfen Sie die Dashboard-Nachrichten oder fragen Sie hier. Bitte senden Sie die Anfrage-ID oder Transaktionsinformationen.' }] },
+                    team: { label: 'Team', desc: 'Empfehlungen', welcome: 'Hallo! 🌸<br>Ich bin <strong>Mia</strong>, Team-Spezialistin.', knowledge: [{ kw: ['einladen'], r: 'Kopieren Sie Ihren Link aus "Mein Team".' }, { kw: ['provision'], r: '3-stufige Provisionen.' }] },
+                    transactions: { label: 'Transaktionen', desc: 'Finanzhistorie', welcome: 'Hallo! 🌺<br>Ich bin <strong>Ava</strong>, Transaktions-Spezialistin.', knowledge: [{ kw: ['filter'], r: 'Filter: Alle, Einzahlungen, Auszahlungen, Belohnungen.' }, { kw: ['status'], r: '🟢 Genehmigt | 🟡 Ausstehend | 🔴 Abgelehnt' }] },
+                    profile: { label: 'Profil', desc: 'Sicherheit', welcome: 'Hallo! 🌷<br>Ich bin <strong>Chloe</strong>, Sicherheits-Spezialistin.', knowledge: [{ kw: ['ändern'], r: 'Öffnen Sie die Karte und klicken Sie "Code anfordern".' }, { kw: ['email'], r: 'Karte "Email ändern" + Selfie.' }, { kw: ['wallet'], r: 'Adressen werden nach dem ersten Speichern gesperrt.' }] },
+                    login: { label: 'Login', desc: 'Login-Probleme', welcome: 'Hallo! 🌸<br>Ich bin <strong>Lily</strong>, Login-Spezialistin.', knowledge: [{ kw: ['fehler'], r: 'Prüfen Sie Email/Passwort, Caps Lock, Captcha.' }, { kw: ['vergessen'], r: 'Klicken Sie "Passwort vergessen".' }, { kw: ['gesperrt'], r: 'Nach 5 Fehlversuchen 15 Min gesperrt.' }] },
+                    register: { label: 'Registrierung', desc: 'Neues Konto', welcome: 'Hallo! 🌺<br>Ich bin <strong>Grace</strong>, Registrierungs-Spezialistin.', knowledge: [{ kw: ['wie'], r: 'Name, Email, Passwort, Captcha, Email bestätigen, Telefon.' }, { kw: ['email'], r: 'Prüfen Sie den Spam-Ordner.' }, { kw: ['telefon'], r: 'Ländercode + Nummer ohne führende Null.' }] }
+                }
+            }
+        };
+        
+        function t(key) { return (LD[currentLang]?.ui && LD[currentLang].ui[key]) || LD.fa.ui[key] || key; }
+
+        function kwMatchSmallTalk(text, keywords) {
+            const clean = ' ' + String(text).toLowerCase().replace(/[.,!?؟،؛:\-_/\\()\[\]{}"'']/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+            return keywords.some(k => {
+                const kk = String(k).toLowerCase().trim();
+                if (!kk) return false;
+                if (kk.length <= 3) {
+                    return clean.includes(' ' + kk + ' ');
+                }
+                return clean.includes(kk);
+            });
+        }
+
+        function applyLang(lang) {
+            if (!LD[lang]) lang = 'fa';
+            currentLang = lang;
+            try { localStorage.setItem('zenix_lang', lang); } catch(e) {}
+            const data = LD[lang];
+            document.documentElement.setAttribute('lang', lang);
+            document.documentElement.setAttribute('dir', data.dir);
+            if (backBtnText) backBtnText.textContent = (chatIsOpen || currentView === 'expert' || currentView === 'admin') ? data.ui.backToTopics : data.ui.back;
+            document.getElementById('welcome-title').textContent = data.ui.welcomeTitle;
+            document.getElementById('welcome-text').textContent = data.ui.welcomeText;
+            document.getElementById('topics-title-text').textContent = data.ui.topicsTitle;
+            document.getElementById('topics-hint').textContent = data.ui.topicsHint;
+            document.getElementById('close-chat-text').textContent = data.ui.closeChat;
+            document.getElementById('conv-id-label').textContent = data.ui.conversationId;
+            document.getElementById('close-modal-title').textContent = data.ui.closeModalTitle;
+            document.getElementById('close-modal-text').textContent = data.ui.closeModalText;
+            document.getElementById('close-cancel').textContent = data.ui.cancel;
+            document.getElementById('close-confirm').textContent = data.ui.confirm;
+            if (currentTopic && currentView === 'expert') {
+                userInput.placeholder = `${data.ui.inputAbout} ${data.topics[currentTopic].label} ${data.ui.inputAboutSuffix}`;
+            } else {
+                userInput.placeholder = data.ui.inputDefault;
+            }
+            document.querySelectorAll('.lang-item').forEach(el => el.classList.toggle('active', el.dataset.lang === lang));
+            buildTopicsGrid();
+            if ((currentView === 'expert' || currentView === 'admin') && chatIsOpen) refreshChatHeader();
+            if (currentView === 'admin' && chatIsOpen) loadMessagesFromSupabase();
+        }
+
+        function refreshChatHeader() {
+            if (currentView === 'expert' && currentTopic) {
+                chatTitleH3.innerHTML = `<span class="expert-name">${EXPERT_NAMES[currentTopic]}</span><span class="expert-role">— ${LD[currentLang].roles[currentTopic]}</span>`;
+                chatTitleP.innerHTML = `<i class="fas fa-circle" style="font-size:6px;color:#22c55e;"></i><span style="color:#22c55e;">${LD[currentLang].ui.online}</span>`;
+            } else if (currentView === 'admin') {
+                chatTitleH3.innerHTML = `<span class="expert-name">${LD[currentLang].ui.adminView}</span><span class="expert-role">— ${LD[currentLang].ui.adminRole}</span>`;
+                chatTitleP.innerHTML = `<i class="fas fa-circle" style="font-size:6px;color:#22c55e;"></i><span style="color:#22c55e;">${LD[currentLang].ui.connected}</span>`;
+            }
+        }
+
+        langBtn.addEventListener('click', (e) => { e.stopPropagation(); langMenu.classList.toggle('show'); });
+        document.querySelectorAll('.lang-item').forEach(el => {
+            el.addEventListener('click', (e) => { e.stopPropagation(); applyLang(el.dataset.lang); langMenu.classList.remove('show'); });
+        });
+        document.addEventListener('click', (e) => { if (!e.target.closest('.wrap')) langMenu.classList.remove('show'); });
+
+        function generateConversationId(userId, topicKey) {
+            let hash = 0;
+            const str = (userId || 'guest') + '-' + (topicKey || 'new') + '-' + Date.now().toString().slice(-4);
+            for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash = hash & hash; }
+            const num = Math.abs(hash % 900000) + 100000;
+            return 'ZE-' + num;
+        }
+
+        function buildTopicsGrid() {
+            topicsGrid.innerHTML = '';
+            const data = LD[currentLang];
+            Object.keys(data.topics).forEach(key => {
+                const topic = data.topics[key];
+                const meta = TOPIC_ICONS[key];
+                const card = document.createElement('button');
+                card.className = 'topic-card';
+                card.dataset.topic = key;
+                card.innerHTML = `<div class="topic-icon ${meta.color}"><i class="fas ${meta.icon}"></i></div><div class="topic-label">${topic.label}</div><div class="topic-desc">${topic.desc}</div>`;
+                card.onclick = () => window.selectTopic(key);
+                topicsGrid.appendChild(card);
+            });
+        }
+
+        function lockTopicsView() { viewTopics.style.setProperty('display', 'none', 'important'); }
+        function unlockTopicsView() { viewTopics.style.setProperty('display', 'flex', 'important'); }
+        function showChatView() { viewChat.style.setProperty('display', 'flex', 'important'); }
+        function hideChatView() { viewChat.style.setProperty('display', 'none', 'important'); }
+
+        window.selectTopic = function(topicKey) {
+            if (isProcessingTopicClick) return;
+            if (chatIsOpen || currentView === 'expert' || currentView === 'admin') {
+                showError(t('activeChatError'));
+                return;
+            }
+            const data = LD[currentLang];
+            const topic = data.topics[topicKey];
+            if (!topic) return;
+            isProcessingTopicClick = true;
+            chatIsOpen = true;
+            currentTopic = topicKey;
+            currentView = 'expert';
+            aiMode = true;
+            currentConversationId = generateConversationId(currentUser?.id, topicKey);
+            conversationIdEl.textContent = currentConversationId;
+            lockTopicsView();
+            showChatView();
+            backBtnText.textContent = data.ui.backToTopics;
+            chatAvatarIcon.style.display = 'none';
+            chatAvatarImg.style.display = 'block';
+            chatAvatarImg.src = EXPERT_IMAGES[topicKey] || '';
+            chatAvatarImg.alt = EXPERT_NAMES[topicKey];
+            chatAvatarEl.classList.add('expert');
+            chatTitleH3.innerHTML = `<span class="expert-name">${EXPERT_NAMES[topicKey]}</span><span class="expert-role">— ${data.roles[topicKey]}</span>`;
+            chatTitleP.innerHTML = `<i class="fas fa-circle" style="font-size:6px;color:#22c55e;"></i><span style="color:#22c55e;">${data.ui.online}</span>`;
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            userInput.placeholder = `${data.ui.inputAbout} ${topic.label} ${data.ui.inputAboutSuffix}`;
+            userInput.value = '';
+            chatBody.innerHTML = '';
+            renderMessage(topic.welcome, 'bot', new Date().toISOString(), `${EXPERT_NAMES[topicKey]} (${data.roles[topicKey]})`);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => {
+                if (!IS_MOBILE) { try { userInput.focus(); } catch(e) {} }
+                isProcessingTopicClick = false;
+            }, 300);
+        };
+
+        window.requestCloseChat = function() { closeModal.classList.add('show'); };
+        window.cancelCloseChat = function() { closeModal.classList.remove('show'); };
+        window.confirmCloseChat = function() { closeModal.classList.remove('show'); closeChat(); };
+
+        function closeChat() {
+            chatIsOpen = false;
+            currentTopic = null;
+            currentChatId = null;
+            currentConversationId = null;
+            currentView = 'topics';
+            aiMode = true;
+            isProcessingTopicClick = false;
+            unsubscribeRealtime();
+            hideChatView();
+            unlockTopicsView();
+            backBtnText.textContent = t('back');
+            userInput.value = '';
+            userInput.disabled = true;
+            sendBtn.disabled = true;
+            chatBody.innerHTML = '';
+            conversationIdEl.textContent = 'ZE-000000';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function ensureUserIdentityMessage() {
+            if (!currentUser || !currentChatId) return;
+            try {
+                const userCode = 'SM-' + generateUIDDigits(currentUser.id);
+                await supabase.rpc('insert_chat_identity_message', { p_user_code: userCode });
+            } catch (e) { console.error('identity msg error:', e); }
+        }
+
+        async function ensureChatExists() {
+            if (currentChatId || !currentUser || !currentUser.email) return;
+            const { data: existing } = await supabase.from('support_chats').select('*').eq('user_email', currentUser.email).maybeSingle();
+            if (existing) { currentChatId = existing.id; return; }
+            const { data: created } = await supabase.from('support_chats').insert([{
+                user_email: currentUser.email, user_name: currentUser.email.split('@')[0],
+                last_message: 'Request admin', unread_by_admin: true, unread_by_user: false,
+                status: 'waiting_admin', created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+            }]).select().single();
+            if (created) currentChatId = created.id;
+        }
+
+        async function showAdminChatView() {
+            currentView = 'admin';
+            aiMode = false;
+            currentTopic = null;
+            chatIsOpen = true;
+            lockTopicsView();
+            showChatView();
+            backBtnText.textContent = t('backToTopics');
+            chatAvatarIcon.style.display = 'none';
+            chatAvatarImg.style.display = 'block';
+            chatAvatarImg.src = 'https://randomuser.me/api/portraits/women/50.jpg';
+            chatAvatarImg.alt = 'Admin';
+            chatAvatarEl.classList.add('expert');
+            chatTitleH3.innerHTML = `<span class="expert-name">${t('adminView')}</span><span class="expert-role">— ${t('adminRole')}</span>`;
+            chatTitleP.innerHTML = `<i class="fas fa-circle" style="font-size:6px;color:#22c55e;"></i><span style="color:#22c55e;">${t('connected')}</span>`;
+            await ensureChatExists();
+            if (currentChatId) {
+                currentConversationId = 'ZE-' + currentChatId.replace(/-/g, '').slice(0, 6).toUpperCase();
+                await ensureUserIdentityMessage();
+            } else {
+                currentConversationId = 'ZE-NEW';
+            }
+            conversationIdEl.textContent = currentConversationId;
+            userInput.disabled = false;
+            sendBtn.disabled = false;
+            userInput.placeholder = t('inputDefault');
+            userInput.value = '';
+            await loadMessagesFromSupabase();
+            subscribeRealtime();
+
+            if (sessionStorage.getItem('zenix_return_focus') === 'otp') {
+                await displayResetOtpCode();
+            }
+        }
+
+        // ★★ تابع اصلاح‌شده: بدون نمایش ایمیل ★★
+        async function displayResetOtpCode() {
+            const email = sessionStorage.getItem('zenix_support_email')
+                       || sessionStorage.getItem('zenix_reset_email');
+
+            if (!email) {
+                console.warn('[OTP Display] No email found in sessionStorage');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.rpc('get_reset_otp_for_admin', { user_email: email });
+
+                if (error) {
+                    console.error('[OTP Display] RPC error:', error);
+                    return;
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;';
+
+                if (!data.exists) {
+                    wrapper.className = 'msg system';
+                    wrapper.style.cssText += 'background:rgba(239,68,68,.15);border:1.5px solid rgba(239,68,68,.5);color:#f87171;max-width:95%;padding:14px;text-align:start;line-height:1.9;';
+                    wrapper.innerHTML = `
+                        <div style="display:flex;align-items:center;gap:8px;font-weight:800;margin-bottom:6px;">
+                            <i class="fas fa-exclamation-triangle" style="font-size:16px;"></i>
+                            <span>کاربر یافت نشد</span>
+                        </div>
+                        <div>این ایمیل در سیستم ثبت‌نام نکرده است.</div>
+                        <div style="margin-top:6px;font-size:11px;opacity:.8;">لطفاً ابتدا از صفحه ثبت‌نام، حساب جدید بسازید.</div>
+                    `;
+                    chatBody.insertBefore(wrapper, chatBody.firstChild);
+                    return;
+                }
+
+                if (!data.otp) {
+                    wrapper.className = 'msg system';
+                    wrapper.style.cssText += 'background:rgba(251,191,36,.15);border:1.5px solid rgba(251,191,36,.5);color:#fbbf24;max-width:95%;padding:14px;text-align:start;line-height:1.9;';
+                    wrapper.innerHTML = `
+                        <div style="display:flex;align-items:center;gap:8px;font-weight:800;margin-bottom:6px;">
+                            <i class="fas fa-clock" style="font-size:16px;"></i>
+                            <span>کد فعالی وجود ندارد</span>
+                        </div>
+                        <div>برای این حساب کد فعالی یافت نشد.</div>
+                        <div style="margin-top:6px;font-size:11px;opacity:.8;">لطفاً دوباره از صفحه بازیابی رمز، درخواست کد جدید بدهید.</div>
+                    `;
+                    chatBody.insertBefore(wrapper, chatBody.firstChild);
+                    return;
+                }
+
+                const otpCode = String(data.otp);
+                const expiresAtMs = data.expires_at ? new Date(data.expires_at).getTime() : (Date.now() + 2 * 60 * 1000);
+
+                wrapper.className = 'msg system code-msg';
+                wrapper.style.cssText += 'max-width:95%;';
+
+                const render = () => {
+                    if (!wrapper.isConnected) return false;
+                    const remaining = expiresAtMs - Date.now();
+                    if (remaining <= 0) {
+                        wrapper.innerHTML = `<div style="color:#f87171;font-weight:700;"><i class="fas fa-times-circle"></i> کد منقضی شد — لطفاً دوباره درخواست بدهید.</div>`;
+                        return false;
+                    }
+                    const mins = Math.floor(remaining / 60000);
+                    const secs = Math.floor((remaining % 60000) / 1000);
+                    const timerText = `${mins}:${String(secs).padStart(2, '0')}`;
+                    wrapper.innerHTML = `
+                        <span class="msg-sender" style="opacity:.9;color:#c084fc;display:block;text-align:center;">🛡️ کد بازیابی زنیکس</span>
+                        <div class="otp-code-display">
+                            <span class="otp-code-text">${otpCode}</span>
+                            <button class="copy-otp-btn" data-code="${otpCode}" title="کپی کد"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="otp-timer-row">
+                            <span>⏱</span>
+                            <span class="otp-timer-val">${timerText}</span>
+                            <span style="color:#94a3b8;font-size:10px;">| پس از کپی، به صفحه بازیابی برمی‌گردید</span>
+                        </div>
+                    `;
+                    const cpBtn = wrapper.querySelector('.copy-otp-btn');
+                    if (cpBtn) cpBtn.onclick = () => window.copyOtp(otpCode, cpBtn);
+                    return true;
+                };
+
+                chatBody.insertBefore(wrapper, chatBody.firstChild);
+                render();
+                const timer = setInterval(() => { if (!render()) clearInterval(timer); }, 1000);
+            } catch (e) {
+                console.error('[OTP Display] Error:', e);
+            }
+        }
+
+        window.goBack = function(event) {
+            if (event) event.preventDefault();
+            if (chatIsOpen || currentView === 'expert' || currentView === 'admin') { requestCloseChat(); return; }
+            if (sessionStorage.getItem('zenix_return_page')) { window.location.href = sessionStorage.getItem('zenix_return_page'); }
+            else if (document.referrer && document.referrer.includes(window.location.host)) { window.history.back(); }
+            else { window.location.href = 'dashboard.html'; }
+        };
+
+        function generateTopicReply(question) {
+            if (!currentTopic) return { handled: false, text: t('mustSelectTopic') };
+            const data = LD[currentLang];
+            const topic = data.topics[currentTopic];
+            const q = String(question || '').toLowerCase().trim();
+
+            const adminKeywords = ['ادمین', 'پشتیبان', 'مدیر', 'admin', 'support', 'human', 'yönetici', 'destek', 'админ', 'поддержка', 'soporte', 'administrateur'];
+            if (adminKeywords.some(k => q.includes(k.toLowerCase()))) return { handled: 'switch_to_admin' };
+
+            for (const item of (topic.knowledge || [])) {
+                if (item.kw.some(k => q.includes(k.toLowerCase()))) return { handled: true, text: item.r };
+            }
+
+            const smallTalk = data.smallTalk || LD.fa.smallTalk;
+            if (smallTalk) {
+                const order = ['greeting', 'howAreYou', 'goodMorning', 'goodNight', 'thanks', 'bye', 'whoAreYou', 'whatCanYouDo'];
+                for (const key of order) {
+                    const item = smallTalk[key];
+                    if (item && item.kw && kwMatchSmallTalk(q, item.kw)) {
+                        const name = EXPERT_NAMES[currentTopic] || 'Sophia';
+                        const role = data.roles[currentTopic] || '';
+                        const reply = String(item.r).replace(/\{name\}/g, name).replace(/\{role\}/g, role);
+                        return { handled: true, text: reply };
+                    }
+                }
+            }
+
+            return { handled: true, text: t('noInfoFound'), showAdminBtn: true };
+        }
+
+        function escapeHtml(value) {
+            return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
         function formatTime(iso) {
             if (!iso) return '';
             const d = new Date(iso);
             if (isNaN(d.getTime())) return '';
             return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
         }
-
         function showError(msg) {
             errorBanner.textContent = msg;
             errorBanner.classList.add('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(() => errorBanner.classList.remove('show'), 4000);
+        }
+        function isCodeExpired(createdAt) {
+            if (!createdAt) return false;
+            const createdMs = new Date(createdAt).getTime();
+            if (isNaN(createdMs)) return false;
+            return (Date.now() - createdMs) >= OTP_EXPIRY_MS;
         }
 
-        function hideError() {
-            errorBanner.classList.remove('show');
-        }
-
-        window.goBack = function(event) {
-            if (event) event.preventDefault();
-            if (sessionStorage.getItem('zenix_return_page')) {
-                window.location.href = sessionStorage.getItem('zenix_return_page');
-            } else if (document.referrer && document.referrer.includes(window.location.host)) {
-                window.history.back();
+        window.copyOtp = async function(code, btn) {
+            try { await navigator.clipboard.writeText(code); } catch (e) {
+                const ta = document.createElement('textarea'); ta.value = code; ta.style.position='fixed'; ta.style.opacity='0';
+                document.body.appendChild(ta); ta.select();
+                try { document.execCommand('copy'); } catch(_) {}
+                document.body.removeChild(ta);
+            }
+            if (btn) { btn.classList.add('copied'); btn.innerHTML = '<i class="fas fa-check"></i>'; }
+            const returnPage = sessionStorage.getItem('zenix_return_page');
+            if (returnPage) {
+                const toast = document.createElement('div');
+                toast.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.95);color:#fff;padding:12px 24px;border-radius:10px;font-size:13px;font-weight:700;z-index:99999;box-shadow:0 8px 25px rgba(34,197,94,.5);display:flex;align-items:center;gap:8px;';
+                toast.innerHTML = `<i class="fas fa-check-circle"></i> ${t('copySuccess')}`;
+                document.body.appendChild(toast);
+                setTimeout(() => { sessionStorage.removeItem('zenix_return_page'); window.location.href = returnPage; }, 1200);
             } else {
-                window.location.href = 'dashboard.html';
+                setTimeout(() => { if (btn) { btn.classList.remove('copied'); btn.innerHTML = '<i class="fas fa-copy"></i>'; } }, 1500);
             }
         };
 
@@ -144,6 +1139,71 @@
             return div;
         }
 
+        function renderIdentityMessage(text, timeIso) {
+            const parts = text.replace('[CHAT_IDENTITY]|', '').split('|');
+            const code = parts[0] || '';
+            const name = parts[1] || '';
+            const email = parts[2] || '';
+            const div = document.createElement('div');
+            div.className = 'msg system identity-msg';
+            div.innerHTML = `
+                <div class="identity-header">
+                    <i class="fas fa-user-shield"></i>
+                    <span>${escapeHtml(t('userInfoHeader'))}</span>
+                </div>
+                <div class="identity-row">
+                    <strong>${escapeHtml(t('userIdLabel'))}:</strong>
+                    <span class="code-val">${escapeHtml(code)}</span>
+                </div>
+                <div class="identity-row">
+                    <strong>${escapeHtml(t('userNameLabel'))}:</strong>
+                    <span class="val">${escapeHtml(name)}</span>
+                </div>
+                <div class="identity-row">
+                    <strong>${escapeHtml(t('userEmailLabel'))}:</strong>
+                    <span class="email-val">${escapeHtml(email)}</span>
+                </div>
+                <span class="msg-meta">${formatTime(timeIso)}</span>
+            `;
+            chatBody.appendChild(div);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            return div;
+        }
+
+        function renderCodeMessage(text, timeIso, createdAt) {
+            const match = text.match(/کد شما:\s*(\d{6})/);
+            const otpCode = match ? match[1] : null;
+            if (!otpCode) {
+                const div = document.createElement('div');
+                div.className = 'msg system';
+                div.innerHTML = text + `<span class="msg-meta">${formatTime(timeIso)}</span>`;
+                chatBody.appendChild(div);
+                return div;
+            }
+            const createdMs = createdAt ? new Date(createdAt).getTime() : Date.now();
+            const expiresAt = createdMs + OTP_EXPIRY_MS;
+            if (Date.now() >= expiresAt) return null;
+            const div = document.createElement('div');
+            div.className = 'msg system code-msg';
+            const render = () => {
+                if (!div.isConnected) return false;
+                const remaining = expiresAt - Date.now();
+                if (remaining <= 0) { div.remove(); return false; }
+                const mins = Math.floor(remaining / 60000);
+                const secs = Math.floor((remaining % 60000) / 1000);
+                const timerText = `${mins}:${String(secs).padStart(2, '0')}`;
+                div.innerHTML = `<span class="msg-sender" style="opacity:.85;color:#c084fc;">🛡️ Zenix</span><div class="otp-code-display"><span class="otp-code-text">${otpCode}</span><button class="copy-otp-btn" data-code="${otpCode}" title="copy"><i class="fas fa-copy"></i></button></div><div class="otp-timer-row"><span>⏱</span><span class="otp-timer-val">${timerText}</span></div><span class="msg-meta">${formatTime(timeIso)}</span>`;
+                const cpBtn = div.querySelector('.copy-otp-btn');
+                if (cpBtn) cpBtn.onclick = () => window.copyOtp(otpCode, cpBtn);
+                return true;
+            };
+            chatBody.appendChild(div);
+            render();
+            const timer = setInterval(() => { if (!render()) clearInterval(timer); }, 1000);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            return div;
+        }
+
         function renderTyping() {
             const div = document.createElement('div');
             div.className = 'msg bot';
@@ -153,412 +1213,204 @@
             return div;
         }
 
-        function renderQuickReplies() {
-            const existing = document.querySelector('.quick-replies');
-            if (existing) existing.remove();
-            
-            const div = document.createElement('div');
-            div.className = 'quick-replies';
-            div.innerHTML = `
-                <button class="quick-reply-btn" onclick="window.__quickReply('مشکل در ورود دارم')">🔑 مشکل ورود</button>
-                <button class="quick-reply-btn" onclick="window.__quickReply('چطور واریز کنم؟')">💰 واریز</button>
-                <button class="quick-reply-btn" onclick="window.__quickReply('چطور برداشت کنم؟')">💳 برداشت</button>
-                <button class="quick-reply-btn" onclick="window.__quickReply('ربات کوانتیفیکیشن چیه؟')">🤖 ربات</button>
-                <button class="quick-reply-btn admin-link" onclick="window.__quickReply('می‌خوام با ادمین حرف بزنم')">💬 اتصال به ادمین</button>
-            `;
-            chatBody.appendChild(div);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-
-        window.__quickReply = function(text) {
-            userInput.value = text;
-            sendMessage();
-        };
-
-        window.generateAIReply = function(question) {
-            const q = question.toLowerCase().trim();
-
-            // ۱. احوال‌پرسی
-            if (q.includes('سلام') || q.includes('درود') || q.includes('وقت بخیر') || q.includes('خسته نباشی') || q.includes('چطوری') || q.includes('هستی')) {
-                return { handled: true, text: 'سلام عزیز دل، وقتت بخیر! 👋 من خوبم ممنون. تو چطوری؟ چیزی شده که کمکت کنم یا سوالی داری؟' };
-            }
-
-            // ۲. مشکل کپچا
-            if ((q.includes('کپچا') || q.includes('کد امنیتی') || q.includes('کد تصویر') || q.includes('کد رو نمیخونم') || q.includes('کد چیه')) && !q.includes('فراموش')) {
-                return { handled: true, text: 'آها، اون کد امنیتی رو میگی. حق داری والا، یکم شیطون بازی درمیاره! 😅<br><br>چند تا راه حل دارم برات:<br>۱. روی خود عکس کد کلیک کن یا دکمه چرخش (Refresh) رو بزن تا یه کد واضح‌تر بیاد.<br>۲. حواست باشه حروف بزرگ و کوچیک (مثل A و a) رو دقیق مثل تصویر وارد کنی.<br>۳. اگه گوشی داری، یه ذره زوم کن روش.<br><br>اگه بازم نشد بگو تا وصلت کنم به مدیریت.' };
-            }
-
-            // ۳. ارور ورود
-            if ((q.includes('وارد نمیشم') || q.includes('لاگین نمیشم') || q.includes('ورود نمیکنه') || q.includes('ارور میده') || q.includes('خطا میده') || q.includes('invalid') || q.includes('اشتباهه')) && (q.includes('رمز') || q.includes('ایمیل') || q.includes('پسورد') || q.includes('یوزر') || q.includes('login'))) {
-                return { handled: true, text: 'آهان، ارور ورود میگیری. نگران نباش، خیلیا این مشکل رو دارن.<br><br>ارور <strong>Invalid credentials</strong> معمولاً یعنی یا ایمیلت رو اشتباه تایپ کردی یا رمز عبورت با اونی که موقع ثبت‌نام زدی فرق داره. یه چک بکن ببین:<br>• Caps Lock (دکمه بزرگ‌نویسی) روشن نباشه.<br>• حتماً کد امنیتی رو هم وارد کرده باشی.<br>• اگه تازه ثبت‌نام کردی، شاید ایمیلت رو تایید نکرده باشی.<br><br>میخوای یه بار دیگه با دقت امتحان کنی؟' };
-            }
-
-            // ۴. قفل حساب
-            if ((q.includes('قفل') || q.includes('بلاک') || q.includes('موقتا') || q.includes('too many') || q.includes('بستن حساب')) && (q.includes('ورود') || q.includes('لاگین') || q.includes('حساب'))) {
-                return { handled: true, text: 'وای، سیستم ضد هکش فعال شده! 🚨<br><br>چون چندبار پشت سر هم رمز اشتباه زدی، سیستم فکر کرده یکی داره حسابتو هک میکنه و برات یه قفل موقت (معمولاً ۱ تا ۵ دقیقه) گذاشته.<br>نگران نباش، این برای امنیت خودته. یه چایی بریز، یه کم صبر کن، بعدش دوباره با آرامش امتحان کن. حتماً درست میشه.' };
-            }
-
-            // ۵. دکمه ورود غیرفعال
-            if ((q.includes('دکمه') || q.includes('دکمه ورود') || q.includes('غیرفعال') || q.includes('خاکستری') || q.includes('کار نمیکنه')) && (q.includes('ورود') || q.includes('لاگین') || q.includes('btn'))) {
-                return { handled: true, text: 'آها، دکمه ورود خاکستریه و روش کلیک نمیشه؟<br><br>این طبیعیه! دکمه ورود فقط وقتی فعال میشه که ۳ تا شرط برقرار باشه:<br>۱. ایمیلت کامل و درست باشه (مثل test@gmail.com).<br>۲. رمز عبورت حداقل ۶ حرف باشه.<br>۳. کد امنیتی رو دقیقاً ۵ حرف زده باشی.<br><br>وقتی اینا کامل بشه، دکمه رنگی میشه و میتونی بزنی. اگه همه رو زدی و بازم خاکستریه، شاید مرورگرت گیر داده، یه بار صفحه رو رفرش کن.' };
-            }
-
-            // ۶. فراموشی رمز
-            if ((q.includes('فراموش') || q.includes('یادم رفته') || q.includes('گم کردم') || q.includes('ریست') || q.includes('بازیابی')) && (q.includes('رمز') || q.includes('پسورد') || q.includes('password'))) {
-                return { handled: true, text: 'برای فراموشی رمز، نگران نباش! توی صفحه ورود، روی گزینه <strong>«فراموشی رمز عبور»</strong> کلیک کن.<br><br>اونجا باید ایمیلت رو وارد کنی، بعدش یه کد ۶ رقمی به ایمیلت میاد. کد رو میزنی، رمز جدیدت رو انتخاب میکنی و تمام!<br>اگه کد به ایمیلت نیومد، پوشه Spam (هرزنامه) رو چک کن. اگه بازم نیومد بگو تا وصلت کنم به مدیریت.' };
-            }
-
-            // ۷. تغییر ایمیل
-            if ((q.includes('تغییر') || q.includes('عوض')) && (q.includes('ایمیل') || q.includes('جمیل') || q.includes('email'))) {
-                return { handled: true, text: 'برای تغییر ایمیل:<br><br>۱. اول باید با حساب فعلیت وارد بشی.<br>۲. برو به بخش <strong>پروفایل / تنظیمات</strong>.<br>۳. اونجا میتونی ایمیل جدیدت رو وارد کنی و تاییدش کنی.<br><br>اگه به هر دلیلی نمیتونی وارد بشی، بگو تا وصلت کنم به مدیریت.' };
-            }
-
-            // ۸. واریز
-            if (q.includes('واریز') || q.includes('شارژ') || q.includes('پول') || q.includes('deposit')) {
-                return { handled: true, text: 'برای واریز و شارژ حساب، از پنل کاربری برو به بخش <strong>واریز</strong>. آدرس کیف پول رو کپی کن و مبلغ رو بفرست. بعدش کد هش تراکنش (TxID) رو اونجا وارد کن تا حسابت شارژ بشه. اگه گیر کردی بگو!' };
-            }
-
-            // ۹. برداشت
-            if (q.includes('برداشت') || q.includes('تسویه') || q.includes('withdraw')) {
-                return { handled: true, text: 'برای برداشت هم از منوی پنل برو به بخش <strong>برداشت</strong>، آدرس کیف پول مقصدت رو بزن و مبلغ رو ثبت کن. درخواستت بعد از تایید سیستم، سریع واریز میشه.' };
-            }
-
-            // ۱۰. تیم و رفرال
-            if (q.includes('تیم') || q.includes('دعوت') || q.includes('کمیسیون') || q.includes('زیرمجموعه')) {
-                return { handled: true, text: 'برای دعوت دوستات، از بخش <strong>تیم / دعوت</strong> لینک اختصاصیت رو کپی کن و بفرست براشون. هرکاری اونا بکنن، کمیسیونش به جیبت میاد. 😉' };
-            }
-
-            // ۱۱. VIP
-            if (q.includes('vip') || q.includes('سطح') || q.includes('تاج') || q.includes('سود روزانه') || q.includes('چطور باز میشه')) {
-                return { handled: true, text: 'سیستم سطوح VIP خیلی ساده‌ست! هرچی سطحت بالاتر بره، درصد سود روزانه‌ت بیشتر میشه (از ۱.۵٪ تا ۴٪).<br><br><strong>چطور سطحم رو ارتقا بدم؟</strong><br>شرط اصلی اینه که <strong>واریزی مستقیم</strong> به همون میزان داشته باشی. مثلاً برای VIP 1 باید ۲۰ دلار واریز کنی، برای VIP 2 باید ۳۰۰ دلار و... .<br><br><span style="color:#fbbf24;">⚠️ نکته مهم:</span> سودی که از معاملات ربات به دست میاری رو برای ارتقای سطح حساب نمی‌کنن، فقط پولی که از بیرون واریز می‌کنی مهمه.' };
-            }
-
-            // ۱۲. ساعت نیویورک
-            if (q.includes('نیویورک') || q.includes('ساعت') || q.includes('ریست') || q.includes('صفر') || q.includes('چرا ریست شد')) {
-                return { handled: true, text: 'ساعت نیویورک (NY Time) برای اینه که کل پلتفرم ما بین‌المللی و زنده‌ست. ما برای معاملات و محاسبه سود، مبنا رو ساعت رسمی نیویورک گذاشتیم.<br><br>هر روز که این ساعت به پایان می‌رسه (ریست میشه)، ظرفیت ۴ بار معامله‌ی تو دوباره پر میشه و می‌تونی از فردای اون روز دوباره شروع کنی. این یعنی همه کاربرا توی کل دنیا هماهنگ هستن.' };
-            }
-
-            // ۱۳. محدودیت روزانه
-            if ((q.includes('۴ بار') || q.includes('چهار بار') || q.includes('محدودیت') || q.includes('چرا نمیشه') || q.includes('دکمه کوانتیفیکیشن')) && !q.includes('دکمه ورود')) {
-                return { handled: true, text: 'آها، اگه دکمه کوانتیفیکیشن برات غیرفعال شده یا نوشته <strong>«پایان ظرفیت امروز»</strong>، به خاطر اینه که تو هر روز فقط ۴ بار می‌تونی از ربات استفاده کنی (سود روزانه به ۴ معامله ۱۰ ثانیه‌ای تقسیم میشه).<br><br>یا ممکنه موجودیت کمتر از ۲۰ دلار باشه که تو این حالت ربات اصلاً فعال نمیشه و باید از بخش واریز، حسابت رو شارژ کنی.' };
-            }
-
-            // ۱۴. کوانتیفیکیشن عمومی
-            if (q.includes('کوانتیفیکیشن') || q.includes('ربات') || q.includes('quantification') || q.includes('چطور کار میکنه') || q.includes('سود')) {
-                return { handled: true, text: 'سیستم <strong>کوانتیفیکیشن</strong> (Quantification) یه ربات معامله‌گر هوشمنده!<br><br>ربات ما به صورت لحظه‌ای قیمت ارزهای دیجیتال رو توی صرافی‌های مختلف جهان بررسی می‌کنه و کوچک‌ترین اختلاف قیمت‌ها رو کشف می‌کنه تا از طریق آربیتراژ و هوش مصنوعی سود مطمئن به دست بیاره.<br>برای فعال کردنش، موجودیت باید بالای ۲۰ دلار باشه. بعد از اون، هر بار که دکمه کوانتیفیکیشن رو بزنی، یه معامله ۱۰ ثانیه‌ای شروع میشه و سودش به موجودیت اضافه میشه.' };
-            }
-
-            // ۱۵. موجودی/داشبورد
-            if (q.includes('موجودی') || q.includes('داشبورد') || q.includes('بالانس') || q.includes('کیف پول')) {
-                return { handled: true, text: 'موجودی کل حسابت رو می‌تونی از بالای صفحه داشبورد یا صفحه کوانتیفیکیشن ببینی. هر سودی هم که از ربات بگیری، به صورت لحظه‌ای به همین موجودی اضافه میشه.<br><br>اگه میخوای موجودیت رو بیشتر کنی، از بخش <strong>واریز</strong> استفاده کن.' };
-            }
-
-            // ۱۶. بازار ارز
-            if (q.includes('بازار') || q.includes('قیمت') || q.includes('بیت کوین') || q.includes('اتریوم') || q.includes('ارز دیجیتال')) {
-                return { handled: true, text: 'بخش <strong>بازار ارز جهانی</strong> که توی داشبورد و صفحه کوانتیفیکیشن می‌بینی، به صورت زنده قیمت‌های لحظه‌ای (مثل بیت‌کوین، اتریوم و...) رو نشون میده.<br><br>این برای اینه که کاربر حس کنه توی یه پلتفرم زنده و بین‌المللیه و ببینه ربات داره توی چه بازار پرنوسانی کار می‌کنه.' };
-            }
-
-            // ۱۷. اعلان
-            if (q.includes('زنگوله') || q.includes('اعلان') || q.includes('پیام') || q.includes('صندوق پیام')) {
-                return { handled: true, text: 'آیکون <strong>زنگوله</strong> (بالای صفحه) صندوق پیام‌ها و اعلان‌های توئه. هر موقع ادمین پیامی برات بفرسته یا درخواست واریز/برداشتت تایید یا رد بشه، اینجا بهت اطلاع میده.<br><br>اگه پیام جدید داشته باشی، یه نقطه قرمز روش ظاهر میشه.' };
-            }
-
-            // درخواست مستقیم ادمین
-            if (q.includes('مدیر') || q.includes('ادمین') || q.includes('اپراتور') || q.includes('آدم واقعی') || q.includes('انسان') || q.includes('پشتیبان')) {
-                return { handled: 'switch_to_admin' };
-            }
-
-            return { handled: false };
-        };
-
-        function updateStatusUI() {
-            const titleEl = document.getElementById('support-status-title');
-            const subEl = document.getElementById('support-status-sub');
-            const avatarEl = document.getElementById('chat-avatar-el');
-            const avatarIcon = document.getElementById('chat-avatar-icon');
-
-            if (aiMode) {
-                titleEl.textContent = 'دستیار هوشمند Zenix';
-                subEl.textContent = 'آماده پاسخگویی';
-                avatarEl.classList.remove('admin');
-                avatarIcon.className = 'fas fa-robot';
-                modeBtn.style.display = currentUser ? 'flex' : 'none';
-                modeBtn.className = 'mode-btn admin-mode';
-                modeBtnText.textContent = 'اتصال به ادمین';
-            } else {
-                titleEl.textContent = 'پشتیبانی زنیکس (ادمین)';
-                subEl.textContent = 'متصل - پیام بدهید';
-                avatarEl.classList.add('admin');
-                avatarIcon.className = 'fas fa-headset';
-                modeBtn.style.display = 'flex';
-                modeBtn.className = 'mode-btn ai-mode';
-                modeBtnText.textContent = 'بازگشت به دستیار';
-            }
-        }
-
         async function switchToHumanMode() {
             if (!currentUser) {
-                renderMessage('برای اتصال به پشتیبان انسانی، لطفاً ابتدا وارد حساب کاربری خود شوید.', 'system', new Date().toISOString());
+                renderMessage('Please log in first.', 'system', new Date().toISOString());
                 setTimeout(() => { window.location.href = 'index.html'; }, 2500);
                 return;
             }
-
             if (aiMode === false) return;
-
             aiMode = false;
-
-            if (!currentChatId) {
-                const { data: existing, error: findError } = await supabase
-                    .from('support_chats')
-                    .select('*')
-                    .eq('user_email', currentUser.email)
-                    .maybeSingle();
-
-                if (existing) {
-                    currentChatId = existing.id;
-                } else {
-                    const { data: created, error: createError } = await supabase
-                        .from('support_chats')
-                        .insert([{
-                            user_email: currentUser.email,
-                            user_name: currentUser.email.split('@')[0],
-                            last_message: 'درخواست اتصال به پشتیبان',
-                            unread_by_admin: true,
-                            unread_by_user: false,
-                            status: 'waiting_admin',
-                            created_at: new Date().toISOString(),
-                            updated_at: new Date().toISOString()
-                        }])
-                        .select()
-                        .single();
-
-                    if (createError || !created) {
-                        console.error('Create chat error:', createError);
-                        showError('خطا در اتصال به ادمین. لطفاً دوباره تلاش کنید.');
-                        aiMode = true;
-                        updateStatusUI();
-                        return;
-                    }
-                    currentChatId = created.id;
+            currentView = 'admin';
+            currentTopic = null;
+            chatIsOpen = true;
+            chatAvatarIcon.style.display = 'none';
+            chatAvatarImg.style.display = 'block';
+            chatAvatarImg.src = 'https://randomuser.me/api/portraits/women/50.jpg';
+            chatAvatarEl.classList.add('expert');
+            chatTitleH3.innerHTML = `<span class="expert-name">${t('adminView')}</span><span class="expert-role">— ${t('adminRole')}</span>`;
+            chatTitleP.innerHTML = `<i class="fas fa-circle" style="font-size:6px;color:#22c55e;"></i><span style="color:#22c55e;">${t('connected')}</span>`;
+            await ensureChatExists();
+            if (currentChatId) {
+                const { data: existingMsgs } = await supabase.from('support_messages').select('id').eq('chat_id', currentChatId).eq('sender', 'user').limit(1);
+                if (!existingMsgs || existingMsgs.length === 0) {
+                    await supabase.from('support_messages').insert([{
+                        chat_id: currentChatId, sender: 'user', text: '🙋 User requests human support', created_at: new Date().toISOString()
+                    }]);
                 }
-
-                await supabase.from('support_messages').insert([{
-                    chat_id: currentChatId,
-                    sender: 'user',
-                    text: '🙋 کاربر درخواست اتصال به پشتیبان انسانی دارد.',
-                    created_at: new Date().toISOString()
-                }]);
+                await ensureUserIdentityMessage();
+                currentConversationId = 'ZE-' + currentChatId.replace(/-/g, '').slice(0, 6).toUpperCase();
+            } else {
+                currentConversationId = 'ZE-NEW';
             }
-
-            updateStatusUI();
+            conversationIdEl.textContent = currentConversationId;
             await loadMessagesFromSupabase();
             subscribeRealtime();
         }
 
-        window.toggleMode = async function() {
-            if (aiMode) {
-                await switchToHumanMode();
-            } else {
-                aiMode = true;
-                currentChatId = null;
-                unsubscribeRealtime();
-                chatBody.innerHTML = '';
-                renderWelcome();
-                updateStatusUI();
-            }
-        };
-
-        function renderWelcome() {
-            chatBody.innerHTML = '';
-            renderMessage('سلام، وقتت بخیر! 👋<br>من دستیار هوشمند پلتفرم <strong>Zenix</strong> هستم. اگر سوالی داری بپرس یا از موضوعات زیر انتخاب کن. اگر به کمک بیشتری نیاز داشتی، از دکمه‌ی بالا «اتصال به ادمین» استفاده کن.', 'bot', new Date().toISOString());
-            renderQuickReplies();
-        }
-
         async function loadMessagesFromSupabase() {
             if (!currentChatId) return;
-
             try {
-                const { data: messages, error } = await supabase
-                    .from('support_messages')
-                    .select('*')
-                    .eq('chat_id', currentChatId)
-                    .order('created_at', { ascending: true });
-
-                if (error) {
-                    console.error('Load messages error:', error);
-                    return;
-                }
-
+                const { data: messages, error } = await supabase.from('support_messages').select('*').eq('chat_id', currentChatId).order('created_at', { ascending: true });
+                if (error) return;
                 chatBody.innerHTML = '';
-
-                if (!messages || messages.length === 0) {
-                    renderMessage('هنوز پیامی در این گفتگو ثبت نشده است. اولین پیام را شما بنویسید.', 'system', new Date().toISOString());
-                    return;
+                let visibleCount = 0;
+                if (messages && messages.length > 0) {
+                    messages.forEach(msg => {
+                        const msgText = msg.text || '';
+                        if (msg.sender === 'system' && msgText.startsWith('[CHAT_IDENTITY]')) {
+                            renderIdentityMessage(msgText, msg.created_at);
+                            visibleCount++;
+                        } else if (msg.sender === 'system' && msgText.includes('کد محافظ')) {
+                            if (isCodeExpired(msg.created_at)) return;
+                            const el = renderCodeMessage(msgText, msg.created_at, msg.created_at);
+                            if (el) visibleCount++;
+                        } else {
+                            const sender = msg.sender === 'admin' ? 'admin' : (msg.sender === 'system' ? 'system' : 'user');
+                            const label = msg.sender === 'admin' ? 'Admin' : (msg.sender === 'system' ? null : 'You');
+                            renderMessage(msgText, sender, msg.created_at, label);
+                            visibleCount++;
+                        }
+                    });
                 }
-
-                messages.forEach(msg => {
-                    const sender = msg.sender === 'admin' ? 'admin' : 'user';
-                    const label = msg.sender === 'admin' ? 'پشتیبان' : 'شما';
-                    renderMessage(msg.text, sender, msg.created_at, label);
-                });
-            } catch (err) {
-                console.error('loadMessagesFromSupabase error:', err);
-            }
+                if (visibleCount === 0) renderMessage(t('noMessages'), 'system', new Date().toISOString());
+            } catch (err) { console.error('loadMessages error:', err); }
         }
 
         function unsubscribeRealtime() {
-            if (realtimeChannel) {
-                supabase.removeChannel(realtimeChannel);
-                realtimeChannel = null;
-            }
+            if (realtimeChannel) { supabase.removeChannel(realtimeChannel); realtimeChannel = null; }
         }
-
         function subscribeRealtime() {
             if (!currentChatId) return;
             unsubscribeRealtime();
-
-            realtimeChannel = supabase
-                .channel('support_rt_' + currentChatId)
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'support_messages',
-                    filter: `chat_id=eq.${currentChatId}`
-                }, () => {
+            realtimeChannel = supabase.channel('support_rt_' + currentChatId)
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages', filter: `chat_id=eq.${currentChatId}` }, () => {
                     loadMessagesFromSupabase();
-                })
-                .subscribe();
+                }).subscribe();
         }
 
         async function sendMessage() {
             const text = userInput.value.trim();
             if (!text || isSending) return;
-
-            if (!currentUser && !aiMode) {
-                showError('برای ارسال پیام به ادمین ابتدا وارد شوید.');
-                return;
-            }
-
-            isSending = true;
-            sendBtn.disabled = true;
-
-            const quickRepliesEl = document.querySelector('.quick-replies');
-            if (quickRepliesEl) quickRepliesEl.remove();
-
-            renderMessage(text, 'user', new Date().toISOString(), 'شما');
+            if (currentView === 'topics') { showError(t('mustSelectTopic')); return; }
+            if (!currentUser && currentView === 'admin') { showError('Please login first.'); return; }
+            isSending = true; sendBtn.disabled = true;
+            renderMessage(text, 'user', new Date().toISOString(), 'You');
             userInput.value = '';
-
             try {
-                if (aiMode) {
-                    const reply = window.generateAIReply(text);
-
+                if (currentView === 'expert') {
+                    const reply = generateTopicReply(text);
+                    const data = LD[currentLang];
+                    const expertLabel = currentTopic ? `${EXPERT_NAMES[currentTopic]} (${data.roles[currentTopic]})` : null;
                     if (reply.handled === 'switch_to_admin') {
                         setTimeout(async () => {
-                            renderMessage('باشه، شما را به پشتیبان انسانی وصل می‌کنم. لطفاً چند لحظه صبر کنید...', 'system', new Date().toISOString());
+                            renderMessage(t('switchingToAdmin'), 'system', new Date().toISOString());
                             await switchToHumanMode();
                         }, 700);
                     } else if (reply.handled === true) {
                         const typing = renderTyping();
                         setTimeout(() => {
                             typing.remove();
-                            renderMessage(reply.text, 'bot', new Date().toISOString());
-                        }, 800);
-                    } else {
-                        const typing = renderTyping();
-                        setTimeout(() => {
-                            typing.remove();
-                            renderMessage('متأسفم، در این مورد نمی‌توانم کمکت کنم. اگر مایل باشید، شما را به پشتیبان انسانی وصل می‌کنم.', 'bot', new Date().toISOString());
-                            const div = document.createElement('div');
-                            div.className = 'quick-replies';
-                            div.innerHTML = `
-                                <button class="quick-reply-btn admin-link" onclick="window.__switchAdmin()">💬 بله، به ادمین وصل کن</button>
-                                <button class="quick-reply-btn" onclick="document.getElementById('user-input').focus()">✏️ سوال دیگری دارم</button>
-                            `;
-                            chatBody.appendChild(div);
-                            chatBody.scrollTop = chatBody.scrollHeight;
-                        }, 800);
+                            renderMessage(reply.text, 'bot', new Date().toISOString(), expertLabel);
+                            if (reply.showAdminBtn) {
+                                const div = document.createElement('div');
+                                div.className = 'quick-replies';
+                                div.innerHTML = `<button class="quick-reply-btn admin-link" onclick="window.__switchAdmin()">${t('switchToAdminBtn')}</button>`;
+                                chatBody.appendChild(div);
+                                chatBody.scrollTop = chatBody.scrollHeight;
+                            }
+                        }, 700);
                     }
-                } else {
-                    if (!currentChatId) {
-                        await switchToHumanMode();
-                    }
-
+                } else if (currentView === 'admin') {
+                    if (!currentChatId) await switchToHumanMode();
                     const now = new Date().toISOString();
-                    const { error: msgError } = await supabase.from('support_messages').insert([{
-                        chat_id: currentChatId,
-                        sender: 'user',
-                        text: text,
-                        created_at: now
-                    }]);
-
+                    const { error: msgError } = await supabase.from('support_messages').insert([{ chat_id: currentChatId, sender: 'user', text: text, created_at: now }]);
                     if (msgError) throw msgError;
-
-                    await supabase.from('support_chats').update({
-                        last_message: text,
-                        updated_at: now,
-                        unread_by_admin: true,
-                        status: 'waiting_admin'
-                    }).eq('id', currentChatId);
+                    await supabase.from('support_chats').update({ last_message: text, updated_at: now, unread_by_admin: true, status: 'waiting_admin' }).eq('id', currentChatId);
                 }
-            } catch (err) {
-                console.error('Send error:', err);
-                showError('خطا در ارسال پیام: ' + (err.message || 'نامشخص'));
-            } finally {
-                isSending = false;
-                sendBtn.disabled = false;
-                userInput.focus();
-            }
+            } catch (err) { showError(t('sendError') + ' ' + (err.message || '')); }
+            finally { isSending = false; sendBtn.disabled = false; if (!IS_MOBILE) { try { userInput.focus(); } catch(e) {} } }
         }
 
         window.__switchAdmin = async function() {
-            const quickRepliesEl = document.querySelector('.quick-replies');
-            if (quickRepliesEl) quickRepliesEl.remove();
-            renderMessage('باشه، شما را به پشتیبان انسانی وصل می‌کنم...', 'system', new Date().toISOString());
+            const q = document.querySelector('.quick-replies'); if (q) q.remove();
+            renderMessage(t('switchingToAdmin'), 'system', new Date().toISOString());
             await switchToHumanMode();
         };
 
         async function init() {
+            let urlTopic = null;
             try {
-                const { data: sessionData } = await supabase.auth.getSession();
-                if (sessionData?.session?.user) {
-                    currentUser = sessionData.session.user;
+                const params = new URLSearchParams(window.location.search);
+                urlTopic = params.get('topic');
+                if (!urlTopic && window.location.hash) {
+                    const hashStr = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : window.location.hash;
+                    const hashParams = new URLSearchParams(hashStr);
+                    urlTopic = hashParams.get('topic');
+                }
+            } catch (e) { console.error('[Zenix Support] URL parse error:', e); }
+
+            console.log('[Zenix Support] URL topic:', urlTopic);
+
+            try {
+                try {
+                    const savedLang = localStorage.getItem('zenix_lang') || 'fa';
+                    applyLang(savedLang);
+                } catch (e) { console.error('[Zenix Support] applyLang error:', e); }
+
+                try {
+                    const { data: sessionData } = await supabase.auth.getSession();
+                    if (sessionData?.session?.user) currentUser = sessionData.session.user;
+                } catch (e) { console.error('[Zenix Support] getSession error:', e); }
+
+                try {
+                    supabase.auth.onAuthStateChange((event, session) => {
+                        if (session?.user && !currentUser) currentUser = session.user;
+                    });
+                } catch (e) {}
+
+                console.log('[Zenix Support] currentUser:', currentUser ? currentUser.email : 'null');
+
+                const validTopics = Object.keys(LD.fa.topics);
+                if (urlTopic && validTopics.includes(urlTopic)) {
+                    console.log('[Zenix Support] Auto-opening chat for topic:', urlTopic);
+                    chatIsOpen = false;
+                    currentView = 'topics';
+                    try { unlockTopicsView(); } catch (e) {}
+                    try { hideChatView(); } catch (e) {}
+                    try { backBtnText.textContent = t('back'); } catch (e) {}
+
+                    setTimeout(() => {
+                        try {
+                            window.selectTopic(urlTopic);
+                            try {
+                                window.history.replaceState({}, document.title, window.location.pathname);
+                            } catch (e) {}
+                        } catch (err) {
+                            console.error('[Zenix Support] selectTopic failed:', err);
+                            showError('Unable to open the chat. Please select a topic below.');
+                        }
+                    }, 100);
+                    return;
                 }
 
-                updateStatusUI();
-                renderWelcome();
-                userInput.disabled = false;
-                sendBtn.disabled = false;
-                userInput.focus();
-
-                if (currentUser && currentUser.email) {
-                    const { data: existingChat } = await supabase
-                        .from('support_chats')
-                        .select('*')
-                        .eq('user_email', currentUser.email)
-                        .maybeSingle();
-
-                    if (existingChat) {
-                        aiMode = false;
-                        currentChatId = existingChat.id;
-                        updateStatusUI();
-                        await loadMessagesFromSupabase();
-                        subscribeRealtime();
-                    }
+                const fromProfile = !!sessionStorage.getItem('zenix_return_focus');
+                if (fromProfile) {
+                    await showAdminChatView();
+                    return;
                 }
+                chatIsOpen = false;
+                currentView = 'topics';
+                unlockTopicsView();
+                hideChatView();
+                backBtnText.textContent = t('back');
             } catch (err) {
-                console.error('init error:', err);
-                showError('خطای اتصال: ' + (err.message || 'نامشخص'));
+                console.error('[Zenix Support] init error:', err);
             }
         }
 
         sendBtn.addEventListener('click', sendMessage);
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
         init();
     </script>
 </body>

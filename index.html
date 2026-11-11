@@ -2,48 +2,88 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
     <title>Zenix Platform - Login</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.cn">
     <link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin>
-    <link href="https://fonts.googleapis.cn/css2?family=Orbitron:wght@700;900&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://challenges.cloudflare.com">
+    <link href="https://fonts.googleapis.cn/css2?family=Orbitron:wght@700;900&family=Vazirmatn:wght@400;500;700&family=Italianno&family=Cinzel:wght@900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <script>
         window.__cfToken = null;
-
         window.onCaptchaSuccess = function (token) {
-            window.__cfToken = token ||
-                (document.querySelector('[name="cf-turnstile-response"]') || {}).value ||
-                null;
+            window.__cfToken = token || (document.querySelector('[name="cf-turnstile-response"]') || {}).value || null;
             try { document.dispatchEvent(new CustomEvent('cf-token-ready')); } catch (e) {}
         };
-
         window.onCaptchaExpired = function () {
             window.__cfToken = null;
             try { document.dispatchEvent(new CustomEvent('cf-token-ready')); } catch (e) {}
         };
-
         window.onCaptchaError = function () {
             window.__cfToken = null;
             try { document.dispatchEvent(new CustomEvent('cf-token-ready')); } catch (e) {}
         };
     </script>
 
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
     <script>(function(){var s=localStorage.getItem('zenix_lang')||'en',r=['fa','ar'];document.documentElement.setAttribute('dir',r.includes(s)?'rtl':'ltr');document.documentElement.setAttribute('lang',s);})();</script>
+
+    <script src="device.js"></script>
+
     <style>
         *{box-sizing:border-box;margin:0;padding:0;font-family:'Vazirmatn',system-ui,sans-serif}
-        body{background:#030712;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#f8fafc;padding:15px;position:relative;overflow-x:hidden}
+
+        html{
+            background:#030712;
+            height:100vh;
+            height:100dvh;
+            overflow:hidden;
+        }
+        body{
+            background:#030712;
+            height:100vh;
+            height:100dvh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            color:#f8fafc;
+            padding:max(15px, env(safe-area-inset-top)) max(15px, env(safe-area-inset-right)) max(15px, env(safe-area-inset-bottom)) max(15px, env(safe-area-inset-left));
+            position:relative;
+            overflow:hidden;
+            box-sizing:border-box;
+            -webkit-text-size-adjust:100%;
+            -moz-text-size-adjust:100%;
+            text-size-adjust:100%;
+        }
+
         .glow-1,.glow-2{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;pointer-events:none;z-index:1}
-        .glow-1{width:250px;height:250px;background:#0ea5e9;top:10%;left:10%}
-        .glow-2{width:250px;height:250px;background:#a855f7;bottom:10%;right:10%}
-        
-        .auth-card{width:100%;max-width:400px;background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:24px 22px;box-shadow:0 20px 50px rgba(0,0,0,.7);position:relative;z-index:10;backdrop-filter:blur(10px);opacity:1;transition:opacity .2s ease-in-out}
-        
+        .glow-1{width:250px;height:250px;background:#f59e0b;top:10%;left:10%}
+        .glow-2{width:250px;height:250px;background:#fbbf24;bottom:10%;right:10%}
+
+        .auth-card{
+            width:100%;
+            max-width:400px;
+            background:rgba(15,23,42,.85);
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:24px;
+            padding:24px 22px;
+            box-shadow:0 20px 50px rgba(0,0,0,.7);
+            position:relative;
+            z-index:10;
+            backdrop-filter:blur(10px);
+            opacity:1;
+            transition:opacity .2s ease-in-out;
+            max-height:100%;
+            overflow-y:auto;
+            scrollbar-width:thin;
+            scrollbar-color:rgba(56,189,248,.3) transparent;
+        }
+        .auth-card::-webkit-scrollbar{width:4px}
+        .auth-card::-webkit-scrollbar-track{background:transparent}
+        .auth-card::-webkit-scrollbar-thumb{background:rgba(56,189,248,.3);border-radius:2px}
+
         .header-actions{position:relative;z-index:20;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:12px}
         .wrap{position:relative}
         .lb{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);height:36px;width:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#38bdf8;text-decoration:none;transition:.2s}
@@ -53,13 +93,78 @@
         .menu.show{display:block!important}
         .mi{padding:6px 12px;font-size:12px;color:#cbd5e1;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;text-decoration:none;white-space:nowrap;transition:.2s}
         .mi:hover,.mi.active{background:rgba(56,189,248,.15);color:#38bdf8!important;font-weight:700}
-        
-        .logo{text-align:center;margin-bottom:20px}
-        .logo-header{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
-        .logo-icon{width:46px;height:46px;background:linear-gradient(135deg,#0ea5e9,#9333ea);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;font-style:italic;transform:skewX(-6deg);box-shadow:0 0 18px rgba(14,165,233,.45)}
-        .logo-text{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;letter-spacing:3px;font-style:italic;transform:skewX(-6deg);background:linear-gradient(135deg,#38bdf8,#c084fc,#f43f5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(56,189,248,.4)}
-        .logo p{color:#94a3b8;font-size:12px;margin-top:4px}
-        
+
+        .logo{display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:20px}
+        .logo .wm{margin-top:-6px;line-height:.85}
+
+        .mark-wrap{position:relative;display:flex;align-items:center;justify-content:center;width:72px;height:72px}
+
+        .mark-glow{
+            position:absolute;inset:-14px;border-radius:50%;
+            background:radial-gradient(circle,rgba(251,191,36,.55),transparent 65%);
+            filter:blur(16px);
+            animation:glowPulse 3s ease-in-out infinite;
+            pointer-events:none;
+        }
+        @keyframes glowPulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:.9;transform:scale(1.05)}}
+
+        .mark-shape{position:relative;z-index:2;width:72px;height:72px;filter:drop-shadow(0 8px 20px rgba(251,191,36,.45)) drop-shadow(0 4px 10px rgba(245,158,11,.3))}
+        .mark-shape svg{position:absolute;inset:0;width:72px;height:72px;display:block;overflow:visible}
+
+        .z-layer{
+            position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;
+            padding-top:14px;padding-bottom:2px;
+        }
+
+        .mark-orbit{position:absolute;top:50%;left:50%;border-radius:50%;border:1.5px solid transparent;pointer-events:none;z-index:3}
+        .orbit-a{width:86px;height:86px;margin:-43px 0 0 -43px;border-top-color:rgba(251,191,36,.9);border-right-color:rgba(251,191,36,.2);animation:orbitA 3.5s linear infinite}
+        .orbit-b{width:96px;height:96px;margin:-48px 0 0 -48px;border-bottom-color:rgba(245,158,11,.7);border-left-color:rgba(245,158,11,.15);animation:orbitB 4.5s linear infinite reverse}
+        @keyframes orbitA{to{transform:rotate(360deg)}}
+        @keyframes orbitB{to{transform:rotate(-360deg)}}
+
+        .z-char{
+            font-family:'Cinzel',serif;
+            font-weight:900;
+            font-size:32px;
+            line-height:1;
+            display:inline-block;
+        }
+
+        .z-gold{
+            background:linear-gradient(180deg,#fef9c3 0%,#fbbf24 30%,#f59e0b 55%,#ffffff 60%,#d97706 70%,#b45309 100%);
+            -webkit-background-clip:text;
+            background-clip:text;
+            -webkit-text-fill-color:transparent;
+            filter:
+                drop-shadow(0 1px 0 #78350f)
+                drop-shadow(0 2px 0 #78350f)
+                drop-shadow(0 3px 6px rgba(0,0,0,.5))
+                drop-shadow(0 0 14px rgba(251,191,36,.6));
+        }
+
+        .wm-sapphire{
+            font-family:'Italianno',cursive;
+            font-weight:700;
+            font-size:96px;
+            letter-spacing:1px;
+            background:linear-gradient(180deg,
+                #fef9c3 0%,
+                #fde68a 20%,
+                #fbbf24 40%,
+                #ffffff 50%,
+                #f59e0b 62%,
+                #b45309 85%,
+                #78350f 100%);
+            -webkit-background-clip:text;
+            background-clip:text;
+            -webkit-text-fill-color:transparent;
+            filter:
+                drop-shadow(0 2px 0 rgba(120,53,15,.9))
+                drop-shadow(0 4px 16px rgba(251,191,36,.5));
+        }
+
+        .logo p{color:#94a3b8;font-size:11.5px;margin-top:4px;letter-spacing:.5px;font-weight:500}
+
         .group{margin-bottom:14px}
         .group label{display:block;margin-bottom:6px;font-size:12px;color:#cbd5e1}
         .req{color:#ef4444;font-weight:700;margin-inline-start:3px}
@@ -74,44 +179,82 @@
         html[dir="rtl"] .group input{padding-right:40px;padding-left:40px}
         html[dir="ltr"] .group input{padding-left:40px;padding-right:40px}
         .group input:-webkit-autofill,.group input:-webkit-autofill:hover,.group input:-webkit-autofill:focus,.group input:-webkit-autofill:active{-webkit-box-shadow:0 0 0 30px rgba(10,15,30,.95) inset!important;-webkit-text-fill-color:#fff!important;caret-color:#fff}
-        #user::placeholder,#pass::placeholder{color:#9ca3af;opacity:1}
+        #user::placeholder,#pass::placeholder{color:#64748b !important;opacity:.55 !important;font-size:12px !important;}
         .group input:focus{border-color:#38bdf8;box-shadow:0 0 10px rgba(56,189,248,.2)}
+        ::spelling-error {text-decoration: none !important;-webkit-text-decoration: none !important;text-decoration-line: none !important;-webkit-text-decoration-line: none !important;background: transparent !important;}
+        ::grammar-error {text-decoration: none !important;-webkit-text-decoration: none !important;text-decoration-line: none !important;-webkit-text-decoration-line: none !important;background: transparent !important;}
+        #user,#pass,.group input,.group input:hover,.group input:focus,.group input:active,.group input:valid,.group input:invalid,.group input:placeholder-shown,.group input:-webkit-autofill {text-decoration: none !important;-webkit-text-decoration: none !important;text-decoration-line: none !important;-webkit-text-decoration-line: none !important;text-decoration-style: none !important;text-decoration-color: transparent !important;-webkit-text-decorations-in-effect: none !important;border-bottom: none !important;outline: none;}
 
-        ::spelling-error {
-            text-decoration: none !important;
-            -webkit-text-decoration: none !important;
-            text-decoration-line: none !important;
-            -webkit-text-decoration-line: none !important;
-            background: transparent !important;
+        .captcha-wrap{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            margin-bottom:14px;
+            height:78px;
+            min-height:78px;
+            max-height:78px;
+            overflow:visible;
         }
-        ::grammar-error {
-            text-decoration: none !important;
-            -webkit-text-decoration: none !important;
-            text-decoration-line: none !important;
-            -webkit-text-decoration-line: none !important;
-            background: transparent !important;
+        #turnstile-container{
+            position:relative;
+            width:300px;
+            max-width:100%;
+            height:70px;
+            min-height:70px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:visible;
         }
-        #user,
-        #pass,
-        .group input,
-        .group input:hover,
-        .group input:focus,
-        .group input:active,
-        .group input:valid,
-        .group input:invalid,
-        .group input:placeholder-shown,
-        .group input:-webkit-autofill {
-            text-decoration: none !important;
-            -webkit-text-decoration: none !important;
-            text-decoration-line: none !important;
-            -webkit-text-decoration-line: none !important;
-            text-decoration-style: none !important;
-            text-decoration-color: transparent !important;
-            -webkit-text-decorations-in-effect: none !important;
-            border-bottom: none !important;
-            outline: none;
+
+        .captcha-loading{
+            position:absolute;
+            inset:0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:transparent;
+            font-size:0;
+            background:transparent;
+            border:none;
+            pointer-events:none;
+            transition:opacity .3s ease;
         }
-        
+        .captcha-loading::before{
+            content:'';
+            width:22px;
+            height:22px;
+            border:2.5px solid rgba(148,163,184,.2);
+            border-top-color:#94a3b8;
+            border-radius:50%;
+            animation:captchaSpin .8s linear infinite;
+        }
+        @keyframes captchaSpin{to{transform:rotate(360deg)}}
+
+        #turnstile-container.has-widget .captcha-loading{
+            opacity:0;
+        }
+
+        .captcha-error{
+            color:#f87171 !important;
+            border:1px solid rgba(239,68,68,.3) !important;
+            background:rgba(239,68,68,.08) !important;
+            padding:10px;
+            text-align:center;
+            font-size:11px;
+            line-height:1.4;
+            border-radius:8px;
+            pointer-events:auto;
+        }
+        .captcha-error::before{display:none}
+
+        #turnstile-container > div,
+        #turnstile-container > iframe {
+            display: block !important;
+            margin: 0 !important;
+            max-width: 100%;
+        }
+
         .extra-links{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:11px}
         .extra-links a{color:#38bdf8;text-decoration:none}
         .extra-links a:hover{text-decoration:underline}
@@ -123,7 +266,53 @@
         #msg.show{display:block}
         .err{color:#f87171;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3)}
         .succ{color:#4ade80;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3)}
-        @media (max-width: 768px) { input { font-size: 16px !important; } }
+
+        @media (max-width: 768px) {
+            .group input { font-size: 14px !important; }
+            .group input:focus { font-size: 16px !important; }
+            #user::placeholder, #pass::placeholder { font-size: 13px !important; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 0; }
+            .auth-card {
+                max-width: 100%;
+                max-height: 100%;
+                height: 100%;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+                backdrop-filter: none;
+                background: #0b1120;
+                padding: 20px 18px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            .glow-1, .glow-2 { display: none; }
+            .header-actions { margin-bottom: 8px; }
+            .logo { margin-bottom: 14px; }
+            .mark-wrap,.mark-shape,.mark-shape svg{width:58px;height:58px}
+            .orbit-a{width:70px;height:70px;margin:-35px 0 0 -35px}
+            .orbit-b{width:80px;height:80px;margin:-40px 0 0 -40px}
+            .z-char{font-size:26px}
+            .wm-sapphire{font-size:72px}
+            .logo p { font-size: 10.5px; }
+            .group { margin-bottom: 10px; }
+            .group label { font-size: 11px; }
+            .group input { padding: 10px 14px; }
+            html[dir="rtl"] .group input { padding-right: 36px; padding-left: 36px; }
+            html[dir="ltr"] .group input { padding-left: 36px; padding-right: 36px; }
+            .extra-links { font-size: 10px; margin-bottom: 12px; }
+            .btn { font-size: 12px; padding: 11px; }
+            .footer { font-size: 11px; margin-top: 12px; }
+            #msg { font-size: 11px; padding: 10px; }
+            .lb { height: 34px; width: 34px; font-size: 12px; }
+            .mi { font-size: 11px; padding: 6px 10px; }
+
+            .captcha-wrap { height: 78px; min-height: 78px; max-height: 78px; margin-bottom: 10px; }
+            #turnstile-container { width: 100%; max-width: 300px; height: 70px; min-height: 70px; }
+        }
     </style>
 </head>
 <body>
@@ -146,62 +335,55 @@
                 </div>
             </div>
         </div>
+
         <div class="logo">
-            <div class="logo-header">
-                <div class="logo-icon">Z</div>
-                <div class="logo-text">ZENIX</div>
+            <div class="mark-wrap">
+                <div class="mark-glow"></div>
+                <div class="mark-shape">
+                    <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="crown-gold" x1="50%" y1="0%" x2="50%" y2="100%">
+                                <stop offset="0%" stop-color="#fbbf24"/>
+                                <stop offset="50%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#b45309"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M8 48 L8 18 L18 30 L30 10 L42 30 L52 18 L52 48 Z" fill="url(#crown-gold)"/>
+                        <path d="M8 48 L8 18 L18 30 L30 10 L42 30 L52 18 L52 48 Z" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="0.8"/>
+                        <circle cx="30" cy="13" r="1.8" fill="#fef9c3"/>
+                        <circle cx="18" cy="32" r="1.4" fill="#fef9c3" opacity=".9"/>
+                        <circle cx="42" cy="32" r="1.4" fill="#fef9c3" opacity=".9"/>
+                    </svg>
+                    <div class="z-layer"><span class="z-char z-gold">Z</span></div>
+                </div>
+                <div class="mark-orbit orbit-a"></div>
+                <div class="mark-orbit orbit-b"></div>
             </div>
+            <div class="wm wm-sapphire">Zenix</div>
             <p id="t-wel"></p>
         </div>
+
         <form id="form" novalidate spellcheck="false" autocomplete="off">
             <div class="group">
                 <label id="l-user"><i class="fas fa-envelope"></i> <span id="txt-user"></span> <span class="req">*</span></label>
                 <div class="wrap-input">
                     <i class="fas fa-envelope f-icon"></i>
-                    <input
-                        type="text"
-                        id="user"
-                        inputmode="email"
-                        pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
-                        aria-label="Email address"
-                        autocomplete="email"
-                        autocorrect="off"
-                        autocapitalize="none"
-                        spellcheck="false"
-                        lang="en"
-                        data-lpignore="true"
-                        data-form-type="other"
-                        required>
+                    <input type="text" id="user" inputmode="email" pattern="[^\s@]+@[^\s@]+\.[^\s@]+" aria-label="Email address" autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false" lang="en" data-lpignore="true" data-form-type="other" required>
                 </div>
             </div>
             <div class="group">
                 <label id="l-pass"><i class="fas fa-lock"></i> <span id="txt-pass"></span> <span class="req">*</span></label>
                 <div class="wrap-input">
                     <i class="fas fa-key f-icon"></i>
-                    <input
-                        type="password"
-                        id="pass"
-                        aria-label="Password"
-                        autocomplete="current-password"
-                        autocorrect="off"
-                        autocapitalize="none"
-                        spellcheck="false"
-                        lang="en"
-                        data-lpignore="true"
-                        required>
+                    <input type="password" id="pass" aria-label="Password" autocomplete="current-password" autocorrect="off" autocapitalize="none" spellcheck="false" lang="en" data-lpignore="true" required>
                     <button type="button" class="eye-btn" id="eye-btn" aria-label="Toggle password visibility" onclick="togglePassword('pass',this)"><i class="fas fa-eye"></i></button>
                 </div>
             </div>
-            
-            <div class="group" style="display:flex; justify-content:center; margin-bottom:14px;">
-                <div class="cf-turnstile"
-                     data-sitekey="0x4AAAAAAFaU1RVZfnTURKOc"
-                     data-theme="dark"
-                     data-callback="onCaptchaSuccess"
-                     data-expired-callback="onCaptchaExpired"
-                     data-error-callback="onCaptchaError"></div>
+            <div class="captcha-wrap">
+                <div id="turnstile-container">
+                    <div class="captcha-loading"></div>
+                </div>
             </div>
-
             <div class="extra-links">
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:#cbd5e1;">
                     <input type="checkbox" id="remember-me" checked style="accent-color:#38bdf8;cursor:pointer;">
@@ -209,7 +391,6 @@
                 </label>
                 <a href="forgot-password.html" id="t-forgot"></a>
             </div>
-
             <button type="submit" id="t-btn" class="btn" disabled></button>
         </form>
         <div id="msg"></div>
@@ -221,8 +402,16 @@
     <script>
         function togglePassword(id,btn){
             const input=document.getElementById(id);
-            if(input.type==='password'){input.type='text';btn.innerHTML='<i class="fas fa-eye-slash"></i>';}
-            else{input.type='password';btn.innerHTML='<i class="fas fa-eye"></i>';}
+            btn.textContent='';
+            const icon=document.createElement('i');
+            if(input.type==='password'){
+                input.type='text';
+                icon.className='fas fa-eye-slash';
+            } else {
+                input.type='password';
+                icon.className='fas fa-eye';
+            }
+            btn.appendChild(icon);
         }
     </script>
 
@@ -234,19 +423,27 @@
         const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const langData = {
-            en:{dir:'ltr',wel:'Login to Your Account',user:'Email',userP:'Email address',pass:'Password',passP:'Password',forgot:'Forgot password?',remember:'Remember me',btn:'Login',noAcc:"Don't have an account?",reg:'Register',supTitle:'Support',langTitle:'Change Language',errEmail:'Please enter a valid email address!',errNoUser:'Invalid credentials or account does not exist.',errTooMany:'Too many failed attempts. Account temporarily locked.',errDisabled:'Your account has been disabled by administrator.',errNet:'Please check your internet connection!',errCaptcha:'Please complete the security check.',succ:'Successfully logged in! Redirecting...'},
-            fa:{dir:'rtl',wel:'ورود به حساب کاربری',user:'ایمیل',userP:'آدرس ایمیل',pass:'رمز عبور',passP:'رمز عبور',forgot:'فراموشی رمز عبور؟',remember:'مرا به خاطر بسپار',btn:'ورود به حساب',noAcc:'حساب کاربری ندارید؟',reg:'ثبت‌نام کنید',supTitle:'پشتیبانی',langTitle:'تغییر زبان',errEmail:'لطفاً یک آدرس ایمیل معتبر وارد کنید!',errNoUser:'اطلاعات ورود نادرست است یا حساب کاربری وجود ندارد.',errTooMany:'به دلیل تلاش‌های ناموفق متعدد، حساب شما موقتاً قفل شده است.',errDisabled:'حساب کاربری شما توسط مدیریت مسدود شده است.',errNet:'اتصال اینترنت خود را بررسی کنید!',errCaptcha:'لطفاً بررسی امنیتی را کامل کنید.',succ:'با موفقیت وارد شدید! در حال انتقال...'},
-            ar:{dir:'rtl',wel:'تسجيل الدخول إلى حسابك',user:'البريد الإلكتروني',userP:'عنوان البريد الإلكتروني',pass:'كلمة المرور',passP:'كلمة المرور',forgot:'نسيت كلمة المرور؟',remember:'تذكرني',btn:'تسجيل الدخول',noAcc:'ليس لديك حساب؟',reg:'سجل الآن',supTitle:'الدعم الفني',langTitle:'تغيير اللغة',errEmail:'يرجى إدخال بريد إلكتروني صالح!',errNoUser:'بيانات الدخول غير صحيحة أو الحساب غير موجود.',errTooMany:'محاولات كثيرة خاطئة. تم قفل الحساب مؤقتاً.',errDisabled:'تم تعطيل حسابك من قبل الإدارة.',errNet:'يرجى التحقق من اتصالك بالإنترنت!',errCaptcha:'يرجى إكمال التحقق الأمني.',succ:'تم تسجيل الدخول بنجاح! جاري التوجيه...'},
-            tr:{dir:'ltr',wel:'Hesabınıza Giriş Yapın',user:'E-posta',userP:'E-posta adresi',pass:'Şifre',passP:'Şifre',forgot:'Şifrenizi mi unuttunuz?',remember:'Beni hatırla',btn:'Giriş Yap',noAcc:'Hesabınız yok mu?',reg:'Kayıt Olun',supTitle:'Destek',langTitle:'Dil Değiştir',errEmail:'Lütfen geçerli bir e-posta adresi girin!',errNoUser:'Hatalı e-posta/şifre veya hesap bulunamadı.',errTooMany:'Çok fazla hatalı deneme. Hesap geçici olarak kilitlendi.',errDisabled:'Hesabınız yönetici tarafından askıya alındı.',errNet:'Lütfen internet bağlantınızı kontrol edin!',errCaptcha:'Lütfen güvenlik kontrolünü tamamlayın.',succ:'Giriş başarılı! Yönlendiriliyorsunuz...'},
-            ru:{dir:'ltr',wel:'Вход в аккаунт',user:'Email',userP:'Адрес Email',pass:'Пароль',passP:'Пароль',forgot:'Забыли пароль?',remember:'Запомнить меня',btn:'Войти',noAcc:'Нет аккаунта?',reg:'Зарегистрироваться',supTitle:'Поддержка',langTitle:'Сменить язык',errEmail:'Пожалуйста, введите правильный адрес электронной почты!',errNoUser:'Неверные данные для входа или аккаунт не существует.',errTooMany:'Слишком много неудачных попыток. Аккаунт заблокирован.',errDisabled:'Ваш аккаунт заблокирован администратором.',errNet:'Пожалуйста, проверьте интернет-соединение!',errCaptcha:'Пожалуйста, пройдите проверку безопасности.',succ:'Успешный вход! Перенаправление...'},
-            es:{dir:'ltr',wel:'Iniciar sesión en su cuenta',user:'Correo electrónico',userP:'Dirección de correo',pass:'Contraseña',passP:'Contraseña',forgot:'¿Olvidaste tu contraseña?',remember:'Recordarme',btn:'Iniciar sesión',noAcc:'¿No tienes una cuenta?',reg:'Regístrate',supTitle:'Soporte',langTitle:'Cambiar idioma',errEmail:'¡Por favor ingrese un correo electrónico válido!',errNoUser:'Credenciales inválidas o cuenta inexistente.',errTooMany:'Demasiados intentos fallidos. Cuenta bloqueada temporalmente.',errDisabled:'Su cuenta ha sido deshabilitada por el administrador.',errNet:'¡Por favor verifique su conexión a internet!',errCaptcha:'Por favor complete la verificación de seguridad.',succ:'¡Inicio de sesión exitoso! Redirigiendo...'},
-            fr:{dir:'ltr',wel:'Connexion à votre compte',user:'E-mail',userP:'Adresse e-mail',pass:'Mot de passe',passP:'Mot de passe',forgot:'Mot de passe oublié ?',remember:'Se souvenir de moi',btn:'Se connecter',noAcc:"Vous n'avez pas de compte ?",reg:'Inscrivez-vous',supTitle:'Support',langTitle:'Changer de langue',errEmail:'Veuillez entrer une adresse e-mail valide !',errNoUser:'Identifiants invalides ou compte inexistant.',errTooMany:'Trop de tentatives échouées. Compte verrouillé.',errDisabled:'Votre compte a été désactivé par l\'administrateur.',errNet:'Veuillez vérifier votre connexion Internet !',errCaptcha:'Veuillez compléter la vérification de sécurité.',succ:'Connexion réussie ! Redirection...'},
-            de:{dir:'ltr',wel:'Anmeldung bei Ihrem Konto',user:'E-Mail',userP:'E-Mail-Adresse',pass:'Passwort',passP:'Passwort',forgot:'Passwort vergessen?',remember:'Angemeldet bleiben',btn:'Anmelden',noAcc:'Noch kein Konto?',reg:'Registrieren',supTitle:'Support',langTitle:'Sprache ändern',errEmail:'Bitte geben Sie eine gültige E-Mail-Adresse ein!',errNoUser:'Ungültige Anmeldedaten oder Konto existiert nicht.',errTooMany:'Zu viele fehlgeschlagene Versuche. Konto temporär gesperrt.',errDisabled:'Ihr Konto wurde vom Administrator deaktiviert.',errNet:'Bitte überprüfen Sie Ihre Internetverbindung!',errCaptcha:'Bitte schließen Sie die Sicherheitsüberprüfung ab.',succ:'Erfolgreich angemeldet! Weiterleitung...'}
+            en:{dir:'ltr',wel:'Login to Your Account',user:'Email',userP:'Email address',pass:'Password',passP:'Password',forgot:'Forgot password?',remember:'Remember me',btn:'Login',noAcc:"Don't have an account?",reg:'Register',supTitle:'Support',langTitle:'Change Language',errEmail:'Please enter a valid email address!',errNoUser:'Invalid credentials or account does not exist.',errTooMany:'Too many failed attempts. Account temporarily locked.',errDisabled:'Your account has been disabled by administrator.',errNet:'Please check your internet connection!',errCaptcha:'Please complete the security check.',errCaptchaLoad:'Security check failed to load. Please refresh or disable ad blockers.',succ:'Successfully logged in! Redirecting...'},
+            fa:{dir:'rtl',wel:'ورود به حساب کاربری',user:'ایمیل',userP:'آدرس ایمیل',pass:'رمز عبور',passP:'رمز عبور',forgot:'فراموشی رمز عبور؟',remember:'مرا به خاطر بسپار',btn:'ورود به حساب',noAcc:'حساب کاربری ندارید؟',reg:'ثبت‌نام کنید',supTitle:'پشتیبانی',langTitle:'تغییر زبان',errEmail:'لطفاً یک آدرس ایمیل معتبر وارد کنید!',errNoUser:'اطلاعات ورود نادرست است یا حساب کاربری وجود ندارد.',errTooMany:'به دلیل تلاش‌های ناموفق متعدد، حساب شما موقتاً قفل شده است.',errDisabled:'حساب کاربری شما توسط مدیریت مسدود شده است.',errNet:'اتصال اینترنت خود را بررسی کنید!',errCaptcha:'لطفاً بررسی امنیتی را کامل کنید.',errCaptchaLoad:'بررسی امنیتی بارگذاری نشد. لطفاً صفحه را رفرش کنید یا مسدودکننده تبلیغات را غیرفعال کنید.',succ:'با موفقیت وارد شدید! در حال انتقال...'},
+            ar:{dir:'rtl',wel:'تسجيل الدخول إلى حسابك',user:'البريد الإلكتروني',userP:'عنوان البريد الإلكتروني',pass:'كلمة المرور',passP:'كلمة المرور',forgot:'نسيت كلمة المرور؟',remember:'تذكرني',btn:'تسجيل الدخول',noAcc:'ليس لديك حساب؟',reg:'سجل الآن',supTitle:'الدعم الفني',langTitle:'تغيير اللغة',errEmail:'يرجى إدخال بريد إلكتروني صالح!',errNoUser:'بيانات الدخول غير صحيحة أو الحساب غير موجود.',errTooMany:'محاولات كثيرة خاطئة. تم قفل الحساب مؤقتاً.',errDisabled:'تم تعطيل حسابك من قبل الإدارة.',errNet:'يرجى التحقق من اتصالك بالإنترنت!',errCaptcha:'يرجى إكمال التحقق الأمني.',errCaptchaLoad:'فشل تحميل التحقق الأمني. يرجى تحديث الصفحة أو تعطيل مانع الإعلانات.',succ:'تم تسجيل الدخول بنجاح! جاري التوجيه...'},
+            tr:{dir:'ltr',wel:'Hesabınıza Giriş Yapın',user:'E-posta',userP:'E-posta adresi',pass:'Şifre',passP:'Şifre',forgot:'Şifrenizi mi unuttunuz?',remember:'Beni hatırla',btn:'Giriş Yap',noAcc:'Hesabınız yok mu?',reg:'Kayıt Olun',supTitle:'Destek',langTitle:'Dil Değiştir',errEmail:'Lütfen geçerli bir e-posta adresi girin!',errNoUser:'Hatalı e-posta/şifre veya hesap bulunamadı.',errTooMany:'Çok fazla hatalı deneme. Hesap geçici olarak kilitlendi.',errDisabled:'Hesabınız yönetici tarafından askıya alındı.',errNet:'Lütfen internet bağlantınızı kontrol edin!',errCaptcha:'Lütfen güvenlik kontrolünü tamamlayın.',errCaptchaLoad:'Güvenlik kontrolü yüklenemedi. Lütfen sayfayı yenileyin veya reklam engelleyiciyi kapatın.',succ:'Giriş başarılı! Yönlendiriliyorsunuz...'},
+            ru:{dir:'ltr',wel:'Вход в аккаунт',user:'Email',userP:'Адрес Email',pass:'Пароль',passP:'Пароль',forgot:'Забыли пароль?',remember:'Запомнить меня',btn:'Войти',noAcc:'Нет аккаунта?',reg:'Зарегистрироваться',supTitle:'Поддержка',langTitle:'Сменить язык',errEmail:'Пожалуйста, введите правильный адрес электронной почты!',errNoUser:'Неверные данные для входа или аккаунт не существует.',errTooMany:'Слишком много неудачных попыток. Аккаунт заблокирован.',errDisabled:'Ваш аккаунт заблокирован администратором.',errNet:'Пожалуйста, проверьте интернет-соединение!',errCaptcha:'Пожалуйста, пройдите проверку безопасности.',errCaptchaLoad:'Не удалось загрузить проверку безопасности. Обновите страницу или отключите блокировщик рекламы.',succ:'Успешный вход! Перенаправление...'},
+            es:{dir:'ltr',wel:'Iniciar sesión en su cuenta',user:'Correo electrónico',userP:'Dirección de correo',pass:'Contraseña',passP:'Contraseña',forgot:'¿Olvidaste tu contraseña?',remember:'Recordarme',btn:'Iniciar sesión',noAcc:'¿No tienes una cuenta?',reg:'Regístrate',supTitle:'Soporte',langTitle:'Cambiar idioma',errEmail:'¡Por favor ingrese un correo electrónico válido!',errNoUser:'Credenciales inválidas o cuenta inexistente.',errTooMany:'Demasiados intentos fallidos. Cuenta bloqueada temporalmente.',errDisabled:'Su cuenta ha sido deshabilitada por el administrador.',errNet:'¡Por favor verifique su conexión a internet!',errCaptcha:'Por favor complete la verificación de seguridad.',errCaptchaLoad:'No se pudo cargar la verificación de seguridad. Actualice la página o desactive el bloqueador de anuncios.',succ:'¡Inicio de sesión exitoso! Redirigiendo...'},
+            fr:{dir:'ltr',wel:'Connexion à votre compte',user:'E-mail',userP:'Adresse e-mail',pass:'Mot de passe',passP:'Mot de passe',forgot:'Mot de passe oublié ?',remember:'Se souvenir de moi',btn:'Se connecter',noAcc:"Vous n'avez pas de compte ?",reg:'Inscrivez-vous',supTitle:'Support',langTitle:'Changer de langue',errEmail:'Veuillez entrer une adresse e-mail valide !',errNoUser:'Identifiants invalides ou compte inexistant.',errTooMany:'Trop de tentatives échouées. Compte verrouillé.',errDisabled:'Votre compte a été désactivé par l\'administrateur.',errNet:'Veuillez vérifier votre connexion Internet !',errCaptcha:'Veuillez compléter la vérification de sécurité.',errCaptchaLoad:'Échec du chargement de la vérification de sécurité. Actualisez la page ou désactivez le bloqueur de publicités.',succ:'Connexion réussie ! Redirection...'},
+            de:{dir:'ltr',wel:'Anmeldung bei Ihrem Konto',user:'E-Mail',userP:'E-Mail-Adresse',pass:'Passwort',passP:'Passwort',forgot:'Passwort vergessen?',remember:'Angemeldet bleiben',btn:'Anmelden',noAcc:'Noch kein Konto?',reg:'Registrieren',supTitle:'Support',langTitle:'Sprache ändern',errEmail:'Bitte geben Sie eine gültige E-Mail-Adresse ein!',errNoUser:'Ungültige Anmeldedaten oder Konto existiert nicht.',errTooMany:'Zu viele fehlgeschlagene Versuche. Konto temporär gesperrt.',errDisabled:'Ihr Konto wurde vom Administrator deaktiviert.',errNet:'Bitte überprüfen Sie Ihre Internetverbindung!',errCaptcha:'Bitte schließen Sie die Sicherheitsüberprüfung ab.',errCaptchaLoad:'Sicherheitsüberprüfung konnte nicht geladen werden. Seite neu laden oder Werbeblocker deaktivieren.',succ:'Erfolgreich angemeldet! Weiterleitung...'}
         };
 
         let currentLang = localStorage.getItem('zenix_lang') || 'en';
         let submitCounter = 0;
         let isSubmitting = false;
+
+        let currentLockoutUntil = 0;
+        let lockedEmail = '';
+        let countdownTimer = null;
+
+        let turnstileInitStarted = false;
+        let turnstileWidgetId = null;
+        let turnstileLoadFailed = false;
 
         const langBtn = document.getElementById('lang-btn'),
               langMenu = document.getElementById('lang-menu'),
@@ -255,7 +452,8 @@
               submitBtn = document.getElementById('t-btn'),
               msg = document.getElementById('msg'),
               form = document.getElementById('form'),
-              authCard = document.getElementById('auth-card');
+              authCard = document.getElementById('auth-card'),
+              turnstileContainer = document.getElementById('turnstile-container');
 
         function hardDisableSpellcheck(el) {
             if (!el) return;
@@ -272,12 +470,132 @@
         hardDisableSpellcheck(userIn);
         hardDisableSpellcheck(passIn);
 
+        function setupPlaceholderClear(inp, getPh) {
+            inp.addEventListener('focus', () => { inp.placeholder = ''; });
+            inp.addEventListener('blur', () => {
+                if (!inp.value.trim()) inp.placeholder = getPh();
+            });
+        }
+        setupPlaceholderClear(userIn, () => (langData[currentLang] || langData.en).userP);
+        setupPlaceholderClear(passIn, () => (langData[currentLang] || langData.en).passP);
+
         function getCaptchaToken() {
             const domToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
             return domToken || window.__cfToken || null;
         }
 
-        // ★★★ اصلاح شده: چک status + بازگشت 'BANNED' برای کاربران مسدود
+        function loadTurnstileScript() {
+            return new Promise((resolve, reject) => {
+                if (window.turnstile) { resolve(); return; }
+                const script = document.createElement('script');
+                script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+                script.async = true;
+                script.defer = true;
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Failed to load Turnstile script'));
+                document.head.appendChild(script);
+            });
+        }
+
+        function renderTurnstileWidget() {
+            if (!turnstileContainer || turnstileWidgetId !== null || turnstileLoadFailed) return;
+            try {
+                turnstileContainer.textContent = '';
+                turnstileContainer.classList.add('has-widget');
+                turnstileWidgetId = window.turnstile.render(turnstileContainer, {
+                    sitekey: '0x4AAAAAAFaU1RVZfnTURKOc',
+                    theme: 'dark',
+                    callback: window.onCaptchaSuccess,
+                    'expired-callback': window.onCaptchaExpired,
+                    'error-callback': window.onCaptchaError
+                });
+            } catch (e) {
+                console.error('Turnstile render error:', e);
+                showTurnstileLoadError();
+            }
+        }
+
+        function showTurnstileLoadError() {
+            turnstileLoadFailed = true;
+            if (!turnstileContainer) return;
+            turnstileContainer.textContent = '';
+            const errDiv = document.createElement('div');
+            errDiv.className = 'captcha-error';
+            const t = langData[currentLang] || langData.en;
+            errDiv.textContent = t.errCaptchaLoad || 'Security check failed to load. Please refresh.';
+            turnstileContainer.appendChild(errDiv);
+        }
+
+        async function initTurnstile() {
+            try {
+                await loadTurnstileScript();
+                renderTurnstileWidget();
+            } catch (e) {
+                console.error('Turnstile init failed:', e);
+                showTurnstileLoadError();
+            }
+        }
+
+        function startTurnstileLoad() {
+            if (turnstileInitStarted) return;
+            turnstileInitStarted = true;
+            initTurnstile();
+        }
+
+        function getRemainingLockoutSec() {
+            const now = Date.now();
+            if (currentLockoutUntil > now) return Math.ceil((currentLockoutUntil - now) / 1000);
+            if (currentLockoutUntil > 0 && currentLockoutUntil <= now) {
+                currentLockoutUntil = 0;
+                lockedEmail = '';
+            }
+            return 0;
+        }
+
+        function formatRemain(sec) {
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            const s = sec % 60;
+            if (h > 0) return `${h}h ${m}m ${s}s`;
+            if (m > 0) return `${m}m ${s}s`;
+            return `${s}s`;
+        }
+
+        function showLockoutMessage() {
+            const t = langData[currentLang] || langData.en;
+            const remainSec = getRemainingLockoutSec();
+            if (remainSec <= 0) return;
+            msg.textContent = `${t.errTooMany} (${formatRemain(remainSec)})`;
+            msg.className = 'err show';
+        }
+
+        function startCountdownIfNeeded() {
+            if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+            if (getRemainingLockoutSec() <= 0) return;
+            if (lockedEmail && lockedEmail !== userIn.value.trim().toLowerCase()) return;
+
+            showLockoutMessage();
+            checkInputs();
+
+            countdownTimer = setInterval(() => {
+                const remain = getRemainingLockoutSec();
+                if (remain <= 0) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                    clearError();
+                    checkInputs();
+                    return;
+                }
+                showLockoutMessage();
+            }, 1000);
+        }
+
+        function stopCountdownAndClear() {
+            if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+            currentLockoutUntil = 0;
+            lockedEmail = '';
+        }
+
         async function getTargetPage(userId) {
             try {
                 const { data } = await supabaseClient
@@ -286,7 +604,6 @@
                     .eq('id', userId)
                     .maybeSingle();
 
-                // اگر کاربر مسدود است، علامت BANNED برگردان
                 if (data && (data.status === 'cancelled' || data.status === 'banned')) {
                     return 'BANNED';
                 }
@@ -315,7 +632,13 @@
             document.getElementById('t-remember').textContent = t.remember;
             document.getElementById('t-forgot').textContent = t.forgot;
             submitBtn.textContent = t.btn;
-            document.getElementById('t-foot').innerHTML = `${t.noAcc} <a href="register.html">${t.reg}</a>`;
+            const footEl = document.getElementById('t-foot');
+            footEl.textContent = '';
+            footEl.appendChild(document.createTextNode(t.noAcc + ' '));
+            const link = document.createElement('a');
+            link.href = 'register.html';
+            link.textContent = t.reg;
+            footEl.appendChild(link);
             document.getElementById('btn-support').setAttribute('title', t.supTitle);
             langBtn.setAttribute('title', t.langTitle);
             document.querySelectorAll('#lang-menu .mi').forEach(i => i.classList.toggle('active', i.dataset.lang === l));
@@ -325,7 +648,7 @@
         }
 
         document.querySelectorAll('#lang-menu .mi').forEach(i => i.addEventListener('click', () => { setLang(i.dataset.lang); clearError(); }));
-        function clearError() { if (msg) { msg.innerHTML = ''; msg.className = ''; } }
+        function clearError() { if (msg) { msg.textContent = ''; msg.className = ''; } }
 
         function isValidEmail(email) {
             if (!email) return false;
@@ -341,34 +664,35 @@
             submitBtn.disabled = !(emailOk && passOk && capOk);
         }
 
-        document.addEventListener('cf-token-ready', () => { checkInputs(); });
-
-        let lastKnownToken = null;
-        setInterval(() => {
-            if (isSubmitting) return;
-            const token = getCaptchaToken();
-            if (token !== lastKnownToken) {
-                lastKnownToken = token;
-                checkInputs();
-            }
-        }, 400);
+        document.addEventListener('cf-token-ready', checkInputs);
 
         userIn.addEventListener('focus', clearError);
-        userIn.addEventListener('input', () => { clearError(); checkInputs(); });
+        userIn.addEventListener('input', () => {
+            clearError();
+            const currentEmail = userIn.value.trim().toLowerCase();
+            if (lockedEmail && lockedEmail !== currentEmail) {
+                stopCountdownAndClear();
+            }
+            checkInputs();
+        });
         passIn.addEventListener('focus', clearError);
         passIn.addEventListener('input', checkInputs);
 
         function showError(errKey) {
             const t = langData[currentLang] || langData.en;
-            msg.innerHTML = `<div>${t[errKey] || errKey}</div>`;
+            msg.textContent = t[errKey] || errKey;
             msg.className = 'err show';
             checkInputs();
         }
 
-        // ★★★ نمایش پیام مسدود بودن با آیکون واضح
         function showBanned() {
             const t = langData[currentLang] || langData.en;
-            msg.innerHTML = `<div><i class="fas fa-ban" style="margin-inline-end:6px;"></i>${t.errDisabled}</div>`;
+            msg.textContent = '';
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-ban';
+            icon.style.marginInlineEnd = '6px';
+            msg.appendChild(icon);
+            msg.appendChild(document.createTextNode(t.errDisabled));
             msg.className = 'err show';
             submitBtn.disabled = false;
             isSubmitting = false;
@@ -376,13 +700,28 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
+            if (!turnstileInitStarted) {
+                startTurnstileLoad();
+            }
+
             const emailVal = userIn.value.trim().toLowerCase();
             const passVal = passIn.value.trim();
 
             if (!isValidEmail(emailVal)) return showError('errEmail');
+
+            if (lockedEmail === emailVal && getRemainingLockoutSec() > 0) {
+                startCountdownIfNeeded();
+                return;
+            }
+
             const captchaToken = getCaptchaToken();
-            if (!captchaToken) return showError('errCaptcha');
+            if (!captchaToken) {
+                if (turnstileLoadFailed) {
+                    return showError('errCaptchaLoad');
+                }
+                return showError('errCaptcha');
+            }
 
             const currentSubmit = ++submitCounter;
             isSubmitting = true;
@@ -390,6 +729,17 @@
             clearError();
 
             try {
+                const { data: lockoutTime, error: lockError } = await supabaseClient.rpc('check_login_lockout', { user_email: emailVal });
+
+                if (lockError) throw lockError;
+                if (lockoutTime) {
+                    currentLockoutUntil = new Date(lockoutTime).getTime();
+                    lockedEmail = emailVal;
+                    isSubmitting = false;
+                    startCountdownIfNeeded();
+                    return;
+                }
+
                 const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: emailVal,
                     password: passVal,
@@ -397,34 +747,63 @@
                 });
 
                 if (currentSubmit !== submitCounter) { isSubmitting = false; return; }
-                if (error) throw error;
+
+                if (error) {
+                    await supabaseClient.rpc('record_failed_login', { user_email: emailVal });
+
+                    const { data: newLockout } = await supabaseClient.rpc('check_login_lockout', { user_email: emailVal });
+                    if (newLockout) {
+                        currentLockoutUntil = new Date(newLockout).getTime();
+                        lockedEmail = emailVal;
+                        startCountdownIfNeeded();
+                    } else {
+                        showError('errNoUser');
+                    }
+                    isSubmitting = false;
+                    try { if (window.turnstile && turnstileWidgetId !== null) window.turnstile.reset(turnstileWidgetId); } catch(e) {}
+                    checkInputs();
+                    return;
+                }
+
+                await supabaseClient.rpc('clear_failed_login', { user_email: emailVal });
+                stopCountdownAndClear();
+
+                try {
+                    if (window.ZenixDevice) {
+                        await window.ZenixDevice.logActivity(supabaseClient, emailVal, 'login');
+                    } else {
+                        console.warn('[Device] ZenixDevice not loaded — device.js missing?');
+                    }
+                } catch (devErr) {
+                    console.warn('[Device] log failed (non-blocking):', devErr);
+                }
 
                 const targetPage = await getTargetPage(data.user.id);
                 if (currentSubmit !== submitCounter) { isSubmitting = false; return; }
 
-                // ★★★ چک مسدود بودن: اگر BANNED بود، خارج شو + پیام بده
                 if (targetPage === 'BANNED') {
                     try { await supabaseClient.auth.signOut(); } catch (_) {}
-                    try { if (window.turnstile) window.turnstile.reset(); } catch(e) {}
+                    try { if (window.turnstile && turnstileWidgetId !== null) window.turnstile.reset(turnstileWidgetId); } catch(e) {}
                     showBanned();
                     return;
                 }
 
                 const t = langData[currentLang] || langData.en;
-                msg.innerHTML = `<div>${t.succ}</div>`;
+                msg.textContent = t.succ;
                 msg.className = 'succ show';
                 setTimeout(() => { window.location.href = targetPage; }, 1000);
+
             } catch (error) {
                 if (currentSubmit !== submitCounter) { isSubmitting = false; return; }
                 console.error('Login Error:', error);
                 isSubmitting = false;
                 submitBtn.disabled = false;
 
-                try { if (window.turnstile) window.turnstile.reset(); } catch(e) {}
+                try { if (window.turnstile && turnstileWidgetId !== null) window.turnstile.reset(turnstileWidgetId); } catch(e) {}
 
                 if (error.status === 429 || (error.message && error.message.toLowerCase().includes('too many requests'))) {
                     const t = langData[currentLang] || langData.en;
-                    msg.innerHTML = `<div>${t.errTooMany}</div>`;
+                    msg.textContent = t.errTooMany;
                     msg.className = 'err show';
                 } else {
                     showError('errNoUser');
@@ -433,8 +812,44 @@
             }
         });
 
-        window.addEventListener('pageshow', () => { clearError(); checkInputs(); });
+        window.addEventListener('pageshow', () => {
+            clearError();
+            if (lockedEmail && lockedEmail === userIn.value.trim().toLowerCase()) {
+                startCountdownIfNeeded();
+            }
+            checkInputs();
+        });
+
+        userIn.addEventListener('focus', startTurnstileLoad, { once: true });
+        passIn.addEventListener('focus', startTurnstileLoad, { once: true });
+
+        if (document.readyState === 'complete') {
+            setTimeout(startTurnstileLoad, 500);
+        } else {
+            window.addEventListener('load', () => setTimeout(startTurnstileLoad, 500));
+        }
+
         setLang(currentLang);
+    </script>
+
+    <!-- ── Zenix Service Worker Registration ── -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('sw.js?v=1.8').then(function (reg) {
+                    setInterval(function () {
+                        reg.update().catch(function () {});
+                    }, 60000);
+                    document.addEventListener('visibilitychange', function () {
+                        if (document.visibilityState === 'visible') {
+                            reg.update().catch(function () {});
+                        }
+                    });
+                }).catch(function (e) {
+                    console.warn('[Zenix SW] register failed:', e);
+                });
+            });
+        }
     </script>
 </body>
 </html>

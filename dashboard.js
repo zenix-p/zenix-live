@@ -33,8 +33,14 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 });
 
 let currentUserId = null;
+let currentUserName = '';
 let allMessages = [];
 let currentNotifFilter = 'all';
+
+// ═══ متغیرهای کیف پول کازینو (دو بازی: رولت / پلینکو) ═══
+const CASINO_CHIPS_RATE = 10;                       // ۱ تتر = ۱۰ ژتون
+const CASINO_GAMES = ['roulette', 'plinko'];        // بازی تاس حذف شد
+// ═══ END ═══
 
 function generateUIDDigits(userId) {
     if (!userId) return '000000';
@@ -47,37 +53,149 @@ function generateUIDDigits(userId) {
 }
 
 // ==========================================
-// 2. مدیریت مدال‌های پلتفرم
+// ★★ اصلاح ریشه‌ای مشکل دکمه‌های هدر روی موبایل
 // ==========================================
+(function injectMobileInteractionFix() {
+    if (document.getElementById('zenix-mobile-fix')) return;
+    const style = document.createElement('style');
+    style.id = 'zenix-mobile-fix';
+    style.textContent = `
+        @media (max-width: 768px) {
+            .help-acc-content,
+            .help-acc-inner {
+                transition: none !important;
+            }
+            .help-acc-arrow {
+                transition: transform .15s ease !important;
+            }
+        }
+        .msg-body-box {
+            margin-bottom: 0 !important;
+            padding: 8px 10px !important;
+        }
+        .msg-body-box.is-read:hover {
+            border-color: rgba(255,255,255,.05) !important;
+            opacity: .75 !important;
+        }
+        body.modal-open {
+            touch-action: manipulation !important;
+        }
+        header, header .hr, header .hr .wrap, header .hr .lb,
+        header .hr a.lb, header .hr button.lb {
+            pointer-events: auto !important;
+        }
+        .modal.show {
+            pointer-events: auto !important;
+        }
+    `;
+    document.head.appendChild(style);
+})();
+
+// ==========================================
+// 2. مدیریت مدال‌ها + قفل اسکرول
+// ==========================================
+function lockBody() { document.body.classList.add('modal-open'); }
+function unlockBody() {
+    setTimeout(() => {
+        const anyOpen = document.querySelector('.modal.show');
+        if (!anyOpen) document.body.classList.remove('modal-open');
+    }, 50);
+}
+
+setInterval(() => {
+    if (document.body.classList.contains('modal-open') && !document.querySelector('.modal.show')) {
+        document.body.classList.remove('modal-open');
+    }
+}, 500);
+
 window.openAboutModal = function() {
     document.getElementById('m-about-modal')?.classList.add('show');
+    lockBody();
     closeAllMenus();
 };
-
 window.closeAboutModal = function() {
     document.getElementById('m-about-modal')?.classList.remove('show');
+    unlockBody();
 };
-
 window.openHelpModal = function() {
     document.getElementById('m-help-modal')?.classList.add('show');
+    lockBody();
     closeAllMenus();
 };
-
 window.closeHelpModal = function() {
     document.getElementById('m-help-modal')?.classList.remove('show');
+    unlockBody();
 };
-
 window.openCasinoModal = function() {
     document.getElementById('m-casino-modal')?.classList.add('show');
+    lockBody();
     closeAllMenus();
 };
-
 window.closeCasinoModal = function() {
     document.getElementById('m-casino-modal')?.classList.remove('show');
+    unlockBody();
+};
+
+// ═══ کیف پول کازینو — مودال مستقل ═══
+window.openCasinoWalletModal = function() {
+    document.getElementById('m-casino-wallet-modal')?.classList.add('show');
+    lockBody();
+    closeAllMenus();
+    if (typeof updateCasinoWalletDisplay === 'function') {
+        updateCasinoWalletDisplay();
+    }
+    // بازنشانی حالت منوی سه خط (بسته باشد)
+    const gamesContainer = document.getElementById('casino-games-container');
+    const hint = document.getElementById('casino-wallet-hint');
+    const hamburger = document.getElementById('casino-wallet-hamburger');
+    if (gamesContainer) gamesContainer.style.display = 'none';
+    if (hint) hint.style.display = 'block';
+    if (hamburger) hamburger.classList.remove('active');
+};
+
+window.closeCasinoWalletModal = function() {
+    document.getElementById('m-casino-wallet-modal')?.classList.remove('show');
+    unlockBody();
+};
+
+window.toggleCasinoWalletGames = function() {
+    const gamesContainer = document.getElementById('casino-games-container');
+    const hamburger = document.getElementById('casino-wallet-hamburger');
+    const hint = document.getElementById('casino-wallet-hint');
+    if (!gamesContainer) return;
+
+    const isOpen = gamesContainer.style.display !== 'none';
+    if (isOpen) {
+        gamesContainer.style.display = 'none';
+        if (hamburger) hamburger.classList.remove('active');
+        if (hint) hint.style.display = 'block';
+    } else {
+        gamesContainer.style.display = 'flex';
+        if (hamburger) hamburger.classList.add('active');
+        if (hint) hint.style.display = 'none';
+    }
+};
+
+window.toggleHelpAccordion = function(btn) {
+    const item = btn.closest('.help-accordion');
+    if (!item) return;
+    item.classList.toggle('open');
+};
+window.toggleAboutBox = function() {
+    const box = document.getElementById('platformInfoBox');
+    if (!box) return;
+    box.classList.toggle('expanded');
+    const toggleText = document.getElementById('t-about-toggle');
+    if (toggleText) {
+        const t = ld[currLang] || ld.en;
+        toggleText.textContent = box.classList.contains('expanded')
+            ? (t.aboutToggleClose || 'بستن')
+            : (t.aboutToggleOpen || 'مشاهده بیشتر');
+    }
 };
 
 // ==========================================
-// 3. سیستم دریافت و نمایش بازار ارزهای دیجیتال
+// 3. بازار ارزهای دیجیتال
 // ==========================================
 async function fetchCryptoPrices() {
     const tickerContainer = document.getElementById('crypto-ticker-list');
@@ -86,7 +204,7 @@ async function fetchCryptoPrices() {
     try {
         const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=30&page=1&sparkline=false');
         if (!response.ok) throw new Error('خطا در دریافت قیمت ارزها');
-        
+
         const data = await response.json();
         const top3 = data.slice(0, 3);
 
@@ -143,7 +261,7 @@ fetchCryptoPrices();
 setInterval(fetchCryptoPrices, 30000);
 
 // ==========================================
-// 4. سیستم اعلان‌ها
+// 4. اعلان‌ها
 // ==========================================
 function getNotifCategory(m) {
     let t = (m.type || '').toLowerCase();
@@ -151,6 +269,13 @@ function getNotifCategory(m) {
     if (t.includes('approved') || title.includes('تایید') || title.includes('approved')) return 'approved';
     if (t.includes('rejected') || title.includes('لغو') || title.includes('رد') || title.includes('rejected')) return 'rejected';
     return 'admin_message';
+}
+
+function isWithdrawalMessage(m) {
+    if (!m) return false;
+    const combined = (((m.type || '') + ' ' + (m.subject || '')).toLowerCase());
+    const keywords = ['withdraw', 'برداشت', 'سحب', 'çekim', 'вывод', 'retiro', 'retrait', 'auszahlung', 'payout'];
+    return keywords.some(k => combined.includes(k));
 }
 
 async function fetchUserMessages(uid) {
@@ -201,6 +326,7 @@ window.openMessageModal = async () => {
     }
     renderMessageList();
     document.getElementById('m-msg')?.classList.add('show');
+    lockBody();
 };
 
 function renderMessageList() {
@@ -217,7 +343,7 @@ function renderMessageList() {
         return;
     }
 
-    let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
+    let html = '<div style="display:flex;flex-direction:column;gap:6px;">';
     list.forEach((m) => {
         let realIdx = allMessages.indexOf(m);
         let dTime = m.time || '';
@@ -231,16 +357,22 @@ function renderMessageList() {
         else { iconClass = 'fa-bullhorn'; iconColor = '#38bdf8'; }
 
         const safeSubject = escapeHtml(m.subject);
-        const safeBody = escapeHtml(m.body);
         const safeTime = escapeHtml(dTime);
 
-        html += `<div class="msg-body-box" style="cursor:pointer;border-right:${unread ? '3px solid #38bdf8' : '1px solid rgba(255,255,255,.08)'};" onclick="window.readAdminMessage(${realIdx})">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div class="msg-title-text" style="${unread ? 'color:#fff;font-weight:800;' : ''}"><i class="fas ${iconClass}" style="color:${iconColor};margin-left:5px;"></i> ${safeSubject}</div>
-                ${unread ? `<span style="font-size:9px;background:#38bdf8;color:#0f172a;padding:2px 6px;border-radius:4px;font-weight:700;">${t.newBadge || 'جدید'}</span>` : ''}
+        const boxStyle = unread
+            ? 'cursor:pointer;padding:8px 10px;margin-bottom:0;background:rgba(56,189,248,.09);border:1px solid rgba(56,189,248,.35);border-right:3px solid #38bdf8;border-radius:8px;'
+            : 'cursor:pointer;padding:8px 10px;margin-bottom:0;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:8px;opacity:.65;';
+
+        const titleStyle = unread
+            ? 'color:#fff;font-weight:800;font-size:12px;'
+            : 'color:#cbd5e1;font-weight:500;font-size:12px;';
+
+        html += `<div class="msg-body-box ${unread ? 'is-unread' : 'is-read'}" style="${boxStyle}" onclick="window.readAdminMessage(${realIdx})">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                <div class="msg-title-text" style="${titleStyle}"><i class="fas ${iconClass}" style="color:${iconColor};margin-left:5px;${unread ? '' : 'opacity:.7;'}"></i> ${safeSubject}</div>
+                ${unread ? `<span style="font-size:9px;background:#38bdf8;color:#0f172a;padding:2px 6px;border-radius:4px;font-weight:700;flex-shrink:0;">${t.newBadge || 'جدید'}</span>` : ''}
             </div>
-            <div class="msg-desc-text" style="margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${safeBody}</div>
-            <div style="font-size:10px;color:#64748b;margin-top:6px;text-align:left" dir="ltr">${safeTime}</div>
+            <div style="font-size:9.5px;color:#64748b;margin-top:3px;text-align:left" dir="ltr">${safeTime}</div>
         </div>`;
     });
     c.innerHTML = html + '</div>';
@@ -257,31 +389,66 @@ window.readAdminMessage = async idx => {
     updateNotifBadges();
     renderMessageList();
 
+    const t = ld[currLang] || ld.en;
+    const cat = getNotifCategory(m);
+    const isWithdrawalReject = (cat === 'rejected') && isWithdrawalMessage(m);
+
     let titleEl = document.getElementById('detail-msg-title');
     let dateEl = document.getElementById('detail-msg-date');
     let bodyEl = document.getElementById('detail-msg-body');
+    let supportEl = document.getElementById('detail-msg-support');
 
     if (titleEl) titleEl.innerHTML = `<i class="fas fa-envelope-open"></i> ${escapeHtml(m.subject)}`;
     if (dateEl) {
         dateEl.textContent = m.time || '';
         dateEl.style.display = m.time ? 'block' : 'none';
     }
-    if (bodyEl) bodyEl.textContent = m.body || '';
+
+    let bodyText = '';
+    if (isWithdrawalReject) {
+        const defaultText = t.rejectWithdrawDefault || '';
+        const adminText = (m.body || '').trim();
+        bodyText = defaultText;
+        if (adminText && adminText.length > 15 && adminText !== defaultText) {
+            bodyText += '\n\n———\n\n' + adminText;
+        }
+    } else {
+        bodyText = m.body || '';
+    }
+    if (bodyEl) bodyEl.textContent = bodyText;
+
+    if (supportEl) {
+        if (cat === 'rejected') {
+            const supportUrl = isWithdrawalReject ? 'support.html?topic=withdraw' : 'support.html';
+            const supportLabel = escapeHtml(t.contactSupport || 'Contact Support');
+            supportEl.innerHTML = `
+                <a href="${supportUrl}" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;padding:11px 16px;background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;text-decoration:none;border-radius:10px;font-size:12.5px;font-weight:700;box-shadow:0 6px 20px rgba(168,85,247,.35);transition:transform .15s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 8px 26px rgba(168,85,247,.5)';" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(168,85,247,.35)';">
+                    <i class="fas fa-headset" style="font-size:13px;"></i>
+                    <span>${supportLabel}</span>
+                </a>`;
+        } else {
+            supportEl.innerHTML = '';
+        }
+    }
 
     document.getElementById('m-msg-detail')?.classList.add('show');
 };
 
-window.closeMessageModal = () => document.getElementById('m-msg')?.classList.remove('show');
-window.closeMsgDetailModal = () => document.getElementById('m-msg-detail')?.classList.remove('show');
+window.closeMessageModal = () => {
+    document.getElementById('m-msg')?.classList.remove('show');
+    unlockBody();
+};
+window.closeMsgDetailModal = () => {
+    document.getElementById('m-msg-detail')?.classList.remove('show');
+    unlockBody();
+};
 
-document.getElementById('bell-btn')?.addEventListener('click', e => { 
-    e.stopPropagation(); 
-    window.openMessageModal(); 
+document.getElementById('bell-btn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    window.openMessageModal();
 });
-
-
 // ==========================================
-// 5. سیستم ترجمه کامل ۸ زبانه (متن‌های معرفی جدید)
+// 5. سیستم ترجمه — دیکشنری ۸ زبانه
 // ==========================================
 const SUPPORTED_LANGUAGES = ['en', 'fa', 'ar', 'tr', 'ru', 'es', 'fr', 'de'];
 const savedLang = safeGetItem('zenix_lang');
@@ -290,6 +457,7 @@ let currLang = SUPPORTED_LANGUAGES.includes(savedLang) ? savedLang : 'en';
 const ld = {
     fa: {
         m1: 'صفحه اصلی', m2: 'کوانتیفیکیشن', m3: 'واریز', m4: 'برداشت', m_team: 'تیم من', m5: 'تراکنش', m6: 'پروفایل', m7: 'پشتیبانی', m_about: 'درباره پلتفرم', m8: 'خروج',
+        mCasinoWallet: 'کیف پول کازینو',
         wel: 'خوش آمدید', sub: 'پنل مدیریت کاربری', st: 'تایید شده',
         ts1: 'موجودی', ts2: 'زیرمجموعه',
         c1: 'کوانتیفیکیشن', d1: 'معاملات هوشمند',
@@ -299,6 +467,7 @@ const ld = {
         c5: 'تراکنش‌ها', d5: 'تاریخچه مالی',
         c6: 'پروفایل', d6: 'تنظیمات امنیت',
         tmkt: 'بازار ارزهای دیجیتال (۳ ارز برتر از ۳۰ ارز رصد شده)', tlive: 'زنده',
+        aboutToggleOpen: 'مشاهده بیشتر', aboutToggleClose: 'بستن متن',
         aboutTitle: 'درباره پلتفرم هوشمند زِنیکس (Zenix)',
         aboutIntro: 'به زِنیکس (Zenix) خوش آمدید؛ جایی که افق‌های مالی دیجیتال و قدرت فناوری مدرن در هم می‌آمیزند تا مسیری به سوی آینده‌ای روشن‌تر را روشن کنند. زِنیکس بر پایه یک باور عمیق بنا شده است: دنیای دارایی‌های دیجیتال نباید یک هزارتوی پیچیده باشد، بلکه باید یک اکوسیستم شفاف، در دسترس و امن برای همه باشد.',
         aboutDesc: 'در عصری که با شتاب بی‌وقفه تعریف می‌شود، جایی که بازارهای جهانی هرگز نمی‌خوابند و تغییر تنها ثابتِ آن است، داشتن یک همراه مطمئن و هوشمند امری حیاتی است. زِنیکس با تکیه بر معماری ابری پیشرفته، الگوریتم‌های کوانتیفیکیشن نوین و لایه‌های امنیتی چندگانه و نفوذناپذیر، پناهگاهی یکپارچه و یکدست برای مدیریت ثروت شما فراهم کرده است. ما فقط در حال ساختن یک پلتفرم نیستیم؛ ما در حال خلق محیطی هستیم که در آن فناوری در خدمت جاه‌طلبی‌های انسانی قرار می‌گیرد، موانع را از بین می‌برد و آنچه را که در اقتصاد دیجیتال ممکن است، بازتعریف می‌کند.',
@@ -311,21 +480,54 @@ const ld = {
         aboutModalTitle: '<i class="fas fa-info-circle"></i> درباره پلتفرم هوشمند زِنیکس',
         modalTitle: 'صندوق پیام‌ها و اعلان‌ها', noMsg: 'هیچ پیام جدیدی وجود ندارد.', newBadge: 'جدید',
         tabAll: 'همه', tabApproved: 'تایید درخواست', tabRejected: 'لغو درخواست', tabAdmin: 'پیام مدیریت',
+        rejectWithdrawDefault: 'درخواست برداشت شما توسط مدیریت لغو شد.\n\nاگر نیاز به بررسی مجدد یا کسب اطلاعات بیشتر درباره‌ی دلیل لغو دارید، می‌توانید از طریق دکمه‌ی زیر با تیم پشتیبانی زِنیکس در ارتباط باشید. پشتیبانی ما همواره آماده‌ی راهنمایی و همراهی شماست.',
+        contactSupport: 'ارتباط با پشتیبانی',
         helpTitle: 'راهنمای جامع داشبورد زِنیکس',
+        helpSubtitle: 'راهنمای کامل استفاده از پنل',
         helpIntro: 'به بخش مدیریت و داشبورد کاربری پلتفرم زِنیکس خوش آمدید. در این بخش می‌توانید خلاصه‌ای از عملکرد مالی و دسترسی سریع به بخش‌های اصلی داشته باشید.',
-        helpS1Title: '<i class="fas fa-wallet" style="margin-left:5px;"></i> ۱. آمار و موجودی',
-        helpS1Desc: 'در بالای صفحه، کل موجودی حساب (USDT) و تعداد کاربران زیرمجموعه شبکه شما به صورت زنده نمایش داده می‌شود.',
-        helpS2Title: '<i class="fas fa-th-large" style="margin-left:5px;"></i> ۲. دسترسی سریع (میانبرها)',
-        helpS2List: '<li><strong>کوانتیفیکیشن:</strong> ورود به بخش معاملات هوشمند و رباتیک و دریافت سود روزانه.</li><li><strong>واریز:</strong> شارژ حساب کاربری از طریق ولت‌های دیجیتال با تأیید شبکه.</li><li><strong>برداشت:</strong> ثبت درخواست برداشت درآمدها و دارایی‌ها به کیف پول شخصی.</li><li><strong>تیم:</strong> مشاهده آمار کامل اعضا و لینک اختصاصی دعوت زیرمجموعه‌ها (سطوح ۱ تا ۳).</li><li><strong>تراکنش‌ها:</strong> بررسی تاریخچه کامل وضیعت ریز تراکنش‌های مالی، واریزی‌ها و برداشت‌ها.</li><li><strong>پروفایل:</strong> مدیریت امنیت حساب، رمز عبور و تنظیمات کاربری.</li>',
-        helpS3Title: '<i class="fas fa-chart-line" style="margin-left:5px;"></i> ۳. بازار ارزهای دیجیتال و اعلان‌ها',
-        helpS3Desc: 'قیمت ۳ ارز برتر بازار به صورت زنده به‌روزرسانی می‌شود. همچنین با کلیک روی آیکون زنگوله هدر می‌توانید پیام‌ها و اطلاعیه‌های سیستم را مشاهده کنید.',
-        helpFooter: '<i class="fas fa-headset" style="color:#a855f7;margin-left:4px;"></i> در صورت نیاز به راهنمایی بیشتر می‌توانید با پشتیبانی زِنیکس در ارتباط باشید.',
+        helpS1Title: 'آمار و موجودی',
+        helpS1Desc: 'در بالای صفحه، موجودی کل حساب (USDT) و تعداد اعضای زیرمجموعه به‌صورت زنده نمایش داده می‌شود. با هر تراکنش، موجودی به‌روز می‌شود.',
+        helpS2Title: 'دسترسی سریع (میانبرها)',
+        helpS2List: '<li><strong>کوانتیفیکیشن:</strong> ورود به معاملات هوشمند و رباتیک و دریافت سود روزانه.</li><li><strong>واریز:</strong> شارژ حساب با ولت‌های دیجیتال و تأیید شبکه.</li><li><strong>برداشت:</strong> ثبت درخواست برداشت به کیف پول شخصی.</li><li><strong>تیم:</strong> مشاهده اعضای زیرمجموعه (سطوح ۱ تا ۳) و لینک دعوت اختصاصی.</li><li><strong>تراکنش‌ها:</strong> تاریخچه کامل واریز، برداشت و سود.</li><li><strong>پروفایل:</strong> مدیریت امنیت، رمز عبور و تنظیمات.</li>',
+        helpS3Title: 'بازار ارزهای دیجیتال',
+        helpS3Desc: 'قیمت ۳ ارز برتر بازار به‌صورت زنده هر ۳۰ ثانیه به‌روزرسانی می‌شود. رنگ سبز نشان‌دهنده رشد و رنگ قرمز کاهش قیمت در ۲۴ ساعت گذشته است.',
+        helpS4Title: 'اعلان‌ها و پیام‌ها',
+        helpS4Desc: 'با کلیک روی آیکون زنگوله در هدر، پیام‌های مدیریت، تأیید یا لغو درخواست‌ها را ببینید. تعداد پیام‌های جدید روی آیکون زنگوله نمایش داده می‌شود.',
+        helpS5Title: 'بازی‌های کازینو',
+        helpS5Desc: 'با کلیک روی دکمه شناور گوشه صفحه، وارد بخش بازی‌های کازینو می‌شوید. رولت آنلاین و پلینکو در دسترس هستند و بازی‌ها با موجودی مجزا و به‌صورت دمو اجرا می‌شوند.',
+        helpS6Title: 'نکات امنیتی مهم',
+        helpS6Desc: 'هرگز رمز عبور خود را با کسی به اشتراک نگذارید. زِنیکس هرگز از شما رمز، کد تأیید یا کلید خصوصی نمی‌خواهد. برای برداشت، تأیید دو مرحله‌ای فعال کنید و از لینک‌های ناشناس وارد نشوید.',
+        helpFooter: 'در صورت نیاز به راهنمایی بیشتر، با پشتیبانی زِنیکس از طریق صفحه پشتیبانی در ارتباط باشید.',
         casinoModalTitle: 'انتخاب بازی‌های کازینو',
         casinoPoker: 'رولت آنلاین', casinoPokerDesc: 'بازی هیجان‌انگیز و شانس',
-        casinoPlinko: 'پلینکو (پاپالان)', casinoPlinkoDesc: 'بازی محبوب ریزش مهره‌ها'
+        casinoPlinko: 'پلینکو (پاپالان)', casinoPlinkoDesc: 'بازی محبوب ریزش مهره‌ها',
+        chipUnit: 'ژتون',
+        buyBtn: 'خرید',
+        convertBtn: 'تبدیل',
+        casinoWalletModalTitle: 'کیف پول کازینو',
+        casinoWalletSub: 'تبدیل تتر به ژتون بازی',
+        casinoUsdtLabel: 'موجودی تتر کازینو',
+        openWalletBtn: 'ورود به کیف پول کازینو',
+        casinoChargeLabel: 'شارژ کیف پول کازینو',
+        casinoChargeBtn: 'شارژ',
+        tradeBtn: 'تبدیل',
+        buyLabel: 'خرید ژتون با تتر',
+        sellLabel: 'فروش ژتون و دریافت تتر',
+        sellBtn: 'فروش',
+        orText: 'یا',
+        casinoRateText: 'نرخ: ۱ تتر = ۱۰ ژتون (خرید و فروش)',
+        casinoChargeSuccess: 'کیف پول کازینو شارژ شد!',
+        casinoChargeInvalid: 'مبلغ نامعتبر است (حداقل ۱ تتر).',
+        casinoBuySuccess: 'ژتون به بازی اضافه شد!',
+        casinoBuyInvalid: 'مقدار نامعتبر (حداقل ۱ تتر).',
+        casinoBuyInsufficient: 'موجودی تتر کازینو کافی نیست.',
+        casinoSellSuccess: 'ژتون فروخته شد و تتر به موجودی اضافه گردید!',
+        casinoSellInvalid: 'تعداد ژتون نامعتبر (حداقل ۱۰ ژتون).',
+        casinoSellInsufficient: 'ژتون کافی در این بازی ندارید.'
     },
     en: {
         m1: 'Home', m2: 'Quantification', m3: 'Deposit', m4: 'Withdraw', m_team: 'My Team', m5: 'Transactions', m6: 'Profile', m7: 'Support', m_about: 'About Platform', m8: 'Logout',
+        mCasinoWallet: 'Casino Wallet',
         wel: 'Welcome', sub: 'User Management Panel', st: 'Verified',
         ts1: 'Balance', ts2: 'Referrals',
         c1: 'Quantification', d1: 'Smart Trading',
@@ -335,6 +537,7 @@ const ld = {
         c5: 'Transactions', d5: 'Financial History',
         c6: 'Profile', d6: 'Security Settings',
         tmkt: 'Cryptocurrency Market (Top 3 of 30 tracked coins)', tlive: 'Live',
+        aboutToggleOpen: 'Show more', aboutToggleClose: 'Show less',
         aboutTitle: 'About Zenix Smart Platform',
         aboutIntro: 'Welcome to Zenix, where the horizons of digital finance and the power of modern technology intertwine to illuminate a path toward a brighter future. Zenix was founded on a profound belief: the world of digital assets should not be a labyrinth of complexity, but a transparent, accessible, and secure ecosystem for everyone.',
         aboutDesc: 'In an era defined by relentless momentum, where global markets never sleep and change is the only constant, having a reliable and intelligent companion is paramount. Zenix, leveraging cutting-edge cloud architecture, advanced quantification algorithms, and impenetrable multi-layered security, provides you with a unified, seamless sanctuary for wealth management. We are not just building a platform; we are crafting an environment where technology serves human ambition, breaking down barriers and redefining what is possible in the digital economy.',
@@ -347,21 +550,54 @@ const ld = {
         aboutModalTitle: '<i class="fas fa-info-circle"></i> About Zenix Smart Platform',
         modalTitle: 'Notifications & Messages', noMsg: 'No new messages.', newBadge: 'NEW',
         tabAll: 'All', tabApproved: 'Approved', tabRejected: 'Rejected', tabAdmin: 'Admin Msg',
+        rejectWithdrawDefault: 'Your withdrawal request has been cancelled by the management.\n\nIf you need a review or wish to know more about the reason for cancellation, you can reach out to the Zenix support team using the button below. Our support is always here to assist and guide you.',
+        contactSupport: 'Contact Support',
         helpTitle: 'Zenix Dashboard Comprehensive Guide',
+        helpSubtitle: 'Complete guide to the panel',
         helpIntro: 'Welcome to the Zenix user management dashboard. Here you can find a summary of your financial performance and quick access to core sections.',
-        helpS1Title: '<i class="fas fa-wallet" style="margin-right:5px;"></i> 1. Stats & Balance',
-        helpS1Desc: 'At the top of the page, your total balance (USDT) and network referral count are displayed live.',
-        helpS2Title: '<i class="fas fa-th-large" style="margin-right:5px;"></i> 2. Quick Shortcuts',
+        helpS1Title: 'Stats & Balance',
+        helpS1Desc: 'At the top of the page, your total balance (USDT) and network referral count are displayed live. Balance updates with each transaction.',
+        helpS2Title: 'Quick Shortcuts',
         helpS2List: '<li><strong>Quantification:</strong> Enter automated robotic trading to earn daily profit.</li><li><strong>Deposit:</strong> Top up your account via digital wallets.</li><li><strong>Withdraw:</strong> Request asset withdrawals to your crypto wallet.</li><li><strong>Team:</strong> View member stats and get your referral link (Levels 1-3).</li><li><strong>Transactions:</strong> Review full history of financial deposits and withdrawals.</li><li><strong>Profile:</strong> Manage account security, password, and settings.</li>',
-        helpS3Title: '<i class="fas fa-chart-line" style="margin-right:5px;"></i> 3. Crypto Market & Notifications',
-        helpS3Desc: 'Top 3 crypto prices are updated live. Click the bell icon on the header to view notifications and admin messages.',
-        helpFooter: '<i class="fas fa-headset" style="color:#a855f7;margin-right:4px;"></i> If you need further assistance, feel free to contact Zenix Support.',
+        helpS3Title: 'Crypto Market',
+        helpS3Desc: 'Top 3 crypto prices are updated live every 30 seconds. Green indicates growth and red indicates 24-hour price decline.',
+        helpS4Title: 'Notifications & Messages',
+        helpS4Desc: 'Click the bell icon on the header to view admin messages, approvals, or rejections. The number of new messages appears on the bell icon.',
+        helpS5Title: 'Casino Games',
+        helpS5Desc: 'Click the floating button on the corner of the page to enter casino games. Online roulette and plinko are available as demo games with separate balance.',
+        helpS6Title: 'Important Security Notes',
+        helpS6Desc: 'Never share your password with anyone. Zenix will never ask for your password, verification code, or private key. For withdrawals, enable two-factor authentication and avoid unknown links.',
+        helpFooter: 'For further assistance, contact Zenix Support through the support page.',
         casinoModalTitle: 'Select Casino Games',
         casinoPoker: 'Online Roulette', casinoPokerDesc: 'Exciting game of chance',
-        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Popular dropping ball game'
+        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Popular dropping ball game',
+        chipUnit: 'chips',
+        buyBtn: 'Buy',
+        convertBtn: 'Convert',
+        casinoWalletModalTitle: 'Casino Wallet',
+        casinoWalletSub: 'Convert USDT to game chips',
+        casinoUsdtLabel: 'Casino USDT Balance',
+        openWalletBtn: 'Open Casino Wallet',
+        casinoChargeLabel: 'Charge Casino Wallet',
+        casinoChargeBtn: 'Charge',
+        tradeBtn: 'Trade',
+        buyLabel: 'Buy Chips with USDT',
+        sellLabel: 'Sell Chips for USDT',
+        sellBtn: 'Sell',
+        orText: 'or',
+        casinoRateText: 'Rate: 1 USDT = 10 chips (buy & sell)',
+        casinoChargeSuccess: 'Casino wallet charged!',
+        casinoChargeInvalid: 'Invalid amount (minimum 1 USDT).',
+        casinoBuySuccess: 'Chips added to game!',
+        casinoBuyInvalid: 'Invalid amount (minimum 1 USDT).',
+        casinoBuyInsufficient: 'Insufficient casino USDT balance.',
+        casinoSellSuccess: 'Chips sold and USDT added to balance!',
+        casinoSellInvalid: 'Invalid chip amount (minimum 10 chips).',
+        casinoSellInsufficient: 'Not enough chips in this game.'
     },
     ar: {
         m1: 'الرئيسية', m2: 'التكميم', m3: 'إيداع', m4: 'سحب', m_team: 'فريقي', m5: 'المعاملات', m6: 'الملف الشخصي', m7: 'الدعم', m_about: 'حول المنصة', m8: 'تسجيل الخروج',
+        mCasinoWallet: 'محفظة الكازينو',
         wel: 'أهلاً بك', sub: 'لوحة إدارة المستخدم', st: 'موثق',
         ts1: 'الرصيد', ts2: 'الإحالات',
         c1: 'التكميم', d1: 'التداول الذكي',
@@ -371,6 +607,7 @@ const ld = {
         c5: 'المعاملات', d5: 'السجل المالي',
         c6: 'الملف الشخصي', d6: 'إعدادات الأمان',
         tmkt: 'سوق العملات الرقمية (أفضل 3 من 30 عملة مراقبة)', tlive: 'مباشر',
+        aboutToggleOpen: 'عرض المزيد', aboutToggleClose: 'إظهار أقل',
         aboutTitle: 'حول منصة Zenix الذكية',
         aboutIntro: 'مرحباً بك في Zenix، حيث تتشابك آفاق التمويل الرقمي وقوة التكنولوجيا الحديثة لإضاءة طريق نحو مستقبل أكثر إشراقاً. تأسست Zenix على إيمان عميق: يجب ألا يكون عالم الأصول الرقمية متاهة معقدة، بل نظاماً بيئياً شفافاً وسهلاً وآمناً للجميع.',
         aboutDesc: 'في عصر يتسم بالزخم الذي لا يلين، حيث لا تنام الأسواق العالمية أبداً والتغيير هو الثابت الوحيد، يعد وجود رفيق موثوق وذكي أمراً بالغ الأهمية. بناءً على بنية سحابية متطورة وخوارزميات تكميم متقدمة وطبقات أمان متعددة لا يمكن اختراقها، توفر لك Zenix ملاذاً موحداً وسلساً لإدارة الثروة. نحن لا نبني منصة فحسب؛ بل نصمم بيئة تخدم فيها التكنولوجيا الطموح البشري، وتكسر الحواجز وتعيد تعريف ما هو ممكن في الاقتصاد الرقمي.',
@@ -383,21 +620,54 @@ const ld = {
         aboutModalTitle: '<i class="fas fa-info-circle"></i> حول منصة Zenix الذكية',
         modalTitle: 'صندوق الرسائل والإشعارات', noMsg: 'لا توجد رسائل جديدة.', newBadge: 'جديد',
         tabAll: 'الكل', tabApproved: 'طلبات مقبولة', tabRejected: 'طلبات مرفوضة', tabAdmin: 'رسائل الإدارة',
+        rejectWithdrawDefault: 'تم إلغاء طلب السحب الخاص بك من قبل الإدارة.\n\nإذا كنت بحاجة إلى إعادة النظر أو ترغب في معرفة المزيد حول سبب الإلغاء، يمكنك التواصل مع فريق دعم Zenix باستخدام الزر أدناه. فريق الدعم لدينا مستعد دائمًا لمساعدتك ومرافقتك.',
+        contactSupport: 'تواصل مع الدعم',
         helpTitle: 'دليل لوحة تحكم Zenix الشامل',
+        helpSubtitle: 'دليل شامل للوحة التحكم',
         helpIntro: 'مرحباً بك في لوحة تحكم إدارة المستخدمين في Zenix. يمكنك هنا العثور على ملخص لأدائك المالي والوصول السريع للأقسام الأساسية.',
-        helpS1Title: '<i class="fas fa-wallet" style="margin-left:5px;"></i> ١. الإحصائيات والرصيد',
-        helpS1Desc: 'في أعلى الصفحة، يتم عرض إجمالي رصيدك (USDT) عدد إحالات شبكتك بشكل مباشر.',
-        helpS2Title: '<i class="fas fa-th-large" style="margin-left:5px;"></i> ٢. الاختصارات السريعة',
-        helpS2List: '<li><strong>التكميم:</strong> الدخول إلى التداول الآلي لكسب الأرباح اليومية.</li><li><strong>إيداع:</strong> شحن حسابك عبر المحافظ الرقمية.</li><li><strong>سحب:</strong> طلب سحب الأصول إلى محفظتك الخاصة.</li><li><strong>الفريق:</strong> عرض إحصائيات الأعضاء ورابط الإحالة الخاص بك.</li><li><strong>المعاملات:</strong> مراجعة السجل الكامل لعمليات الإيداع والسحب.</li><li><strong>الملف الشخصي:</strong> إدارة أمان الحساب والإعدادات.</li>',
-        helpS3Title: '<i class="fas fa-chart-line" style="margin-left:5px;"></i> ٣. سوق العملات والإشعارات',
-        helpS3Desc: 'يتم تحديث أسعار العملات بشكل مباشر. انقر فوق أيقونة الجرس لعرض الإشعارات.',
-        helpFooter: '<i class="fas fa-headset" style="color:#a855f7;margin-left:4px;"></i> إذا كنت بحاجة إلى مساعدة إضافية، تواصل مع دعم Zenix.',
+        helpS1Title: 'الإحصائيات والرصيد',
+        helpS1Desc: 'في أعلى الصفحة، يتم عرض إجمالي رصيدك (USDT) وعدد إحالات الشبكة بشكل مباشر. يتم تحديث الرصيد مع كل معاملة.',
+        helpS2Title: 'الاختصارات السريعة',
+        helpS2List: '<li><strong>التكميم:</strong> الدخول إلى التداول الآلي لكسب الأرباح اليومية.</li><li><strong>إيداع:</strong> شحن حسابك عبر المحافظ الرقمية.</li><li><strong>سحب:</strong> طلب سحب الأصول إلى محفظتك.</li><li><strong>الفريق:</strong> عرض إحصائيات الأعضاء ورابط الإحالة.</li><li><strong>المعاملات:</strong> مراجعة السجل الكامل.</li><li><strong>الملف الشخصي:</strong> إدارة الأمان والإعدادات.</li>',
+        helpS3Title: 'سوق العملات الرقمية',
+        helpS3Desc: 'يتم تحديث أسعار أفضل 3 عملات بشكل مباشر كل 30 ثانية. الأخضر يعني النمو والأحمر يعني الانخفاض.',
+        helpS4Title: 'الإشعارات والرسائل',
+        helpS4Desc: 'انقر على أيقونة الجرس لعرض رسائل الإدارة والموافقات أو الرفض. عدد الرسائل الجديدة يظهر على الأيقونة.',
+        helpS5Title: 'ألعاب الكازينو',
+        helpS5Desc: 'انقر على الزر العائم لفتح ألعاب الكازينو. الروليت والبلينكو متاحة كلعبة تجريبية برصيد منفصل.',
+        helpS6Title: 'ملاحظات أمنية هامة',
+        helpS6Desc: 'لا تشارك كلمة المرور مع أي شخص. لن تطلب منك Zenix أبدًا كلمة المرور أو رمز التحقق أو المفتاح الخاص. لتفعيل السحب، قم بتشغيل المصادقة الثنائية.',
+        helpFooter: 'للمزيد من المساعدة، تواصل مع دعم Zenix.',
         casinoModalTitle: 'اختر ألعاب الكازينو',
         casinoPoker: 'رولت مباشر', casinoPokerDesc: 'لعبة حظ مثيرة',
-        casinoPlinko: 'بلينكو', casinoPlinkoDesc: 'لعبة سقوط الكرات الشهيرة'
+        casinoPlinko: 'بلينكو', casinoPlinkoDesc: 'لعبة سقوط الكرات الشهيرة',
+        chipUnit: 'شريحة',
+        buyBtn: 'شراء',
+        convertBtn: 'تحويل',
+        casinoWalletModalTitle: 'محفظة الكازينو',
+        casinoWalletSub: 'تحويل USDT إلى شرائح اللعب',
+        casinoUsdtLabel: 'رصيد USDT الكازينو',
+        openWalletBtn: 'فتح محفظة الكازينو',
+        casinoChargeLabel: 'شحن محفظة الكازينو',
+        casinoChargeBtn: 'شحن',
+        tradeBtn: 'تبديل',
+        buyLabel: 'شراء شرائح بـ USDT',
+        sellLabel: 'بيع الشرائح واستلام USDT',
+        sellBtn: 'بيع',
+        orText: 'أو',
+        casinoRateText: 'السعر: 1 USDT = 10 شرائح (شراء وبيع)',
+        casinoChargeSuccess: 'تم شحن محفظة الكازينو!',
+        casinoChargeInvalid: 'المبلغ غير صالح (الحد الأدنى 1 USDT).',
+        casinoBuySuccess: 'تمت إضافة الشرائح للعبة!',
+        casinoBuyInvalid: 'المبلغ غير صالح (الحد الأدنى 1 USDT).',
+        casinoBuyInsufficient: 'رصيد USDT الكازينو غير كافٍ.',
+        casinoSellSuccess: 'تم بيع الشرائح وإضافة USDT للرصيد!',
+        casinoSellInvalid: 'عدد الشرائح غير صالح (الحد الأدنى 10).',
+        casinoSellInsufficient: 'لا تملك شرائح كافية في هذه اللعبة.'
     },
     tr: {
         m1: 'Ana Sayfa', m2: 'Kuantifikasyon', m3: 'Yatırım', m4: 'Çekim', m_team: 'Ekibim', m5: 'İşlemler', m6: 'Profil', m7: 'Destek', m_about: 'Platform Hakkında', m8: 'Çıkış',
+        mCasinoWallet: 'Casino Cüzdanı',
         wel: 'Hoş Geldiniz', sub: 'Kullanıcı Yönetim Paneli', st: 'Onaylandı',
         ts1: 'Bakiye', ts2: 'Referanslar',
         c1: 'Kuantifikasyon', d1: 'Akıllı İşlem',
@@ -407,33 +677,67 @@ const ld = {
         c5: 'İşlemler', d5: 'Finansal Geçmiş',
         c6: 'Profil', d6: 'Güvenlik Ayarları',
         tmkt: 'Kripto Para Piyasası (Takip edilen 30 coinden en iyi 3ü)', tlive: 'Canlı',
+        aboutToggleOpen: 'Daha fazla göster', aboutToggleClose: 'Daha az göster',
         aboutTitle: 'Zenix Akıllı Platform Hakkında',
         aboutIntro: 'Zenix\'e hoş geldiniz; dijital finansın ufukları ile modern teknolojinin gücünün, daha aydınlık bir geleceğe giden yolu aydınlatmak için iç içe geçtiği yer. Zenix, derin bir inanç üzerine kurulmuştur: dijital varlıklar dünyası karmaşık bir labirent değil, herkes için şeffaf, erişilebilir ve güvenli bir ekosistem olmalıdır.',
-        aboutDesc: 'Küresel piyasaların asla uyumadığı ve tek sabitin değişim olduğu, amansız bir ivmeyle tanımlanan bir çağda, güvenilir ve akıllı bir yol arkadaşına sahip olmak çok önemlidir. Zenix, en son bulut mimarisi, gelişmiş kuantifikasyon algoritmaları ve aşılamaz çok katmanlı güvenlikten yararlanarak size servet yönetimi için birleşik ve kusursuz bir sığınak sunar. Sadece bir platform inşa etmiyoruz; teknolojinin insan hırsına hizmet ettiği, engelleri yıktığı ve dijital ekonomide nelerin mümkün olduğunu yeniden tanımladığı bir ortam yaratıyoruz.',
-        aboutGoal: '<strong style="color:#38bdf8;">Hedefimiz:</strong> Olağanüstüyü demokratikleştirmek. Kurumsal seçkinlerin kullandığı aynı güçlü finansal araçları günlük vizyonerlerin eline vermeye çalışıyoruz. İster ilk adımınızı atıyor olun ister deneyimli bir uzman olun, Zenix karmaşık uzmanlığa ihtiyaç duymadan küresel piyasalarda güvenle yol almanızı sağlar ve sermayenizin mutlak güvenlik, şeffaflık ve dinamik potansiyel ortamında büyümesini garanti eder.',
-        aboutStrategy: '<strong style="color:#38bdf8;">Stratejimiz:</strong> yıkılmaz bir üçlü üzerine inşa edilmiştir: ödünsüz güvenlik, radikal şeffaflık ve amansız inovasyon. En son veri işleme algoritmalarını, dinamik çok katmanlı bir ödül sistemini ve sonsuz ölçeklenebilir altyapıyı entegre ederek kusursuz, yıldırım hızında ve son derece güvenilir bir deneyim tasarlıyoruz. Karmaşıklıkları biz yönetiyoruz, böylece odağınız yalnızca en önemli şeyde kalıyor: büyümeniz ve başarınız.',
-        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix, sadece bir platform tanımını aşar; teknolojinin, sermayenin ve ileri görüşlü bir topluluğun bir araya geldiği canlı bir ekosistemdir. Bu yolculukta sizin kararlı ortağınızız ve sizi daha fazla finansal özgürlük, sınırsız fırsat ve anıtsal başarıların olduğu bir geleceğe yönlendirmeye kararlıyız. Birlikte, sadece geleceği tahmin etmiyoruz—onu inşa ediyoruz.',
+        aboutDesc: 'Küresel piyasaların asla uyumadığı ve tek sabitin değişim olduğu, amansız bir ivmeyle tanımlanan bir çağda, güvenilir ve akıllı bir yol arkadaşına sahip olmak çok önemlidir. Zenix, en son bulut mimarisi, gelişmiş kuantifikasyon algoritmaları ve aşılamaz çok katmanlı güvenlikten yararlanarak size servet yönetimi için birleşik ve kusursuz bir sığınak sunar.',
+        aboutGoal: '<strong style="color:#38bdf8;">Hedefimiz:</strong> Olağanüstüyü demokratikleştirmek. Kurumsal seçkinlerin kullandığı aynı güçlü finansal araçları günlük vizyonerlerin eline vermeye çalışıyoruz.',
+        aboutStrategy: '<strong style="color:#38bdf8;">Stratejimiz:</strong> yıkılmaz bir üçlü üzerine inşa edilmiştir: ödünsüz güvenlik, radikal şeffaflık ve amansız inovasyon.',
+        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix, sadece bir platform tanımını aşar; teknolojinin, sermayenin ve ileri görüşlü bir topluluğun bir araya geldiği canlı bir ekosistemdir.',
         floatingCasino: 'Casino', floatingCasinoTitle: 'Casino Oyunları',
         helpBtnTitle: 'Panel Yardımı',
         detailMsgTitle: 'Mesajı Görüntüle',
         aboutModalTitle: '<i class="fas fa-info-circle"></i> Zenix Akıllı Platform Hakkında',
         modalTitle: 'Bildirimler ve Mesajlar', noMsg: 'Yeni mesaj yok.', newBadge: 'YENİ',
         tabAll: 'Tümü', tabApproved: 'Onaylanan', tabRejected: 'Reddedilen', tabAdmin: 'Yönetici',
+        rejectWithdrawDefault: 'Para çekme talebiniz yönetim tarafından iptal edildi.\n\nYeniden inceleme yapılmasına veya iptal nedenini öğrenmek istiyorsanız, aşağıdaki düğmeyi kullanarak Zenix destek ekibiyle iletişime geçebilirsiniz. Desteğimiz size yardımcı olmak ve sizinle birlikte olmak için her zaman hazırdır.',
+        contactSupport: 'Destek ile İletişim',
         helpTitle: 'Zenix Kontrol Paneli Kapsamlı Rehberi',
+        helpSubtitle: 'Panel için kapsamlı rehber',
         helpIntro: 'Zenix kullanıcı yönetim paneline hoş geldiniz. Burada finansal performansınızın bir özetini bulabilirsiniz.',
-        helpS1Title: '<i class="fas fa-wallet" style="margin-right:5px;"></i> 1. İstatistikler ve Bakiye',
-        helpS1Desc: 'Sayfanın üst kısmında toplam bakiyeniz (USDT) canlı olarak görüntülenir.',
-        helpS2Title: '<i class="fas fa-th-large" style="margin-right:5px;"></i> 2. Hızlı Kısayollar',
-        helpS2List: '<li><strong>Kuantifikasyon:</strong> Otomatik işlemler.</li><li><strong>Yatırım:</strong> Bakiye yükleme.</li><li><strong>Çekim:</strong> Varlık çekme.</li><li><strong>Ekip:</strong> Üye istatistikleri.</li><li><strong>İşlemler:</strong> Geçmiş.</li><li><strong>Profil:</strong> Güvenlik.</li>',
-        helpS3Title: '<i class="fas fa-chart-line" style="margin-right:5px;"></i> 3. Kripto Piyasası ve Bildirimler',
-        helpS3Desc: 'Canlı fiyatlar ve bildirimler.',
-        helpFooter: '<i class="fas fa-headset" style="color:#a855f7;margin-right:4px;"></i> Zenix Desteği ile iletişime geçin.',
+        helpS1Title: 'İstatistikler ve Bakiye',
+        helpS1Desc: 'Sayfanın üst kısmında toplam bakiyeniz (USDT) ve ağ referans sayınız canlı olarak gösterilir. Bakiye her işlemde güncellenir.',
+        helpS2Title: 'Hızlı Kısayollar',
+        helpS2List: '<li><strong>Kuantifikasyon:</strong> Otomatik robotik ticarete girin.</li><li><strong>Yatırım:</strong> Dijital cüzdanlarla hesap yükleyin.</li><li><strong>Çekim:</strong> Kripto cüzdanınıza varlık çekin.</li><li><strong>Ekip:</strong> Üye istatistiklerini görüntüleyin.</li><li><strong>İşlemler:</strong> Tam finansal geçmişi inceleyin.</li><li><strong>Profil:</strong> Güvenlik ve ayarları yönetin.</li>',
+        helpS3Title: 'Kripto Piyasası',
+        helpS3Desc: 'En iyi 3 kripto fiyatı her 30 saniyede bir canlı olarak güncellenir. Yeşil büyümeyi, kırmızı 24 saatlik düşüşü gösterir.',
+        helpS4Title: 'Bildirimler ve Mesajlar',
+        helpS4Desc: 'Başlıktaki zil simgesine tıklayarak yönetici mesajlarını, onayları veya redleri görüntüleyin.',
+        helpS5Title: 'Casino Oyunları',
+        helpS5Desc: 'Sayfanın köşesindeki yüzen düğmeye tıklayarak casino oyunlarına girin. Rulet ve plinko demo olarak mevcuttur.',
+        helpS6Title: 'Önemli Güvenlik Notları',
+        helpS6Desc: 'Şifrenizi asla kimseyle paylaşmayın. Zenix sizden asla şifre, doğrulama kodu veya özel anahtar istemez.',
+        helpFooter: 'Daha fazla yardım için Zenix Desteği ile iletişime geçin.',
         casinoModalTitle: 'Casino Oyunları Seçimi',
         casinoPoker: 'Canlı Rulet', casinoPokerDesc: 'Heyecan verici şans oyunu',
-        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Popüler top bırakma oyunu'
+        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Popüler top bırakma oyunu',
+        chipUnit: 'jeton',
+        buyBtn: 'Satın Al',
+        convertBtn: 'Dönüştür',
+        casinoWalletModalTitle: 'Casino Cüzdanı',
+        casinoWalletSub: 'USDT\'yi oyun jetonlarına dönüştür',
+        casinoUsdtLabel: 'Casino USDT Bakiyesi',
+        openWalletBtn: 'Casino Cüzdanını Aç',
+        casinoChargeLabel: 'Casino Cüzdanını Yükle',
+        casinoChargeBtn: 'Yükle',
+        tradeBtn: 'İşlem',
+        buyLabel: 'USDT ile Jeton Al',
+        sellLabel: 'Jeton Sat ve USDT Al',
+        sellBtn: 'Sat',
+        orText: 'veya',
+        casinoRateText: 'Kur: 1 USDT = 10 jeton (al & sat)',
+        casinoChargeSuccess: 'Casino cüzdanı yüklendi!',
+        casinoChargeInvalid: 'Geçersiz miktar (min 1 USDT).',
+        casinoBuySuccess: 'Jetoun oyuna eklendi!',
+        casinoBuyInvalid: 'Geçersiz miktar (min 1 USDT).',
+        casinoBuyInsufficient: 'Casino USDT bakiyesi yetersiz.',
+        casinoSellSuccess: 'Jeton satıldı ve USDT bakiyeye eklendi!',
+        casinoSellInvalid: 'Geçersiz jeton sayısı (min 10).',
+        casinoSellInsufficient: 'Bu oyunda yeterli jeton yok.'
     },
     ru: {
         m1: 'Главная', m2: 'Квантификация', m3: 'Депозит', m4: 'Вывод', m_team: 'Команда', m5: 'Транзакции', m6: 'Профиль', m7: 'Поддержка', m_about: 'О платформе', m8: 'Выход',
+        mCasinoWallet: 'Кошелек казино',
         wel: 'Добро пожаловать', sub: 'Панель управления', st: 'Подтверждено',
         ts1: 'Баланс', ts2: 'Рефералы',
         c1: 'Квантификация', d1: 'Умная торговля',
@@ -443,33 +747,67 @@ const ld = {
         c5: 'Транзакции', d5: 'История финансов',
         c6: 'Профиль', d6: 'Настройки безопасности',
         tmkt: 'Криптовалютный рынок (топ-3 из 30 монет)', tlive: 'Онлайн',
+        aboutToggleOpen: 'Показать больше', aboutToggleClose: 'Показать меньше',
         aboutTitle: 'О смарт-платформе Zenix',
-        aboutIntro: 'Добро пожаловать в Zenix — место, где горизонты цифровых финансов и мощь современных технологий переплетаются, чтобы осветить путь к светлому будущему. Zenix основан на глубоком убеждении: мир цифровых активов не должен быть лабиринтом сложности, а должен быть прозрачной, доступной и безопасной экосистемой для всех.',
-        aboutDesc: 'В эпоху, определяемую неустанным импульсом, когда мировые рынки никогда не спят и единственная константа — это перемены, наличие надежного и умного спутника имеет первостепенное значение. Опираясь на передовую облачную архитектуру, современные алгоритмы квантификации и непроницаемую многоуровневую безопасность, Zenix предоставляет вам единое, бесшовное убежище для управления капиталом. Мы не просто строим платформу; мы создаем среду, в которой технологии служат человеческим амбициям, разрушая барьеры и переопределяя то, что возможно в цифровой экономике.',
-        aboutGoal: '<strong style="color:#38bdf8;">Наша цель:</strong> демократизировать выдающееся. Мы стремимся вложить те же мощные финансовые инструменты, используемые институциональной элитой, в руки обычных мечтателей. Делаете ли вы свой первый шаг или являетесь опытным экспертом, Zenix дает вам возможность уверенно ориентироваться на мировых рынках без необходимости сложных знаний, гарантируя, что ваш капитал будет расти в условиях абсолютной безопасности, прозрачности и динамичного потенциала.',
-        aboutStrategy: '<strong style="color:#38bdf8;">Наша стратегия:</strong> построена на незыблемой триаде — бескомпромиссная безопасность, радикальная прозрачность и неустанные инновации. Интегрируя новейшие алгоритмы обработки данных, динамическую многоуровневую систему вознаграждений и бесконечно масштабируемую инфраструктуру, мы создаем безупречный, молниеносно быстрый и высоконадежный опыт. Мы берем на себя все сложности, чтобы ваше внимание оставалось сосредоточенным только на самом важном: вашем росте и успехе.',
-        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix выходит за рамки определения простой платформы; это яркая экосистема, где сходятся технологии, капитал и сообщество прогрессивных мыслителей. Мы ваш верный партнер в этом путешествии, призванный вести вас к будущему с большей финансовой свободой, безграничными возможностями и колоссальными достижениями. Вместе мы не просто предсказываем будущее — мы строим его.',
+        aboutIntro: 'Добро пожаловать в Zenix — место, где горизонты цифровых финансов и мощь современных технологий переплетаются, чтобы осветить путь к светлому будущему.',
+        aboutDesc: 'В эпоху, определяемую неустанным импульсом, когда мировые рынки никогда не спят и единственная константа — это перемены, наличие надежного и умного спутника имеет первостепенное значение.',
+        aboutGoal: '<strong style="color:#38bdf8;">Наша цель:</strong> демократизировать выдающееся. Мы стремимся вложить те же мощные финансовые инструменты в руки обычных мечтателей.',
+        aboutStrategy: '<strong style="color:#38bdf8;">Наша стратегия:</strong> построена на незыблемой триаде — бескомпромиссная безопасность, радикальная прозрачность и неустанные инновации.',
+        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix выходит за рамки определения простой платформы; это яркая экосистема.',
         floatingCasino: 'Казино', floatingCasinoTitle: 'Игры казино',
         helpBtnTitle: 'Помощь',
         detailMsgTitle: 'Просмотр сообщения',
         aboutModalTitle: '<i class="fas fa-info-circle"></i> О смарт-платформе Zenix',
         modalTitle: 'Уведомления', noMsg: 'Нет новых сообщений.', newBadge: 'НОВОЕ',
         tabAll: 'Все', tabApproved: 'Одобрено', tabRejected: 'Отклонено', tabAdmin: 'Админ',
+        rejectWithdrawDefault: 'Ваш запрос на вывод средств был отменён администрацией.\n\nЕсли вам нужна дополнительная проверка или вы хотите узнать причину отмены, вы можете связаться со службой поддержки Zenix с помощью кнопки ниже. Наша поддержка всегда готова помочь и сопровождать вас.',
+        contactSupport: 'Связаться с поддержкой',
         helpTitle: 'Руководство панели управления Zenix',
-        helpIntro: 'Добро пожаловать в панель управления.',
-        helpS1Title: '<i class="fas fa-wallet" style="margin-right:5px;"></i> 1. Баланс',
-        helpS1Desc: 'Общий баланс.',
-        helpS2Title: '<i class="fas fa-th-large" style="margin-right:5px;"></i> 2. Быстрый доступ',
-        helpS2List: '<li>Квантификация</li><li>Депозит</li><li>Вывод</li>',
-        helpS3Title: '<i class="fas fa-chart-line" style="margin-right:5px;"></i> 3. Рынок',
-        helpS3Desc: 'Цены в реальном времени.',
-        helpFooter: 'Поддержка Zenix.',
+        helpSubtitle: 'Полное руководство по панели',
+        helpIntro: 'Добро пожаловать в панель управления Zenix.',
+        helpS1Title: 'Статистика и баланс',
+        helpS1Desc: 'В верхней части страницы отображается ваш общий баланс (USDT) и количество рефералов в реальном времени.',
+        helpS2Title: 'Быстрые ярлыки',
+        helpS2List: '<li><strong>Квантификация:</strong> Автоматическая роботизированная торговля.</li><li><strong>Депозит:</strong> Пополнение через цифровые кошельки.</li><li><strong>Вывод:</strong> Запрос вывода на криптокошелек.</li><li><strong>Команда:</strong> Статистика участников и реферальная ссылка.</li><li><strong>Транзакции:</strong> Полная история финансов.</li><li><strong>Профиль:</strong> Управление безопасностью и настройками.</li>',
+        helpS3Title: 'Криптовалютный рынок',
+        helpS3Desc: 'Цены топ-3 криптовалют обновляются каждые 30 секунд. Зеленый — рост, красный — падение за 24 часа.',
+        helpS4Title: 'Уведомления и сообщения',
+        helpS4Desc: 'Нажмите на иконку колокольчика, чтобы просмотреть сообщения администратора и статусы запросов.',
+        helpS5Title: 'Игры казино',
+        helpS5Desc: 'Нажмите на плавающую кнопку в углу страницы, чтобы войти в игры казино. Рулетка и плинко доступны как демо.',
+        helpS6Title: 'Важные меры безопасности',
+        helpS6Desc: 'Никогда не делитесь паролем. Zenix никогда не запрашивает пароль, код подтверждения или приватный ключ.',
+        helpFooter: 'За дополнительной помощью обращайтесь в поддержку Zenix.',
         casinoModalTitle: 'Выбор игр казино',
         casinoPoker: 'Онлайн Рулетка', casinoPokerDesc: 'Захватывающая игра',
-        casinoPlinko: 'Плинко', casinoPlinkoDesc: 'Популярная игра с шариками'
+        casinoPlinko: 'Плинко', casinoPlinkoDesc: 'Популярная игра с шариками',
+        chipUnit: 'фишек',
+        buyBtn: 'Купить',
+        convertBtn: 'Обмен',
+        casinoWalletModalTitle: 'Кошелек казино',
+        casinoWalletSub: 'Обмен USDT на игровые фишки',
+        casinoUsdtLabel: 'Баланс USDT казино',
+        openWalletBtn: 'Открыть кошелек казино',
+        casinoChargeLabel: 'Пополнить кошелек казино',
+        casinoChargeBtn: 'Пополнить',
+        tradeBtn: 'Обмен',
+        buyLabel: 'Купить фишки за USDT',
+        sellLabel: 'Продать фишки за USDT',
+        sellBtn: 'Продать',
+        orText: 'или',
+        casinoRateText: 'Курс: 1 USDT = 10 фишек (покупка и продажа)',
+        casinoChargeSuccess: 'Кошелек казино пополнен!',
+        casinoChargeInvalid: 'Неверная сумма (минимум 1 USDT).',
+        casinoBuySuccess: 'Фишки добавлены в игру!',
+        casinoBuyInvalid: 'Неверная сумма (минимум 1 USDT).',
+        casinoBuyInsufficient: 'Недостаточно USDT в кошельке казино.',
+        casinoSellSuccess: 'Фишки проданы, USDT добавлен на баланс!',
+        casinoSellInvalid: 'Неверное количество фишек (минимум 10).',
+        casinoSellInsufficient: 'Недостаточно фишек в этой игре.'
     },
     es: {
         m1: 'Inicio', m2: 'Cuantificación', m3: 'Depósito', m4: 'Retiro', m_team: 'Equipo', m5: 'Transacciones', m6: 'Perfil', m7: 'Soporte', m_about: 'Sobre la plataforma', m8: 'Cerrar sesión',
+        mCasinoWallet: 'Monedero Casino',
         wel: 'Bienvenido', sub: 'Panel de gestión de usuario', st: 'Verificado',
         ts1: 'Saldo', ts2: 'Referidos',
         c1: 'Cuantificación', d1: 'Comercio inteligente',
@@ -479,33 +817,67 @@ const ld = {
         c5: 'Transacciones', d5: 'Historial financiero',
         c6: 'Perfil', d6: 'Configuración de seguridad',
         tmkt: 'Mercado de criptomonedas (Top 3 de 30 monedas)', tlive: 'En vivo',
+        aboutToggleOpen: 'Ver más', aboutToggleClose: 'Ver menos',
         aboutTitle: 'Sobre la plataforma inteligente Zenix',
-        aboutIntro: 'Bienvenido a Zenix, donde los horizontes de las finanzas digitales y el poder de la tecnología moderna se entrelazan para iluminar un camino hacia un futuro más brillante. Zenix se fundó sobre una profunda convicción: el mundo de los activos digitales no debería ser un laberinto de complejidad, sino un ecosistema transparente, accesible y seguro para todos.',
-        aboutDesc: 'En una era definida por un impulso implacable, donde los mercados globales nunca duermen y el cambio es la única constante, contar con un compañero confiable e inteligente es primordial. Zenix, aprovechando la arquitectura en la nube de vanguardia, los avanzados algoritmos de cuantificación y la impenetrable seguridad de múltiples capas, le proporciona un santuario unificado y perfecto para la gestión de patrimonios. No solo estamos construyendo una plataforma; estamos creando un entorno donde la tecnología sirve a la ambición humana, derribando barreras y redefiniendo lo que es posible en la economía digital.',
-        aboutGoal: '<strong style="color:#38bdf8;">Nuestro objetivo:</strong> democratizar lo extraordinario. Nos esforzamos por poner las mismas herramientas financieras poderosas utilizadas por las élites institucionales en manos de visionarios cotidianos. Ya sea que esté dando su primer paso o sea un experto experimentado, Zenix le permite navegar por los mercados globales con confianza, sin la necesidad de una experiencia compleja, asegurando que su capital crezca en un entorno de seguridad absoluta, transparencia y potencial dinámico.',
-        aboutStrategy: '<strong style="color:#38bdf8;">Nuestra estrategia:</strong> se basa en una tríada inquebrantable: seguridad sin concesiones, transparencia radical e innovación implacable. Al integrar algoritmos de procesamiento de datos de última generación, un sistema dinámico de recompensas de varios niveles y una infraestructura infinitamente escalable, diseñamos una experiencia impecable, ultrarrápida y altamente confiable. Nos encargamos de las complejidades para que su enfoque siga estando únicamente en lo que más importa: su crecimiento y éxito.',
-        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix trasciende la definición de una mera plataforma; es un ecosistema vibrante donde convergen la tecnología, el capital y una comunidad de pensadores avanzados. Somos su firme socio en este viaje, comprometido a guiarle hacia un futuro de mayor libertad financiera, oportunidades ilimitadas y logros monumentales. Juntos, no solo predecimos el futuro, lo estamos construyendo.',
+        aboutIntro: 'Bienvenido a Zenix, donde los horizontes de las finanzas digitales y el poder de la tecnología moderna se entrelazan para iluminar un camino hacia un futuro más brillante.',
+        aboutDesc: 'En una era definida por un impulso implacable, donde los mercados globales nunca duermen y el cambio es la única constante, contar con un compañero confiable e inteligente es primordial.',
+        aboutGoal: '<strong style="color:#38bdf8;">Nuestro objetivo:</strong> democratizar lo extraordinario.',
+        aboutStrategy: '<strong style="color:#38bdf8;">Nuestra estrategia:</strong> se basa en una tríada inquebrantable: seguridad sin concesiones, transparencia radical e innovación implacable.',
+        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix trasciende la definición de una mera plataforma; es un ecosistema vibrante.',
         floatingCasino: 'Casino', floatingCasinoTitle: 'Juegos de Casino',
         helpBtnTitle: 'Ayuda',
         detailMsgTitle: 'Ver mensaje',
         aboutModalTitle: '<i class="fas fa-info-circle"></i> Sobre la plataforma inteligente Zenix',
         modalTitle: 'Notificaciones', noMsg: 'No hay mensajes nuevos.', newBadge: 'NUEVO',
         tabAll: 'Todo', tabApproved: 'Aprobado', tabRejected: 'Rechazado', tabAdmin: 'Admin',
+        rejectWithdrawDefault: 'Su solicitud de retiro ha sido cancelada por la administración.\n\nSi necesita una revisión o desea saber más sobre el motivo de la cancelación, puede ponerse en contacto con el equipo de soporte de Zenix mediante el botón a continuación. Nuestro soporte siempre está listo para ayudarle y acompañarle.',
+        contactSupport: 'Contactar con soporte',
         helpTitle: 'Guía de Zenix',
-        helpIntro: 'Bienvenido.',
-        helpS1Title: '1. Saldo',
-        helpS1Desc: 'Saldo total.',
-        helpS2Title: '2. Accesos',
-        helpS2List: '<li>Cuantificación</li><li>Depósito</li>',
-        helpS3Title: '3. Mercado',
-        helpS3Desc: 'Precios en vivo.',
-        helpFooter: 'Soporte Zenix.',
+        helpSubtitle: 'Guía completa del panel',
+        helpIntro: 'Bienvenido al panel de Zenix.',
+        helpS1Title: 'Estadísticas y saldo',
+        helpS1Desc: 'En la parte superior, su saldo total (USDT) y el número de referidos se muestran en vivo. Se actualiza con cada transacción.',
+        helpS2Title: 'Accesos rápidos',
+        helpS2List: '<li><strong>Cuantificación:</strong> Trading robótico automático.</li><li><strong>Depósito:</strong> Recarga vía billeteras digitales.</li><li><strong>Retiro:</strong> Retire activos a su billetera.</li><li><strong>Equipo:</strong> Estadísticas de miembros y enlace de referido.</li><li><strong>Transacciones:</strong> Historial financiero completo.</li><li><strong>Perfil:</strong> Gestión de seguridad y ajustes.</li>',
+        helpS3Title: 'Mercado de criptomonedas',
+        helpS3Desc: 'Los precios de las 3 principales criptos se actualizan cada 30 segundos. Verde indica crecimiento, rojo indica caída del 24h.',
+        helpS4Title: 'Notificaciones y mensajes',
+        helpS4Desc: 'Haga clic en la campana del encabezado para ver mensajes de administrador, aprobaciones o rechazos.',
+        helpS5Title: 'Juegos de casino',
+        helpS5Desc: 'Haga clic en el botón flotante para acceder a los juegos de casino. Ruleta online y plinko disponibles como demo.',
+        helpS6Title: 'Notas de seguridad importantes',
+        helpS6Desc: 'Nunca comparta su contraseña. Zenix nunca le pedirá contraseña, código de verificación o clave privada.',
+        helpFooter: 'Para más ayuda, contacte con Zenix Support.',
         casinoModalTitle: 'Selección de Juegos de Casino',
         casinoPoker: 'Ruleta Online', casinoPokerDesc: 'Emocionante juego de azar',
-        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Popular juego de caída'
+        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Popular juego de caída',
+        chipUnit: 'fichas',
+        buyBtn: 'Comprar',
+        convertBtn: 'Convertir',
+        casinoWalletModalTitle: 'Monedero Casino',
+        casinoWalletSub: 'Convierte USDT en fichas de juego',
+        casinoUsdtLabel: 'Saldo USDT Casino',
+        openWalletBtn: 'Abrir Monedero Casino',
+        casinoChargeLabel: 'Cargar Monedero Casino',
+        casinoChargeBtn: 'Cargar',
+        tradeBtn: 'Cambiar',
+        buyLabel: 'Comprar fichas con USDT',
+        sellLabel: 'Vender fichas por USDT',
+        sellBtn: 'Vender',
+        orText: 'o',
+        casinoRateText: 'Tasa: 1 USDT = 10 fichas (compra y venta)',
+        casinoChargeSuccess: '¡Monedero casino cargado!',
+        casinoChargeInvalid: 'Cantidad inválida (mínimo 1 USDT).',
+        casinoBuySuccess: '¡Fichas añadidas al juego!',
+        casinoBuyInvalid: 'Cantidad inválida (mínimo 1 USDT).',
+        casinoBuyInsufficient: 'Saldo USDT casino insuficiente.',
+        casinoSellSuccess: '¡Fichas vendidas y USDT añadido al saldo!',
+        casinoSellInvalid: 'Cantidad de fichas inválida (mínimo 10).',
+        casinoSellInsufficient: 'No tienes suficientes fichas en este juego.'
     },
     fr: {
         m1: 'Accueil', m2: 'Quantification', m3: 'Dépôt', m4: 'Retrait', m_team: 'Équipe', m5: 'Transactions', m6: 'Profil', m7: 'Support', m_about: 'À propos', m8: 'Déconnexion',
+        mCasinoWallet: 'Portefeuille Casino',
         wel: 'Bienvenue', sub: 'Panneau de gestion', st: 'Vérifié',
         ts1: 'Solde', ts2: 'Parrainages',
         c1: 'Quantification', d1: 'Trading intelligent',
@@ -515,33 +887,67 @@ const ld = {
         c5: 'Transactions', d5: 'Historique financier',
         c6: 'Profil', d6: 'Paramètres de sécurité',
         tmkt: 'Marché des crypto-monnaies (Top 3 sur 30)', tlive: 'En direct',
+        aboutToggleOpen: 'Voir plus', aboutToggleClose: 'Voir moins',
         aboutTitle: 'À propos de la plateforme intelligente Zenix',
-        aboutIntro: 'Bienvenue sur Zenix, où les horizons de la finance numérique et la puissance de la technologie moderne s\'entrelacent pour éclairer la voie vers un avenir plus radieux. Zenix a été fondé sur une conviction profonde : le monde des actifs numériques ne doit pas être un labyrinthe de complexité, mais un écosystème transparent, accessible et sécurisé pour tous.',
-        aboutDesc: 'À une époque définie par un élan implacable, où les marchés mondiaux ne dorment jamais et où le changement est la seule constante, avoir un compagnon fiable et intelligent est primordial. Zenix, en tirant parti d\'une architecture cloud de pointe, d\'algorithmes de quantification avancés et d\'une sécurité multicouche impénétrable, vous offre un sanctuaire unifié et transparent pour la gestion de patrimoine. Nous ne construisons pas seulement une plateforme ; nous créons un environnement où la technologie sert l\'ambition humaine, brisant les barrières et redéfinissant ce qui est possible dans l\'économie numérique.',
-        aboutGoal: '<strong style="color:#38bdf8;">Notre objectif :</strong> démocratiser l\'extraordinaire. Nous nous efforçons de mettre les mêmes outils financiers puissants utilisés par les élites institutionnelles entre les mains de visionnaires ordinaires. Que vous fassiez votre premier pas ou que vous soyez un expert chevronné, Zenix vous permet de naviguer sur les marchés mondiaux en toute confiance, sans avoir besoin d\'une expertise complexe, en veillant à ce que votre capital croisse dans un environnement de sécurité absolue, de transparence et de potentiel dynamique.',
-        aboutStrategy: '<strong style="color:#38bdf8;">Notre stratégie :</strong> repose sur une triade indestructible : sécurité sans compromis, transparence radicale et innovation incessante. En intégrant des algorithmes de traitement de données de pointe, un système de récompenses dynamique à plusieurs niveaux et une infrastructure infiniment évolutive, nous concevons une expérience impeccable, ultra-rapide et hautement fiable. Nous gérons les complexités afin que votre attention reste uniquement concentrée sur ce qui compte le plus : votre croissance et votre succès.',
-        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix transcende la définition d\'une simple plateforme ; c\'est un écosystème dynamique où convergent la technologie, le capital et une communauté de penseurs avant-gardistes. Nous sommes votre partenaire indéfectible dans ce voyage, engagé à vous guider vers un avenir de plus grande liberté financière, d\'opportunités illimitées et de réalisations monumentales. Ensemble, nous ne prédisons pas seulement l\'avenir — nous le construisons.',
+        aboutIntro: 'Bienvenue sur Zenix, où les horizons de la finance numérique et la puissance de la technologie moderne s\'entrelacent pour éclairer la voie vers un avenir plus radieux.',
+        aboutDesc: 'À une époque définie par un élan implacable, où les marchés mondiaux ne dorment jamais et où le changement est la seule constante, avoir un compagnon fiable et intelligent est primordial.',
+        aboutGoal: '<strong style="color:#38bdf8;">Notre objectif :</strong> démocratiser l\'extraordinaire.',
+        aboutStrategy: '<strong style="color:#38bdf8;">Notre stratégie :</strong> repose sur une triade indestructible : sécurité sans compromis, transparence radicale et innovation incessante.',
+        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix transcende la définition d\'une simple plateforme ; c\'est un écosystème dynamique.',
         floatingCasino: 'Casino', floatingCasinoTitle: 'Jeux de casino',
         helpBtnTitle: 'Aide',
         detailMsgTitle: 'Voir le message',
         aboutModalTitle: '<i class="fas fa-info-circle"></i> À propos de la plateforme intelligente Zenix',
         modalTitle: 'Notifications', noMsg: 'Aucun nouveau message.', newBadge: 'NOUVEAU',
         tabAll: 'Tout', tabApproved: 'Approuvé', tabRejected: 'Rejeté', tabAdmin: 'Admin',
+        rejectWithdrawDefault: 'Votre demande de retrait a été annulée par l\'administration.\n\nSi vous avez besoin d\'un réexamen ou si vous souhaitez en savoir plus sur le motif de l\'annulation, vous pouvez contacter l\'équipe d\'assistance Zenix à l\'aide du bouton ci-dessous. Notre support est toujours prêt à vous aider et à vous accompagner.',
+        contactSupport: 'Contacter le support',
         helpTitle: 'Guide Zenix',
-        helpIntro: 'Bienvenue.',
-        helpS1Title: '1. Solde',
-        helpS1Desc: 'Solde total.',
-        helpS2Title: '2. Raccourcis',
-        helpS2List: '<li>Quantification</li><li>Dépôt</li>',
-        helpS3Title: '3. Marché',
-        helpS3Desc: 'Prix en direct.',
-        helpFooter: 'Support Zenix.',
+        helpSubtitle: 'Guide complet du panneau',
+        helpIntro: 'Bienvenue sur le tableau de bord Zenix.',
+        helpS1Title: 'Statistiques et solde',
+        helpS1Desc: 'En haut de la page, votre solde total (USDT) et le nombre de filleuls sont affichés en direct.',
+        helpS2Title: 'Raccourcis rapides',
+        helpS2List: '<li><strong>Quantification:</strong> Trading robotique automatique.</li><li><strong>Dépôt:</strong> Recharger via portefeuilles numériques.</li><li><strong>Retrait:</strong> Retirer des actifs vers votre portefeuille.</li><li><strong>Équipe:</strong> Statistiques et lien de parrainage.</li><li><strong>Transactions:</strong> Historique financier complet.</li><li><strong>Profil:</strong> Sécurité et paramètres.</li>',
+        helpS3Title: 'Marché des cryptos',
+        helpS3Desc: 'Les prix des 3 meilleures cryptos sont mis à jour toutes les 30 secondes. Vert pour la croissance, rouge pour la baisse sur 24h.',
+        helpS4Title: 'Notifications et messages',
+        helpS4Desc: 'Cliquez sur la cloche dans l\'en-tête pour voir les messages admin et les approbations.',
+        helpS5Title: 'Jeux de casino',
+        helpS5Desc: 'Cliquez sur le bouton flottant pour accéder aux jeux de casino. Roulette et plinko disponibles en démo.',
+        helpS6Title: 'Notes de sécurité importantes',
+        helpS6Desc: 'Ne partagez jamais votre mot de passe. Zenix ne demande jamais de mot de passe, code de vérification ou clé privée.',
+        helpFooter: 'Pour plus d\'aide, contactez Zenix Support.',
         casinoModalTitle: 'Sélection des Jeux de Casino',
         casinoPoker: 'Roulette en ligne', casinoPokerDesc: 'Jeu de hasard excitant',
-        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Jeu populaire de balles'
+        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Jeu populaire de balles',
+        chipUnit: 'jetons',
+        buyBtn: 'Acheter',
+        convertBtn: 'Convertir',
+        casinoWalletModalTitle: 'Portefeuille Casino',
+        casinoWalletSub: 'Convertir USDT en jetons de jeu',
+        casinoUsdtLabel: 'Solde USDT Casino',
+        openWalletBtn: 'Ouvrir le portefeuille Casino',
+        casinoChargeLabel: 'Recharger le portefeuille Casino',
+        casinoChargeBtn: 'Recharger',
+        tradeBtn: 'Échanger',
+        buyLabel: 'Acheter jetons avec USDT',
+        sellLabel: 'Vendre jetons pour USDT',
+        sellBtn: 'Vendre',
+        orText: 'ou',
+        casinoRateText: 'Taux : 1 USDT = 10 jetons (achat et vente)',
+        casinoChargeSuccess: 'Portefeuille casino rechargé !',
+        casinoChargeInvalid: 'Montant invalide (min 1 USDT).',
+        casinoBuySuccess: 'Jetons ajoutés au jeu !',
+        casinoBuyInvalid: 'Montant invalide (min 1 USDT).',
+        casinoBuyInsufficient: 'Solde USDT casino insuffisant.',
+        casinoSellSuccess: 'Jetons vendus, USDT ajouté au solde !',
+        casinoSellInvalid: 'Nombre de jetons invalide (min 10).',
+        casinoSellInsufficient: 'Pas assez de jetons dans ce jeu.'
     },
     de: {
         m1: 'Startseite', m2: 'Quantifizierung', m3: 'Einzahlung', m4: 'Auszahlung', m_team: 'Team', m5: 'Transaktionen', m6: 'Profil', m7: 'Unterstützung', m_about: 'Über die Plattform', m8: 'Abmelden',
+        mCasinoWallet: 'Casino-Wallet',
         wel: 'Willkommen', sub: 'Benutzer-Management-Panel', st: 'Verifiziert',
         ts1: 'Guthaben', ts2: 'Empfehlungen',
         c1: 'Quantifizierung', d1: 'Smart Trading',
@@ -551,40 +957,76 @@ const ld = {
         c5: 'Transaktionen', d5: 'Finanzhistorie',
         c6: 'Profil', d6: 'Sicherheitseinstellungen',
         tmkt: 'Kryptowährungsmarkt (Top 3 von 30 Münzen)', tlive: 'Live',
+        aboutToggleOpen: 'Mehr anzeigen', aboutToggleClose: 'Weniger anzeigen',
         aboutTitle: 'Über die intelligente Zenix-Plattform',
-        aboutIntro: 'Willkommen bei Zenix, wo die Horizonte der digitalen Finanzwelt und die Kraft moderner Technologie ineinandergreifen, um den Weg in eine hellere Zukunft zu beleuchten. Zenix wurde auf der tiefen Überzeugung gegründet, dass die Welt der digitalen Vermögenswerte kein Labyrinth der Komplexität sein sollte, sondern ein transparentes, zugängliches und sicheres Ökosystem für alle.',
-        aboutDesc: 'In einer Ära des unaufhaltsamen Wandels, in der globale Märkte niemals schlafen und Veränderung die einzige Konstante ist, ist ein zuverlässiger und intelligenter Begleiter von größter Bedeutung. Zenix bietet Ihnen durch modernste Cloud-Architektur, fortschrittliche Quantifizierungsalgorithmen und undurchdringliche mehrschichtige Sicherheit einen einheitlichen, nahtlosen Zufluchtsort für die Vermögensverwaltung. Wir bauen nicht nur eine Plattform; wir schaffen eine Umgebung, in der Technologie dem menschlichen Ehrgeiz dient, Barrieren abbaut und neu definiert, was in der digitalen Wirtschaft möglich ist.',
-        aboutGoal: '<strong style="color:#38bdf8;">Unser Ziel:</strong> Das Außergewöhnliche zu demokratisieren. Wir sind bestrebt, dieselben leistungsstarken Finanzwerkzeuge, die von institutionellen Eliten genutzt werden, in die Hände alltäglicher Visionäre zu legen. Ob Sie Ihren ersten Schritt machen oder ein erfahrener Experte sind, Zenix befähigt Sie, sich mit Zuversicht auf globalen Märkten zurechtzufinden, ohne komplexe Fachkenntnisse zu benötigen, und stellt sicher, dass Ihr Kapital in einer Umgebung absoluter Sicherheit, Transparenz und dynamischen Potenzials wächst.',
-        aboutStrategy: '<strong style="color:#38bdf8;">Unsere Strategie:</strong> baut auf einer unzerbrechlichen Triade auf – kompromisslose Sicherheit, radikale Transparenz und unermüdliche Innovation. Durch die Integration modernster Datenverarbeitungsalgorithmen, eines dynamischen mehrstufigen Belohnungssystems und einer unendlich skalierbaren Infrastruktur entwickeln wir ein makelloses, blitzschnelles und hochzuverlässiges Erlebnis. Wir kümmern uns um die Komplexität, damit Ihr Fokus ausschließlich auf dem Wichtigsten bleibt: Ihrem Wachstum und Erfolg.',
-        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix geht über die Definition einer bloßen Plattform hinaus; es ist ein lebendiges Ökosystem, in dem Technologie, Kapital und eine Gemeinschaft von Vordenkern zusammenkommen. Wir sind Ihr standhafter Partner auf dieser Reise und verpflichtet, Sie in eine Zukunft mit größerer finanzieller Freiheit, grenzenlosen Möglichkeiten und monumentalen Erfolgen zu führen. Gemeinsam sagen wir die Zukunft nicht nur voraus – wir bauen sie.',
+        aboutIntro: 'Willkommen bei Zenix, wo die Horizonte der digitalen Finanzwelt und die Kraft moderner Technologie ineinandergreifen.',
+        aboutDesc: 'In einer Ära des unaufhaltsamen Wandels ist ein zuverlässiger und intelligenter Begleiter von größter Bedeutung.',
+        aboutGoal: '<strong style="color:#38bdf8;">Unser Ziel:</strong> Das Außergewöhnliche zu demokratisieren.',
+        aboutStrategy: '<strong style="color:#38bdf8;">Unsere Strategie:</strong> baut auf einer unzerbrechlichen Triade auf.',
+        aboutConclusion: '<i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> Zenix geht über die Definition einer bloßen Plattform hinaus.',
         floatingCasino: 'Casino', floatingCasinoTitle: 'Casino-Spiele',
         helpBtnTitle: 'Hilfe',
         detailMsgTitle: 'Nachricht anzeigen',
         aboutModalTitle: '<i class="fas fa-info-circle"></i> Über die intelligente Zenix-Plattform',
         modalTitle: 'Benachrichtigungen', noMsg: 'Keine neuen Nachrichten.', newBadge: 'NEU',
         tabAll: 'Alle', tabApproved: 'Genehmigt', tabRejected: 'Abgelehnt', tabAdmin: 'Admin',
+        rejectWithdrawDefault: 'Ihre Auszahlungsanfrage wurde von der Verwaltung storniert.\n\nWenn Sie eine Überprüfung benötigen oder mehr über den Grund der Stornierung erfahren möchten, können Sie unser Zenix-Support-Team über die untenstehende Schaltfläche kontaktieren. Unser Support ist jederzeit bereit, Ihnen zu helfen und Sie zu begleiten.',
+        contactSupport: 'Support kontaktieren',
         helpTitle: 'Zenix Leitfaden',
-        helpIntro: 'Willkommen.',
-        helpS1Title: '1. Guthaben',
-        helpS1Desc: 'Gesamtguthaben.',
-        helpS2Title: '2. Schnellzugriff',
-        helpS2List: '<li>Quantifizierung</li>',
-        helpS3Title: '3. Markt',
-        helpS3Desc: 'Live-Preise.',
-        helpFooter: 'Zenix Support.',
+        helpSubtitle: 'Vollständiger Leitfaden zum Panel',
+        helpIntro: 'Willkommen beim Zenix-Dashboard.',
+        helpS1Title: 'Statistiken und Guthaben',
+        helpS1Desc: 'Oben auf der Seite werden Ihr Gesamtguthaben (USDT) und die Anzahl der Empfehlungen live angezeigt.',
+        helpS2Title: 'Schnellzugriff',
+        helpS2List: '<li><strong>Quantifizierung:</strong> Automatischer Roboterhandel.</li><li><strong>Einzahlung:</strong> Aufladen über digitale Wallets.</li><li><strong>Auszahlung:</strong> Vermögenswerte abheben.</li><li><strong>Team:</strong> Mitgliederstatistiken und Empfehlungslink.</li><li><strong>Transaktionen:</strong> Vollständige Finanzhistorie.</li><li><strong>Profil:</strong> Sicherheit und Einstellungen.</li>',
+        helpS3Title: 'Krypto-Markt',
+        helpS3Desc: 'Die Preise der Top-3-Kryptos werden alle 30 Sekunden aktualisiert. Grün für Wachstum, rot für 24-Stunden-Rückgang.',
+        helpS4Title: 'Benachrichtigungen und Nachrichten',
+        helpS4Desc: 'Klicken Sie auf das Glockensymbol in der Kopfzeile, um Admin-Nachrichten und Status anzuzeigen.',
+        helpS5Title: 'Casino-Spiele',
+        helpS5Desc: 'Klicken Sie auf die schwebende Schaltfläche, um Casino-Spiele zu öffnen. Roulette und Plinko als Demo verfügbar.',
+        helpS6Title: 'Wichtige Sicherheitshinweise',
+        helpS6Desc: 'Teilen Sie niemals Ihr Passwort. Zenix fordert niemals Passwort, Bestätigungscode oder privaten Schlüssel an.',
+        helpFooter: 'Für weitere Hilfe wenden Sie sich an den Zenix-Support.',
         casinoModalTitle: 'Casino-Spiele Auswahl',
         casinoPoker: 'Online Roulette', casinoPokerDesc: 'Spannendes Glücksspiel',
-        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Beliebtes Ballspiel'
+        casinoPlinko: 'Plinko', casinoPlinkoDesc: 'Beliebtes Ballspiel',
+        chipUnit: 'Chips',
+        buyBtn: 'Kaufen',
+        convertBtn: 'Umtauschen',
+        casinoWalletModalTitle: 'Casino-Wallet',
+        casinoWalletSub: 'USDT in Spiel-Chips umwandeln',
+        casinoUsdtLabel: 'Casino USDT-Guthaben',
+        openWalletBtn: 'Casino-Wallet öffnen',
+        casinoChargeLabel: 'Casino-Wallet aufladen',
+        casinoChargeBtn: 'Aufladen',
+        tradeBtn: 'Tauschen',
+        buyLabel: 'Chips mit USDT kaufen',
+        sellLabel: 'Chips für USDT verkaufen',
+        sellBtn: 'Verkaufen',
+        orText: 'oder',
+        casinoRateText: 'Kurs: 1 USDT = 10 Chips (Kauf & Verkauf)',
+        casinoChargeSuccess: 'Casino-Wallet aufgeladen!',
+        casinoChargeInvalid: 'Ungültiger Betrag (min. 1 USDT).',
+        casinoBuySuccess: 'Chips zum Spiel hinzugefügt!',
+        casinoBuyInvalid: 'Ungültiger Betrag (min. 1 USDT).',
+        casinoBuyInsufficient: 'Nicht genügend USDT im Casino-Wallet.',
+        casinoSellSuccess: 'Chips verkauft und USDT zum Guthaben hinzugefügt!',
+        casinoSellInvalid: 'Ungültige Chip-Anzahl (min. 10).',
+        casinoSellInsufficient: 'Nicht genug Chips in diesem Spiel.'
     }
 };
 
+// ==========================================
+// ★ تابع setLang — با پشتیبانی از کلیدهای شارژ و تبدیل دوطرفه
+// ==========================================
 function setLang(l) {
     if (!SUPPORTED_LANGUAGES.includes(l)) l = 'en';
     currLang = l;
     safeSetItem('zenix_lang', l);
     let t = ld[l] || ld.en;
     let r = l === 'fa' || l === 'ar';
-    
+
     document.documentElement.setAttribute('dir', r ? 'rtl' : 'ltr');
     document.documentElement.setAttribute('lang', l);
 
@@ -607,6 +1049,9 @@ function setLang(l) {
     let mAbout = document.getElementById('m_about');
     if (mAbout) mAbout.textContent = t.m_about;
 
+    let mCasinoWallet = document.getElementById('m_casino_wallet');
+    if (mCasinoWallet) mCasinoWallet.textContent = t.mCasinoWallet || 'کیف پول کازینو';
+
     document.getElementById('help-btn')?.setAttribute('title', t.helpBtnTitle);
     document.getElementById('floating-casino-btn')?.setAttribute('title', t.floatingCasinoTitle);
 
@@ -623,7 +1068,8 @@ function setLang(l) {
         if (el && html) el.innerHTML = html;
     };
 
-    setTxt('t-wel', t.wel);
+    const welEl = document.getElementById('t-wel');
+    if (welEl) welEl.textContent = currentUserName ? `${t.wel} ${currentUserName}` : t.wel;
     setTxt('t-sub', t.sub);
     setTxt('t-st', t.st);
     setTxt('ts1', t.ts1);
@@ -636,13 +1082,14 @@ function setLang(l) {
     setTxt('c6', t.c6); setTxt('d6', t.d6);
     setTxt('t-mkt', t.tmkt);
     setTxt('t-live', t.tlive);
-    
+
     setTxt('t-about-box-title', t.aboutTitle);
     setTxt('t-about-box-intro', t.aboutIntro);
     setTxt('t-about-box-desc', t.aboutDesc);
     setHtml('t-about-box-goal', t.aboutGoal);
     setHtml('t-about-box-strategy', t.aboutStrategy);
     setHtml('t-about-box-conclusion', t.aboutConclusion);
+    setTxt('t-about-toggle', t.aboutToggleOpen);
 
     setHtml('t-about-modal-title', t.aboutModalTitle);
     setTxt('t-about-modal-intro', t.aboutIntro);
@@ -651,15 +1098,22 @@ function setLang(l) {
     setHtml('t-about-modal-strategy', t.aboutStrategy);
     setHtml('t-about-modal-conclusion', t.aboutConclusion);
 
-    setHtml('t-help-modal-title', `<i class="fas fa-circle-question" style="color:#38bdf8;"></i> ${t.helpTitle}`);
+    setHtml('t-help-modal-title', t.helpTitle);
+    setTxt('t-help-modal-subtitle', t.helpSubtitle);
     setTxt('t-help-intro', t.helpIntro);
-    setHtml('t-help-s1-title', t.helpS1Title);
+    setTxt('t-help-s1-title', t.helpS1Title);
     setTxt('t-help-s1-desc', t.helpS1Desc);
-    setHtml('t-help-s2-title', t.helpS2Title);
+    setTxt('t-help-s2-title', t.helpS2Title);
     setHtml('t-help-s2-list', t.helpS2List);
-    setHtml('t-help-s3-title', t.helpS3Title);
+    setTxt('t-help-s3-title', t.helpS3Title);
     setTxt('t-help-s3-desc', t.helpS3Desc);
-    setHtml('t-help-footer', t.helpFooter);
+    setTxt('t-help-s4-title', t.helpS4Title);
+    setTxt('t-help-s4-desc', t.helpS4Desc);
+    setTxt('t-help-s5-title', t.helpS5Title);
+    setTxt('t-help-s5-desc', t.helpS5Desc);
+    setTxt('t-help-s6-title', t.helpS6Title);
+    setTxt('t-help-s6-desc', t.helpS6Desc);
+    setTxt('t-help-footer', t.helpFooter);
 
     setHtml('t-casino-modal-title', `<i class="fas fa-dice" style="color:#f43f5e;"></i> ${t.casinoModalTitle}`);
     setTxt('t-casino-poker', t.casinoPoker);
@@ -676,8 +1130,47 @@ function setLang(l) {
     setTxt('t-tab-approved', t.tabApproved);
     setTxt('t-tab-rejected', t.tabRejected);
     setTxt('t-tab-admin', t.tabAdmin);
+
+    // ═══ کلیدهای کیف پول کازینو ═══
+    const walletModalTitle = document.getElementById('t-casino-wallet-modal-title');
+    if (walletModalTitle) {
+        walletModalTitle.innerHTML = `<i class="fas fa-wallet" style="color:#fbbf24;"></i> ${t.casinoWalletModalTitle || 'کیف پول کازینو'}`;
+    }
+
+    setTxt('t-casino-wallet-title', t.casinoWalletModalTitle);
+    setTxt('t-casino-wallet-sub', t.casinoWalletSub);
+    setTxt('t-casino-usdt-label', t.casinoUsdtLabel);
+    setTxt('t-open-casino-wallet-btn', t.openWalletBtn);
+
+    // شارژ
+    setTxt('t-casino-charge-label', t.casinoChargeLabel);
+    setTxt('t-casino-charge-btn', t.casinoChargeBtn);
+
+    setTxt('t-game-roulette', t.casinoPoker);
+    setTxt('t-game-plinko', t.casinoPlinko);
+
+    // دکمه تبدیل هر بازی
+    setTxt('t-trade-1', t.tradeBtn); setTxt('t-trade-2', t.tradeBtn);
+
+    // برچسب خرید/فروش هر بازی
+    setTxt('t-buy-label-1', t.buyLabel); setTxt('t-buy-label-2', t.buyLabel);
+    setTxt('t-sell-label-1', t.sellLabel); setTxt('t-sell-label-2', t.sellLabel);
+    setTxt('t-buy-btn-1', t.buyBtn); setTxt('t-buy-btn-2', t.buyBtn);
+    setTxt('t-sell-btn-1', t.sellBtn); setTxt('t-sell-btn-2', t.sellBtn);
+    setTxt('t-or-1', t.orText); setTxt('t-or-2', t.orText);
+
+    // نرخ
+    setTxt('casino-rate-text', t.casinoRateText);
+
+    // به‌روزرسانی نمایش ژتون‌ها با واحد زبان جدید
+    if (typeof updateCasinoWalletDisplay === 'function') {
+        updateCasinoWalletDisplay();
+    }
 }
 
+// ==========================================
+// اتصال منوی انتخاب زبان
+// ==========================================
 document.querySelectorAll('#lang-menu .mi').forEach(i => {
     i.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -687,10 +1180,8 @@ document.querySelectorAll('#lang-menu .mi').forEach(i => {
 });
 
 setLang(currLang);
-
-
 // ==========================================
-// 6. دریافت اطلاعات کاربر و محاسبه زیرمجموعه‌ها
+// 6. دریافت اطلاعات کاربر
 // ==========================================
 async function loadDashboardUserData(uid, sessionUser) {
     try {
@@ -698,6 +1189,21 @@ async function loadDashboardUserData(uid, sessionUser) {
         const { data: dbUser } = await supabaseClient.from('users').select('*').eq('id', uid).maybeSingle();
         const { data: dbProfile } = await supabaseClient.from('profiles').select('*').eq('id', uid).maybeSingle();
         const meta = sessionUser.user_metadata || {};
+
+        const userFullName =
+            dbUser?.fullname ||
+            dbUser?.full_name ||
+            dbProfile?.fullname ||
+            dbProfile?.full_name ||
+            meta.fullname ||
+            meta.full_name ||
+            '';
+        if (userFullName) {
+            currentUserName = userFullName;
+            const t = ld[currLang] || ld.en;
+            const welEl = document.getElementById('t-wel');
+            if (welEl) welEl.textContent = `${t.wel} ${currentUserName}`;
+        }
 
         const balance = parseFloat(dbUser?.balance ?? dbProfile?.balance ?? meta.balance ?? 0);
         const valBalance = document.getElementById('val-balance');
@@ -802,28 +1308,84 @@ async function loadDashboardUserData(uid, sessionUser) {
         allMessages = await fetchUserMessages(uid);
         updateNotifBadges();
 
+        // به‌روزرسانی نمایش کیف پول کازینو (موجودی تتر کازینو + ژتون هر بازی)
+        if (typeof updateCasinoWalletDisplay === 'function') {
+            updateCasinoWalletDisplay();
+        }
+
     } catch (err) {
         console.error("خطا در دریافت اطلاعات کاربر:", err);
     }
 }
 
-supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    if (session && session.user) {
+// ==========================================
+// 6.b. احراز هویت — نسخه اصلاح‌شده (رفع باگ فلش داشبورد)
+// ==========================================
+
+// بررسی سریع و همزمان وجود توکن در localStorage
+function hasStoredAuthToken() {
+    try {
+        const keys = Object.keys(localStorage);
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i];
+            if (k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
+                const val = safeGetItem(k);
+                if (val && val.length > 20) return true;
+            }
+        }
+    } catch (e) {}
+    return false;
+}
+
+(async function initAuth() {
+    // اگر هیچ توکنی در localStorage نیست، بلافاصله بدون نیاز به Supabase redirect کن
+    if (!hasStoredAuthToken()) {
+        window.location.replace('index.html');
+        return;
+    }
+
+    try {
+        // خواندن سریع session از localStorage (+ تلاش برای refresh اگر منقضی شده)
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+
+        if (error || !session || !session.user) {
+            window.location.replace('index.html');
+            return;
+        }
+
+        // ✅ احراز هویت معتبر است — داشبورد را نمایش بده
+        document.body.classList.remove('zenix-auth-checking');
         currentUserId = session.user.id;
         loadDashboardUserData(session.user.id, session.user);
 
-        fetchUserMessages(session.user.id).then(msgs => {
-            allMessages = msgs;
-            updateNotifBadges();
-        });
+        // بعد از لود شدن، نمایش کیف پول کازینو را به‌روز کن
+        setTimeout(() => {
+            if (typeof updateCasinoWalletDisplay === 'function') {
+                updateCasinoWalletDisplay();
+            }
+        }, 600);
+
+    } catch (e) {
+        console.error('Auth check failed:', e);
+        window.location.replace('index.html');
+    }
+})();
+
+// گوش دادن به تغییرات احراز هویت در آینده (logout، انقضای توکن و ...)
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === 'INITIAL_SESSION') return;    // قبلاً در initAuth مدیریت شد
+    if (event === 'TOKEN_REFRESHED') return;    // فقط refresh است، کاری لازم نیست
+
+    if (!session || !session.user) {
+        window.location.replace('index.html');
     } else {
-        window.location.href = 'index.html';
+        currentUserId = session.user.id;
+        loadDashboardUserData(session.user.id, session.user);
     }
 });
 
-
 // ==========================================
-// 7. مدیریت منوهای هدر
+// 7. منوهای هدر
 // ==========================================
 const menuBtn = document.getElementById('menu-btn');
 const navMenu = document.getElementById('nav-menu');
@@ -865,8 +1427,332 @@ document.addEventListener('click', (e) => {
     if (langMenu && !langMenu.contains(e.target) && e.target !== langBtn) langMenu.classList.remove('show');
 });
 
+// بستن مدال با کلیک روی backdrop
+document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', (e) => {
+        if (e.target === m) {
+            m.classList.remove('show');
+            unlockBody();
+        }
+    });
+});
+
 document.getElementById('logout-btn')?.addEventListener('click', async e => {
     e.preventDefault();
     try { await supabaseClient.auth.signOut(); } catch(e) {}
     window.location.href = 'index.html';
 });
+// ═══════════════════════════════════════════════════════════════
+// 8. CASINO WALLET — کیف پول کازینو با موجودی تتر مستقل
+//    - موجودی تتر کازینو جدا از موجودی پلتفرم ذخیره می‌شود
+//    - هر بازی ژتون مستقل دارد
+//    - تبدیل دوطرفه: تتر ↔ ژتون
+// ═══════════════════════════════════════════════════════════════
+
+// ─── کلیدهای localStorage ───
+const CASINO_USDT_KEY = 'zenix_casino_usdt_balance';
+function getChipsKey(game) { return 'zenix_casino_chips_' + game; }
+
+// ─── خواندن/نوشتن موجودی تتر کازینو (مستقل از پلتفرم) ───
+function getCasinoUSDT() {
+    try {
+        const v = localStorage.getItem(CASINO_USDT_KEY);
+        return parseFloat(v) || 0;
+    } catch(e) { return 0; }
+}
+function setCasinoUSDT(amount) {
+    try { localStorage.setItem(CASINO_USDT_KEY, String(Math.max(0, amount))); } catch(e) {}
+}
+
+// ─── خواندن موجودی USDT پلتفرم (از داشبورد) ───
+function getPlatformUSDT() {
+    const el = document.getElementById('val-balance');
+    if (!el) return 0;
+    const txt = el.textContent.replace(/[^0-9.]/g, '');
+    return parseFloat(txt) || 0;
+}
+
+// ─── خواندن/نوشتن ژتون هر بازی ───
+function getGameChips(game) {
+    try {
+        const v = localStorage.getItem(getChipsKey(game));
+        return parseFloat(v) || 0;
+    } catch(e) { return 0; }
+}
+function setGameChips(game, chips) {
+    try { localStorage.setItem(getChipsKey(game), String(Math.max(0, chips))); } catch(e) {}
+}
+
+// ─── به‌روزرسانی نمایش کیف پول کازینو ───
+function updateCasinoWalletDisplay() {
+    // موجودی تتر کازینو
+    const usdtEl = document.getElementById('casino-usdt-balance');
+    if (usdtEl) usdtEl.textContent = '$' + getCasinoUSDT().toFixed(2);
+
+    // واحد ژتون بر اساس زبان فعلی
+    const chipUnit = (ld[currLang] && ld[currLang].chipUnit) || 'ژتون';
+
+    // موجودی هر بازی
+    CASINO_GAMES.forEach(function(game) {
+        const el = document.getElementById('chips-' + game);
+        if (el) {
+            const chips = getGameChips(game);
+            el.textContent = chips.toLocaleString('en-US') + ' ' + chipUnit;
+        }
+    });
+}
+
+// ─── نمایش Toast ───
+function casinoToast(msg, isError) {
+    const t = document.getElementById('casino-toast');
+    if (!t) return;
+    t.innerHTML = (isError ? '<i class="fas fa-exclamation-circle"></i> ' : '<i class="fas fa-check-circle"></i> ') + msg;
+    t.className = 'casino-toast show' + (isError ? ' error' : '');
+    clearTimeout(window.__casinoToastTimer);
+    window.__casinoToastTimer = setTimeout(function() { t.className = 'casino-toast'; }, 3200);
+}
+
+// ─── باز/بسته کردن پنل تبدیل هر بازی ───
+window.selectCasinoGame = function(game) {
+    CASINO_GAMES.forEach(function(g) {
+        const panel = document.getElementById('buy-panel-' + g);
+        const btn = document.querySelector('.casino-game-buy-btn[data-game="' + g + '"]');
+        if (!panel) return;
+        if (g === game) {
+            const isOpen = panel.style.display !== 'none';
+            panel.style.display = isOpen ? 'none' : 'block';
+            if (btn) btn.classList.toggle('active', !isOpen);
+            if (!isOpen) {
+                const inp = document.getElementById('convert-amount-' + g);
+                if (inp) setTimeout(function() { inp.focus(); }, 100);
+            }
+        } else {
+            panel.style.display = 'none';
+            if (btn) btn.classList.remove('active');
+        }
+    });
+};
+
+// ═══════════════════════════════════════════════════════════════
+// شارژ کیف پول کازینو (از موجودی پلتفرم به کیف پول کازینو)
+// ═══════════════════════════════════════════════════════════════
+window.chargeCasinoWallet = function() {
+    const t = ld[currLang] || ld.en;
+    const input = document.getElementById('casino-charge-amount');
+    if (!input) return;
+
+    const amount = parseFloat(input.value);
+    if (!amount || amount < 1 || isNaN(amount)) {
+        casinoToast(t.casinoChargeInvalid || 'مبلغ نامعتبر است (حداقل ۱ تتر).', true);
+        return;
+    }
+
+    const platformBalance = getPlatformUSDT();
+    if (amount > platformBalance) {
+        casinoToast(
+            (currLang === 'fa'
+                ? 'موجودی پلتفرم کافی نیست. موجودی: $'
+                : 'Insufficient platform balance: $') + platformBalance.toFixed(2),
+            true
+        );
+        return;
+    }
+
+    // ← در صورت نیاز به کسر واقعی از حساب پلتفرم در Supabase، این خط را فعال کنید:
+    // await supabaseClient.from('users').update({ balance: platformBalance - amount }).eq('id', currentUserId);
+
+    // کاهش موجودی پلتفرم (فقط در UI — چون backend نداریم)
+    const valBalance = document.getElementById('val-balance');
+    if (valBalance) valBalance.textContent = '$' + (platformBalance - amount).toFixed(2);
+
+    // افزایش موجودی تتر کازینو
+    setCasinoUSDT(getCasinoUSDT() + amount);
+
+    input.value = '';
+    updateCasinoWalletDisplay();
+
+    const successMsg = (currLang === 'fa'
+        ? 'کیف پول کازینو به مبلغ $' + amount.toFixed(2) + ' شارژ شد!'
+        : 'Casino wallet charged with $' + amount.toFixed(2) + '!');
+    casinoToast(successMsg);
+};
+
+// ═══════════════════════════════════════════════════════════════
+// تبدیل دوطرفه:
+//   - buyChips:  تتر کازینو → ژتون بازی
+//   - sellChips: ژتون بازی   → تتر کازینو
+// ═══════════════════════════════════════════════════════════════
+window.buyChips = function(game) {
+    const t = ld[currLang] || ld.en;
+    const input = document.getElementById('convert-amount-' + game);
+    if (!input) return;
+
+    const amount = parseFloat(input.value);
+    const gameNames = { roulette: 'رولت', plinko: 'پلینکو' };
+
+    if (!amount || amount < 1 || isNaN(amount)) {
+        casinoToast(t.casinoBuyInvalid || 'مقدار نامعتبر (حداقل ۱ تتر).', true);
+        return;
+    }
+
+    const casinoBalance = getCasinoUSDT();
+    if (amount > casinoBalance) {
+        casinoToast(
+            (currLang === 'fa'
+                ? 'موجودی تتر کازینو کافی نیست. موجودی: $'
+                : 'Insufficient casino USDT: $') + casinoBalance.toFixed(2),
+            true
+        );
+        return;
+    }
+
+    const chipsToAdd = Math.floor(amount * CASINO_CHIPS_RATE);
+    if (chipsToAdd <= 0) {
+        casinoToast(t.casinoBuyInvalid || 'مقدار نامعتبر.', true);
+        return;
+    }
+
+    // کاهش تتر کازینو + افزودن ژتون به بازی
+    setCasinoUSDT(casinoBalance - amount);
+    setGameChips(game, getGameChips(game) + chipsToAdd);
+    input.value = '';
+    updateCasinoWalletDisplay();
+
+    const gameName = gameNames[game] || game;
+    const msg = (currLang === 'fa'
+        ? chipsToAdd.toLocaleString('en-US') + ' ژتون به ' + gameName + ' اضافه شد!'
+        : chipsToAdd.toLocaleString('en-US') + ' chips added to ' + gameName + '!');
+    casinoToast(msg);
+};
+
+window.sellChips = function(game) {
+    const t = ld[currLang] || ld.en;
+    const input = document.getElementById('sell-amount-' + game);
+    if (!input) return;
+
+    const chipsToSell = parseFloat(input.value);
+    const gameNames = { roulette: 'رولت', plinko: 'پلینکو' };
+
+    if (!chipsToSell || chipsToSell < 10 || isNaN(chipsToSell)) {
+        casinoToast(t.casinoSellInvalid || 'تعداد ژتون نامعتبر (حداقل ۱۰).', true);
+        return;
+    }
+
+    const gameChips = getGameChips(game);
+    if (chipsToSell > gameChips) {
+        casinoToast(
+            (currLang === 'fa'
+                ? 'ژتون کافی در این بازی ندارید. موجودی: '
+                : 'Not enough chips. Balance: ') + gameChips.toLocaleString('en-US'),
+            true
+        );
+        return;
+    }
+
+    const usdtToGet = chipsToSell / CASINO_CHIPS_RATE;
+    if (usdtToGet <= 0) {
+        casinoToast(t.casinoSellInvalid || 'مقدار نامعتبر.', true);
+        return;
+    }
+
+    // کاهش ژتون بازی + افزایش تتر کازینو
+    setGameChips(game, gameChips - chipsToSell);
+    setCasinoUSDT(getCasinoUSDT() + usdtToGet);
+    input.value = '';
+    updateCasinoWalletDisplay();
+
+    const gameName = gameNames[game] || game;
+    const msg = (currLang === 'fa'
+        ? chipsToSell.toLocaleString('en-US') + ' ژتون ' + gameName + ' فروخته شد و $' + usdtToGet.toFixed(2) + ' به کیف پول اضافه شد!'
+        : chipsToSell.toLocaleString('en-US') + ' chips from ' + gameName + ' sold for $' + usdtToGet.toFixed(2) + '!');
+    casinoToast(msg);
+};
+
+// ─── اتصال رویدادهای کلیک ───
+document.addEventListener('click', function(e) {
+    // دکمه «تبدیل» هر بازی (باز/بسته پنل)
+    const buyBtn = e.target.closest('.casino-game-buy-btn');
+    if (buyBtn) {
+        e.preventDefault();
+        window.selectCasinoGame(buyBtn.dataset.game);
+        return;
+    }
+    // دکمه «خرید» (تتر → ژتون)
+    const convBtn = e.target.closest('.casino-convert-btn[data-dir="buy"]');
+    if (convBtn) {
+        e.preventDefault();
+        window.buyChips(convBtn.dataset.game);
+        return;
+    }
+    // دکمه «فروش» (ژتون → تتر)
+    const sellBtn = e.target.closest('.casino-convert-btn[data-dir="sell"]');
+    if (sellBtn) {
+        e.preventDefault();
+        window.sellChips(sellBtn.dataset.game);
+        return;
+    }
+});
+
+// ─── پشتیبانی از کلید Enter در inputها ───
+CASINO_GAMES.forEach(function(game) {
+    const buyInp = document.getElementById('convert-amount-' + game);
+    if (buyInp) {
+        buyInp.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                window.buyChips(game);
+            }
+        });
+    }
+    const sellInp = document.getElementById('sell-amount-' + game);
+    if (sellInp) {
+        sellInp.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                window.sellChips(game);
+            }
+        });
+    }
+});
+
+// ─── Enter برای فیلد شارژ ───
+(function attachChargeEnter() {
+    const chargeInp = document.getElementById('casino-charge-amount');
+    if (chargeInp) {
+        chargeInp.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                window.chargeCasinoWallet();
+            }
+        });
+    }
+})();
+
+// ─── به‌روزرسانی اولیه در زمان لود صفحه ───
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCasinoWalletDisplay();
+    });
+} else {
+    updateCasinoWalletDisplay();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 9. مدیریت Service Worker — بررسی آپدیت و اعمال فوری
+// ═══════════════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg && reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+        // هر ۶۰ ثانیه بررسی آپدیت
+        setInterval(() => reg && reg.update().catch(() => {}), 60000);
+    });
+
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+    });
+}

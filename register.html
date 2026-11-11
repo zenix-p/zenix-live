@@ -2,12 +2,12 @@
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, viewport-fit=cover">
     <title>Zenix - Register</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <link rel="preconnect" href="https://fonts.googleapis.cn">
     <link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin>
-    <link href="https://fonts.googleapis.cn/css2?family=Orbitron:wght@700;900&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.cn/css2?family=Orbitron:wght@700;900&family=Vazirmatn:wght@400;500;700&family=Italianno&family=Cinzel:wght@900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -21,26 +21,98 @@
 
     <style>
         *{box-sizing:border-box;margin:0;padding:0;font-family:'Vazirmatn',system-ui,sans-serif}
-        body{background:#030712;min-height:100vh;display:flex;justify-content:center;align-items:center;color:#f8fafc;padding:15px}
-        .card{width:100%;max-width:400px;background:rgba(15,23,42,.9);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:24px;box-shadow:0 20px 40px rgba(0,0,0,.6);position:relative;overflow:visible}
-        .header-actions{position:relative;z-index:20;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:12px}
+        
+        html{
+            background:#030712;
+            height:100vh;
+            height:100dvh;
+            overflow:hidden;
+        }
+        body{
+            background:#030712;
+            height:100vh;
+            height:100dvh;
+            color:#f8fafc;
+            display:flex;
+            flex-direction:column;
+            overflow:hidden;
+            box-sizing:border-box;
+            font-size:14px;
+            -webkit-text-size-adjust:100%;
+            -moz-text-size-adjust:100%;
+            text-size-adjust:100%;
+        }
+
+        /* هدر */
+        header{
+            background:rgba(15,23,42,.9);
+            border-bottom:1px solid rgba(255,255,255,.1);
+            padding:10px 18px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            position:relative;
+            z-index:100;
+            backdrop-filter:blur(10px);
+            flex-shrink:0;
+        }
+        .hr{display:flex;align-items:center;gap:8px}
         .wrap{position:relative}
-        .lb{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);height:36px;width:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#38bdf8;text-decoration:none;transition:.2s}
-        .lb:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)}
-        .menu{display:none;position:absolute;top:42px;background:#0f172a;border:1px solid rgba(255,255,255,.2);border-radius:8px;width:max-content;padding:5px;z-index:999;box-shadow:0 8px 25px rgba(0,0,0,.8)}
-        [dir="rtl"] .wrap .menu{left:0}[dir="ltr"] .wrap .menu{right:0}
-        .menu.show{display:block!important}
-        .mi{padding:6px 12px;font-size:12px;color:#cbd5e1;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;text-decoration:none;white-space:nowrap;transition:.2s}
+        .lb{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);height:36px;width:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#38bdf8;text-decoration:none}
+        .menu{display:none;position:absolute;top:42px;background:#0f172a;border:1px solid rgba(255,255,255,.2);border-radius:8px;width:max-content;min-width:max-content;white-space:nowrap;padding:6px;z-index:999;box-shadow:0 8px 25px rgba(0,0,0,.8)}
+        [dir="rtl"] .wrap .menu{left:0}
+        [dir="ltr"] .wrap .menu{right:0}
+        .menu.show{display:block}
+        .mi{padding:7px 12px;font-size:12px;color:#cbd5e1;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;text-decoration:none;white-space:nowrap;transition:all 0.2s ease}
         .mi:hover,.mi.active{background:rgba(56,189,248,.15);color:#38bdf8!important;font-weight:700}
-        
-        .logo{text-align:center;margin-bottom:20px}
-        .logo-header{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-bottom:8px}
-        .logo-icon{width:46px;height:46px;background:linear-gradient(135deg,#0ea5e9,#9333ea);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;font-style:italic;transform:skewX(-6deg);box-shadow:0 0 18px rgba(14,165,233,.45)}
-        .logo-text{font-family:'Orbitron',sans-serif;font-size:26px;font-weight:900;letter-spacing:3px;font-style:italic;transform:skewX(-6deg);background:linear-gradient(135deg,#38bdf8,#c084fc,#f43f5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 20px rgba(56,189,248,.4)}
-        .logo p{color:#94a3b8;font-size:12px;margin-top:4px}
-        
+
+        /* لوگوی هدر */
+        .logo{display:flex;align-items:center;gap:6px}
+        .logo-mark{position:relative;width:38px;height:38px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .logo-glow{position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,.5),transparent 65%);filter:blur(8px);animation:logoGlowPulse 3s ease-in-out infinite;pointer-events:none}
+        @keyframes logoGlowPulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:.9;transform:scale(1.08)}}
+        .logo-crown{position:relative;width:38px;height:38px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 4px 10px rgba(251,191,36,.5)) drop-shadow(0 2px 4px rgba(245,158,11,.35));z-index:2}
+        .logo-crown svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+        .logo-z{position:relative;z-index:2;font-family:'Cinzel',serif;font-weight:900;font-size:16px;line-height:1;padding-top:7px;background:linear-gradient(180deg,#fef9c3 0%,#fbbf24 30%,#f59e0b 55%,#ffffff 60%,#d97706 70%,#b45309 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 1px 0 #78350f) drop-shadow(0 0 6px rgba(251,191,36,.5))}
+        .logo-orbit{position:absolute;top:50%;left:50%;border-radius:50%;border:1px solid transparent;pointer-events:none;z-index:3}
+        .logo-orbit.orbit-a{width:48px;height:48px;margin:-24px 0 0 -24px;border-top-color:rgba(251,191,36,.85);border-right-color:rgba(251,191,36,.2);animation:logoOrbitA 3.5s linear infinite}
+        .logo-orbit.orbit-b{width:54px;height:54px;margin:-27px 0 0 -27px;border-bottom-color:rgba(245,158,11,.65);border-left-color:rgba(245,158,11,.15);animation:logoOrbitB 4.5s linear infinite reverse}
+        @keyframes logoOrbitA{to{transform:rotate(360deg)}}
+        @keyframes logoOrbitB{to{transform:rotate(-360deg)}}
+        .logo-text{font-family:'Italianno',cursive;font-weight:700;font-size:44px;line-height:.8;margin-top:-10px;background:linear-gradient(180deg,#fef9c3 0%,#fde68a 20%,#fbbf24 40%,#ffffff 50%,#f59e0b 62%,#b45309 85%,#78350f 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 1px 0 rgba(120,53,15,.9)) drop-shadow(0 2px 10px rgba(251,191,36,.45));padding-inline-start:2px}
+
+        /* Wrapper */
+        .c{
+            flex:1;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:flex-start;
+            padding:20px 15px;
+            width:100%;
+            overflow-y:auto;
+            -webkit-overflow-scrolling:touch;
+        }
+
+        .card{
+            width:100%;
+            max-width:400px;
+            background:rgba(15,23,42,.9);
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:24px;
+            padding:24px;
+            box-shadow:0 20px 40px rgba(0,0,0,.6);
+            position:relative;
+            margin:auto 0;
+            display:flex;
+            flex-direction:column;
+            justify-content:flex-start;
+        }
+
+        .card-title{text-align:center;margin-bottom:20px;color:#38bdf8;font-size:17px;font-weight:800}
+
         .group{margin-bottom:12px}
-        .group label{display:block;margin-bottom:5px;font-size:12px;color:#cbd5e1}
+        .group label{display:block;margin-bottom:5px;font-size:12px;color:#cbd5e1;font-weight:500}
         .req{color:#ef4444}
         .wrap-input{position:relative;display:flex;align-items:center}
         .wrap-input i:not(.eye-icon){position:absolute;color:#64748b;font-size:13px}
@@ -49,7 +121,9 @@
         .eye-btn{position:absolute;background:none;border:none;color:#64748b;cursor:pointer;font-size:13px;padding:4px}
         [dir="rtl"] .eye-btn{left:10px}
         [dir="ltr"] .eye-btn{right:10px}
-        input{width:100%;padding:10px 12px;background:rgba(10,15,30,.7);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:13px;outline:none;transition:all .2s}
+
+        /* ★ فونت فیلدها کوچیک‌تر شد (از 13 به 12) */
+        input{width:100%;padding:10px 12px;background:rgba(10,15,30,.7);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:12px;outline:none;transition:all .2s}
         [dir="rtl"] input{padding-right:36px;padding-left:36px}
         [dir="ltr"] input{padding-left:36px;padding-right:36px}
         input:focus{border-color:#38bdf8}
@@ -60,32 +134,136 @@
         .btn:disabled{background:rgba(255,255,255,.1);color:#64748b;cursor:not-allowed}
         .footer{text-align:center;margin-top:14px;font-size:12px;color:#94a3b8}
         .footer a{color:#38bdf8;text-decoration:none}
-        #msg{margin-top:8px;font-size:12px;text-align:center;font-weight:bold;padding:6px;border-radius:6px}
+        #msg{margin-top:8px;font-size:12px;text-align:center;font-weight:bold;padding:6px;border-radius:6px;display:none}
+        #msg.show{display:block}
         .err{color:#f87171;background:rgba(239,68,68,.15)}
         .succ{color:#22c55e;background:rgba(34,197,94,.1)}
         #invite-required{display:none;margin-top:10px;padding:10px 12px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35);border-radius:10px;color:#fca5a5;font-size:12px;line-height:1.6;}
         #invite-required.show{display:block}
 
+        /* Turnstile */
+        .captcha-wrap{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            margin-bottom:14px;
+            height:78px;
+            min-height:78px;
+            max-height:78px;
+            overflow:visible;
+        }
+        #turnstile-container{
+            position:relative;
+            width:300px;
+            max-width:100%;
+            height:70px;
+            min-height:70px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:visible;
+        }
+
+        /* ★ فونت موبایل: 13px (از 15) */
         @media (max-width: 768px) {
-            input, select, textarea { font-size: 16px !important; }
+            input, select, textarea { font-size: 13px !important; }
+            .group label { font-size: 11px; }
+            .btn { font-size: 13px; padding: 11px; }
         }
-    </style>
-    <style id="zenix-placeholder-contrast-fix">
-        input::placeholder { color: #f8fafc !important; opacity: 1 !important; -webkit-text-fill-color: #f8fafc !important; }
-        input::-webkit-input-placeholder { color: #f8fafc !important; opacity: 1 !important; -webkit-text-fill-color: #f8fafc !important; }
-        input::-moz-placeholder { color: #f8fafc !important; opacity: 1 !important; }
-        input:-ms-input-placeholder { color: #f8fafc !important; opacity: 1 !important; }
-        input::-ms-input-placeholder { color: #f8fafc !important; opacity: 1 !important; }
-        #email::placeholder, #fullname::placeholder, #pass::placeholder, #confirm-pass::placeholder {
-            color: #f8fafc !important;
-            opacity: 1 !important;
-            -webkit-text-fill-color: #f8fafc !important;
+
+        @media (max-width: 480px) {
+            header{
+                background:#0b1120;
+                border-bottom:none;
+                padding:max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+            }
+            .c{
+                padding: 0;
+                align-items: stretch;
+                overflow-y: auto;
+            }
+            .card{
+                max-width: 100%;
+                width: 100%;
+                height: auto;
+                min-height: 100%;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+                background: #0b1120;
+                padding: max(20px, env(safe-area-inset-top)) 18px max(20px, env(safe-area-inset-bottom)) 18px;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                margin: 0;
+            }
+            
+            .card-title { font-size: 14px; margin-bottom: 14px; }
+            
+            .logo-mark{width:32px;height:32px}
+            .logo-crown{width:32px;height:32px}
+            .logo-z{font-size:14px;padding-top:6px}
+            .logo-orbit.orbit-a{width:40px;height:40px;margin:-20px 0 0 -20px}
+            .logo-orbit.orbit-b{width:46px;height:46px;margin:-23px 0 0 -23px}
+            .logo-text{font-size:32px;margin-top:-8px}
+
+            .group { margin-bottom: 10px; }
+            .group label { font-size: 10.5px; }
+            .footer { font-size: 10.5px; margin-top: 12px; }
+            #msg { font-size: 10.5px; padding: 5px; }
+            #invite-required { font-size: 10.5px; }
+
+            input { padding: 9px 12px; }
+
+            .captcha-wrap { height: 78px; min-height: 78px; max-height: 78px; margin-bottom: 10px; }
+            #turnstile-container { width: 100%; max-width: 300px; height: 70px; min-height: 70px; }
         }
+
+        /* Placeholder خاکستری ملایم */
+        #email::placeholder,
+        #fullname::placeholder,
+        #pass::placeholder,
+        #confirm-pass::placeholder,
+        #ref-in::placeholder {
+            color: #64748b !important;
+            opacity: 0.75 !important;
+            -webkit-text-fill-color: #64748b !important;
+            font-weight: 400 !important;
+            font-size: 0.92em !important;
+        }
+        input::-webkit-input-placeholder { color: #64748b !important; opacity: 0.75 !important; -webkit-text-fill-color: #64748b !important; font-weight: 400 !important; }
+        input::-moz-placeholder { color: #64748b !important; opacity: 0.75 !important; font-weight: 400 !important; }
+        input:-ms-input-placeholder { color: #64748b !important; opacity: 0.75 !important; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="header-actions">
+    <header>
+        <div class="logo">
+            <div class="logo-mark">
+                <div class="logo-glow"></div>
+                <div class="logo-crown">
+                    <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="crown-gold-header" x1="50%" y1="0%" x2="50%" y2="100%">
+                                <stop offset="0%" stop-color="#fbbf24"/>
+                                <stop offset="50%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#b45309"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M8 48 L8 18 L18 30 L30 10 L42 30 L52 18 L52 48 Z" fill="url(#crown-gold-header)"/>
+                        <path d="M8 48 L8 18 L18 30 L30 10 L42 30 L52 18 L52 48 Z" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="0.8"/>
+                        <circle cx="30" cy="13" r="1.8" fill="#fef9c3"/>
+                        <circle cx="18" cy="32" r="1.4" fill="#fef9c3" opacity=".9"/>
+                        <circle cx="42" cy="32" r="1.4" fill="#fef9c3" opacity=".9"/>
+                    </svg>
+                    <span class="logo-z">Z</span>
+                </div>
+                <div class="logo-orbit orbit-a"></div>
+                <div class="logo-orbit orbit-b"></div>
+            </div>
+            <div class="logo-text">Zenix</div>
+        </div>
+        <div class="hr">
             <a href="support.html" onclick="window.location.href='support.html';return false;" class="lb" id="btn-support"><i class="fas fa-headset" style="color:#a855f7"></i></a>
             <div class="wrap">
                 <button type="button" class="lb" id="lang-btn"><i class="fas fa-globe" style="color:#22c55e"></i></button>
@@ -101,68 +279,68 @@
                 </div>
             </div>
         </div>
+    </header>
 
-        <div class="logo">
-            <div class="logo-header">
-                <div class="logo-icon">Z</div>
-                <div class="logo-text">ZENIX</div>
-            </div>
-            <p id="t-wel">Register New Account</p>
-        </div>
+    <div class="c">
+        <div class="card">
+            <div class="card-title" id="t-wel">Register New Account</div>
 
-        <form id="form">
-            <div class="group">
-                <label id="l-email" for="email"><i class="fas fa-envelope"></i> Email <span class="req">*</span></label>
-                <div class="wrap-input">
-                    <i class="fas fa-at"></i>
-                    <input type="email" id="email" placeholder="Email" aria-label="Email" required>
+            <form id="form">
+                <div class="group">
+                    <label id="l-email" for="email"><i class="fas fa-envelope"></i> Email <span class="req">*</span></label>
+                    <div class="wrap-input">
+                        <i class="fas fa-at"></i>
+                        <input type="email" id="email" placeholder="Email" aria-label="Email" required>
+                    </div>
                 </div>
-            </div>
-            <div class="group">
-                <label id="l-name" for="fullname"><i class="fas fa-id-card"></i> Full Name <span class="req">*</span></label>
-                <div class="wrap-input">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="fullname" placeholder="Full Name" aria-label="Full Name" required>
+                <div class="group">
+                    <label id="l-name" for="fullname"><i class="fas fa-id-card"></i> Full Name <span class="req">*</span></label>
+                    <div class="wrap-input">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="fullname" placeholder="Full Name" aria-label="Full Name" required>
+                    </div>
                 </div>
-            </div>
-            <div class="group">
-                <label id="l-pass" for="pass"><i class="fas fa-lock"></i> Password <span class="req">*</span></label>
-                <div class="wrap-input">
-                    <i class="fas fa-key"></i>
-                    <input type="password" id="pass" placeholder="Password" aria-label="Password" required>
-                    <button type="button" class="eye-btn" aria-label="Show password" onclick="togglePassword('pass',this)"><i class="fas fa-eye eye-icon"></i></button>
+                <div class="group">
+                    <label id="l-pass" for="pass"><i class="fas fa-lock"></i> Password <span class="req">*</span></label>
+                    <div class="wrap-input">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="pass" placeholder="Password" aria-label="Password" required>
+                        <button type="button" class="eye-btn" aria-label="Show password" onclick="togglePassword('pass',this)"><i class="fas fa-eye eye-icon"></i></button>
+                    </div>
                 </div>
-            </div>
-            <div class="group">
-                <label id="l-confirm-pass" for="confirm-pass"><i class="fas fa-lock"></i> Confirm Password <span class="req">*</span></label>
-                <div class="wrap-input">
-                    <i class="fas fa-key"></i>
-                    <input type="password" id="confirm-pass" placeholder="Confirm Password" aria-label="Confirm Password" required>
-                    <button type="button" class="eye-btn" aria-label="Show password" onclick="togglePassword('confirm-pass',this)"><i class="fas fa-eye eye-icon"></i></button>
+                <div class="group">
+                    <label id="l-confirm-pass" for="confirm-pass"><i class="fas fa-lock"></i> Confirm Password <span class="req">*</span></label>
+                    <div class="wrap-input">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="confirm-pass" placeholder="Confirm Password" aria-label="Confirm Password" required>
+                        <button type="button" class="eye-btn" aria-label="Show password" onclick="togglePassword('confirm-pass',this)"><i class="fas fa-eye eye-icon"></i></button>
+                    </div>
                 </div>
-            </div>
-            <div class="group">
-                <label id="l-ref" for="ref-in"><i class="fas fa-ticket"></i> Referral Code <span class="req">*</span></label>
-                <div class="wrap-input">
-                    <i class="fas fa-lock" id="ref-icon"></i>
-                    <input type="text" id="ref-in" placeholder="Referral Code" aria-label="Referral Code" readonly required tabindex="-1">
+                <div class="group">
+                    <label id="l-ref" for="ref-in"><i class="fas fa-ticket"></i> Referral Code <span class="req">*</span></label>
+                    <div class="wrap-input">
+                        <i class="fas fa-lock" id="ref-icon"></i>
+                        <input type="text" id="ref-in" placeholder="Referral Code" aria-label="Referral Code" readonly required tabindex="-1">
+                    </div>
                 </div>
-            </div>
 
-            <div class="group" style="display:flex; justify-content:center; margin-bottom:14px;">
-                <div class="cf-turnstile" data-sitekey="0x4AAAAAAFaU1RVZfnTURKOc" data-theme="dark" data-callback="onloadTurnstileCallback"></div>
-            </div>
+                <div class="captcha-wrap">
+                    <div id="turnstile-container">
+                        <div class="cf-turnstile" data-sitekey="0x4AAAAAAFaU1RVZfnTURKOc" data-theme="dark" data-callback="onloadTurnstileCallback"></div>
+                    </div>
+                </div>
 
-            <button type="submit" id="t-btn" class="btn" disabled>Sign Up</button>
-            <div id="msg"></div>
-            <div id="invite-required">
-                <strong id="t-invite-title">Invitation required.</strong><br>
-                <span id="t-invite-desc">A referral code is required for every new account. Please open the registration page through an invitation link. If you already have one, ask the person who invited you to resend it.</span>
-            </div>
-        </form>
+                <button type="submit" id="t-btn" class="btn" disabled>Sign Up</button>
+                <div id="msg"></div>
+                <div id="invite-required">
+                    <strong id="t-invite-title">Invitation required.</strong><br>
+                    <span id="t-invite-desc">A referral code is required for every new account. Please open the registration page through an invitation link. If you already have one, ask the person who invited you to resend it.</span>
+                </div>
+            </form>
 
-        <div class="footer">
-            <p><a href="index.html" id="t-back"><i class="fas fa-arrow-left"></i> Back to Main Page</a></p>
+            <div class="footer">
+                <p><a href="index.html" id="t-back"><i class="fas fa-arrow-left"></i> Back to Main Page</a></p>
+            </div>
         </div>
     </div>
 
@@ -342,14 +520,14 @@
         form.onsubmit = async (e) => {
             e.preventDefault();
             const t = langData[currentLang] || langData.en;
-            if (passIn.value.length < 6) { msg.textContent = t.lenErr; msg.className = 'err'; return; }
-            if (passIn.value !== confirmPassIn.value) { msg.textContent = t.passErr; msg.className = 'err'; return; }
+            if (passIn.value.length < 6) { msg.textContent = t.lenErr; msg.className = 'err show'; return; }
+            if (passIn.value !== confirmPassIn.value) { msg.textContent = t.passErr; msg.className = 'err show'; return; }
             
             const refCodeValue = refIn.value.trim().toUpperCase();
-            if (!refCodeValue) { msg.textContent = t.refErr; msg.className = 'err'; return; }
+            if (!refCodeValue) { msg.textContent = t.refErr; msg.className = 'err show'; return; }
 
             const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
-            if (!turnstileToken) { msg.textContent = t.errCaptcha; msg.className = 'err'; return; }
+            if (!turnstileToken) { msg.textContent = t.errCaptcha; msg.className = 'err show'; return; }
 
             btn.disabled = true;
             const emailValue = emailIn.value.trim().toLowerCase();
@@ -360,7 +538,7 @@
                     const { data: refData, error: refError } = await supabaseClient.from('profiles').select('id').eq('referral_code', refCodeValue).maybeSingle();
                     if (refError || !refData) {
                         msg.textContent = t.refErr;
-                        msg.className = 'err';
+                        msg.className = 'err show';
                         btn.disabled = false;
                         if (window.turnstile) window.turnstile.reset();
                         chk();
@@ -370,7 +548,7 @@
                     const { data: isAllowed, error: rpcError } = await supabaseClient.rpc('can_register_with_admin');
                     if (rpcError || isAllowed !== true) {
                         msg.textContent = t.refErr;
-                        msg.className = 'err';
+                        msg.className = 'err show';
                         btn.disabled = false;
                         if (window.turnstile) window.turnstile.reset();
                         chk();
@@ -412,7 +590,7 @@
                 await supabaseClient.auth.signOut();
 
                 msg.textContent = t.succ;
-                msg.className = 'succ';
+                msg.className = 'succ show';
                 setTimeout(() => window.location.href = 'index.html', 1500);
 
             } catch (error) {
@@ -428,7 +606,7 @@
                 } else {
                     msg.textContent = error.message || t.errGeneral;
                 }
-                msg.className = 'err';
+                msg.className = 'err show';
                 chk();
             }
         };
@@ -436,6 +614,26 @@
         setLang(currentLang);
         checkFirstUserInit();
         chk();
+    </script>
+
+    <!-- ── Zenix Service Worker Registration ── -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('sw.js?v=2.6').then(function (reg) {
+                    setInterval(function () {
+                        reg.update().catch(function () {});
+                    }, 60000);
+                    document.addEventListener('visibilitychange', function () {
+                        if (document.visibilityState === 'visible') {
+                            reg.update().catch(function () {});
+                        }
+                    });
+                }).catch(function (e) {
+                    console.warn('[Zenix SW] register failed:', e);
+                });
+            });
+        }
     </script>
 </body>
 </html>

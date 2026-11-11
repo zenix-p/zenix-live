@@ -14,7 +14,7 @@
             document.documentElement.setAttribute('dir', language === 'fa' || language === 'ar' ? 'rtl' : 'ltr');
         })();
     </script>
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -23,12 +23,19 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.cn">
     <link rel="preconnect" href="https://fonts.gstatic.cn" crossorigin>
-    <link href="https://fonts.googleapis.cn/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.cn/css2?family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Vazirmatn:wght@400;500;700&family=Italianno&family=Cinzel:wght@900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.loli.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     
     <style>
         *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans','Vazirmatn',sans-serif}
-        body{background:#030712;min-height:100vh;color:#f8fafc;display:flex;flex-direction:column}
+        html{scroll-behavior:smooth}
+        body{background:#030712;min-height:100vh;min-height:100dvh;color:#f8fafc;display:flex;flex-direction:column;overflow-x:hidden;overscroll-behavior-y:contain}
+        body.modal-open{overflow:hidden;touch-action:none}
+        ::-webkit-scrollbar{width:8px;height:8px}
+        ::-webkit-scrollbar-track{background:rgba(15,23,42,.4)}
+        ::-webkit-scrollbar-thumb{background:rgba(56,189,248,.3);border-radius:10px}
+        ::-webkit-scrollbar-thumb:hover{background:rgba(56,189,248,.6)}
+
         header{background:rgba(15,23,42,.9);border-bottom:1px solid rgba(255,255,255,.1);padding:10px 18px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
         .logo{display:flex;align-items:center;gap:10px}
         .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#0ea5e9,#9333ea);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Orbitron',sans-serif;font-size:18px;font-weight:900;font-style:italic;transform:skewX(-6deg);box-shadow:0 0 15px rgba(14,165,233,.4)}
@@ -45,9 +52,13 @@
         .mi{padding:7px 10px;font-size:12px;color:#cbd5e1;cursor:pointer;border-radius:6px;display:flex;align-items:center;gap:8px;text-decoration:none;white-space:nowrap}
         .mi:hover,.mi.active{background:rgba(56,189,248,.15);color:#38bdf8!important;font-weight:700}
         .c{max-width:900px;width:100%;margin:15px auto;padding:0 12px;flex:1}
-        .wel{background:linear-gradient(135deg,rgba(2,132,199,.15),rgba(147,51,234,.15));border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:15px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-        .wel h1{font-size:16px;margin-bottom:3px}
-        .wel p{color:#94a3b8;font-size:11px}
+
+        .wel{background:linear-gradient(135deg,rgba(2,132,199,.15),rgba(147,51,234,.15));border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:15px;margin-bottom:12px;display:flex;flex-direction:column;gap:3px}
+        .wel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+        .wel-head h1{font-size:16px;margin:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f8fafc;font-weight:800}
+        .wel p{color:#94a3b8;font-size:11px;margin:0}
+        .wel-verified{font-size:11px;background:rgba(56,189,248,.1);border:1px solid #38bdf8;padding:4px 8px;border-radius:6px;color:#38bdf8;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:4px}
+
         .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px}
         .sc{border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;min-width:0}
         .sc-bal{background:linear-gradient(135deg,rgba(15,23,42,.95),rgba(14,165,233,.18));border:1px solid rgba(56,189,248,.4)}
@@ -57,8 +68,10 @@
         .sn{min-width:0}
         .sn span{font-size:11px;color:#94a3b8;display:block;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
         .sn h3{font-size:16px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
         .banner-box{width:100%;max-height:150px;margin-bottom:12px;border-radius:12px;overflow:hidden;border:1px solid rgba(56,189,248,.35);box-shadow:0 10px 25px rgba(2,132,199,.15)}
         .banner-box img{width:100%;height:150px;display:block;object-fit:cover}
+
         .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
         .nc{background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;text-decoration:none;color:inherit;display:flex;align-items:center;justify-content:space-between;min-width:0}
         .nc:hover{border-color:#38bdf8;background:rgba(15,23,42,1)}
@@ -68,6 +81,7 @@
         .ninf h3{font-size:14px;color:#f8fafc;margin-bottom:2px}
         .ninf p{font-size:11px;color:#94a3b8}
         .nca{color:#64748b;font-size:12px;margin-inline-start:4px}
+
         .market-box{background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;margin-bottom:12px}
         #crypto-ticker-list{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
         @media(max-width:768px){#crypto-ticker-list{grid-template-columns:1fr}}
@@ -77,164 +91,640 @@
         .crypto-icon img{width:100%;height:100%;object-fit:cover}
         .price-up{color:#22c55e!important;font-weight:bold}
         .price-down{color:#ef4444!important;font-weight:bold}
-        
-        .platform-info-box{background:rgba(15,23,42,.85);border:1px solid rgba(56,189,248,.25);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-        
-        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(2,6,23,.85);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+
+        .platform-info-box{background:rgba(15,23,42,.85);border:1px solid rgba(56,189,248,.25);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);position:relative}
+        .about-box-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:10px}
+        .about-box-head .about-icon{width:34px;height:34px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#38bdf8;font-size:15px;flex-shrink:0}
+        .about-box-head h3{font-size:13px;color:#38bdf8;font-weight:800;margin:0}
+        .about-content{font-size:11px;color:#cbd5e1;line-height:1.8;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;transition:max-height .4s ease}
+        .about-content p{margin:0}
+        .platform-info-box:not(.expanded) .about-content{max-height:120px}
+        .platform-info-box.expanded .about-content{max-height:4000px}
+        .platform-info-box:not(.expanded) .about-content::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(180deg,transparent,rgba(15,23,42,.98));pointer-events:none}
+        .about-toggle{background:transparent;border:1px solid rgba(56,189,248,.35);color:#38bdf8;padding:7px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;margin-top:10px;display:inline-flex;align-items:center;gap:6px;transition:.2s}
+        .about-toggle:hover{background:rgba(56,189,248,.15)}
+        .about-toggle i{transition:transform .3s;font-size:9px}
+        .platform-info-box.expanded .about-toggle i{transform:rotate(180deg)}
+        @media(min-width:769px){
+            .platform-info-box:not(.expanded) .about-content{max-height:none}
+            .platform-info-box:not(.expanded) .about-content::after{display:none}
+            .about-toggle{display:none}
+        }
+
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(2,6,23,.85);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(10px);padding:10px}
         .modal.show{display:flex}
         .modal-content{background:linear-gradient(135deg,#0f172a,#1e293b);border:1px solid rgba(56,189,248,.3);border-radius:20px;width:100%;max-width:460px;max-height:85vh;display:flex;flex-direction:column;padding:22px;box-shadow:0 20px 50px rgba(0,0,0,.9);overflow:hidden}
         .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;color:#38bdf8;font-weight:800;font-size:14px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:10px;flex-shrink:0}
-        .modal-close{background:rgba(255,255,255,.05);border:none;color:#94a3b8;cursor:pointer;font-size:14px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+        .modal-close{background:rgba(255,255,255,.05);border:none;color:#94a3b8;cursor:pointer;font-size:14px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:.2s}
         .modal-close:hover{background:rgba(239,68,68,.2);color:#ef4444}
-        
+
         .notif-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0}
         .notif-tab{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#94a3b8;padding:5px 10px;border-radius:20px;font-size:11px;cursor:pointer;white-space:nowrap;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:5px;flex:1 1 auto}
         .notif-tab:hover{background:rgba(56,189,248,.15);color:#38bdf8}
         .notif-tab.active{background:#38bdf8;color:#0f172a;font-weight:bold;border-color:#38bdf8;box-shadow:0 0 10px rgba(56,189,248,.3)}
         .tab-badge{background:rgba(255,255,255,.15);color:inherit;padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700;line-height:1.2;min-width:16px;text-align:center;display:inline-block}
         .notif-tab.active .tab-badge{background:rgba(15,23,42,.3);color:#0f172a}
-        
+
         #modal-msg-container, .modal-content div[style*="overflow-y:auto"]{overflow-y:auto;padding-right:6px}
         #modal-msg-container::-webkit-scrollbar, .modal-content div::-webkit-scrollbar{width:5px}
         #modal-msg-container::-webkit-scrollbar-track, .modal-content div::-webkit-scrollbar-track{background:rgba(15,23,42,.6);border-radius:10px}
         #modal-msg-container::-webkit-scrollbar-thumb, .modal-content div::-webkit-scrollbar-thumb{background:rgba(56,189,248,.35);border-radius:10px}
         #modal-msg-container::-webkit-scrollbar-thumb:hover, .modal-content div::-webkit-scrollbar-thumb:hover{background:rgba(56,189,248,.7)}
-        
+
         .msg-body-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;margin-bottom:10px;transition:0.2s}
         .msg-body-box:hover{border-color:rgba(56,189,248,.5)!important;opacity:1!important;}
         .msg-title-text{font-size:13px;font-weight:700;color:#38bdf8;margin-bottom:0}
         .msg-desc-text{font-size:12px;color:#cbd5e1;line-height:1.5}
-        
+
+        .help-modal-content{max-width:520px;padding:0!important;overflow:hidden;display:flex;flex-direction:column;max-height:88vh;border:1px solid rgba(56,189,248,.4)!important;box-shadow:0 25px 60px rgba(2,132,199,.25),0 0 0 1px rgba(56,189,248,.1)!important}
+        .help-modal-header{background:linear-gradient(135deg,rgba(56,189,248,.25),rgba(168,85,247,.25));padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.12);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-shrink:0;position:relative;overflow:hidden}
+        .help-modal-header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 0%,rgba(56,189,248,.3),transparent 60%);pointer-events:none}
+        .help-modal-brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0;position:relative;z-index:1}
+        .help-modal-icon{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#a855f7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;flex-shrink:0;box-shadow:0 8px 20px rgba(56,189,248,.45);position:relative}
+        .help-modal-icon::after{content:'';position:absolute;inset:-3px;border-radius:14px;background:linear-gradient(135deg,#38bdf8,#a855f7);opacity:.3;z-index:-1;filter:blur(8px)}
+        .help-modal-title-wrap{min-width:0;flex:1}
+        .help-modal-title-wrap h2{font-size:14px;color:#f8fafc;font-weight:800;margin:0 0 3px;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+        .help-modal-title-wrap p{font-size:10.5px;color:#cbd5e1;margin:0;font-weight:500}
+        .help-modal-body{overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;flex:1;min-height:0;scroll-behavior:smooth;overscroll-behavior:contain}
+        .help-hero{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(168,85,247,.12));border:1px solid rgba(56,189,248,.3);border-radius:10px;padding:12px 14px;flex-shrink:0}
+        .help-hero p{font-size:11.5px;color:#e2e8f0;line-height:1.75;margin:0;font-weight:500}
+
+        .help-accordion{border:1px solid rgba(255,255,255,.1);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.025);transition:border-color .25s,background .25s;flex-shrink:0}
+        .help-accordion.open{border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.05)}
+        .help-acc-btn{width:100%;background:transparent;border:none;color:#f8fafc;padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:right;transition:.2s;font-family:inherit}
+        .help-acc-btn:hover{background:rgba(56,189,248,.06)}
+        .help-acc-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+        .help-acc-title{flex:1;text-align:right;font-size:12.5px;font-weight:700}
+        .help-acc-arrow{color:#94a3b8;font-size:10px;transition:transform .3s}
+        .help-accordion.open .help-acc-arrow{transform:rotate(180deg);color:#38bdf8}
+
+        .help-acc-content{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(.4,0,.2,1);overflow:hidden}
+        .help-accordion.open .help-acc-content{grid-template-rows:1fr}
+        .help-acc-inner{overflow:hidden;min-height:0;padding:0 13px;transition:padding .4s cubic-bezier(.4,0,.2,1)}
+        .help-accordion.open .help-acc-inner{padding:0 13px 13px}
+        .help-acc-inner p{font-size:11.5px;color:#cbd5e1;line-height:1.8;margin:0}
+        .help-acc-inner ul{padding-right:18px;margin:0;display:flex;flex-direction:column;gap:5px}
+        .help-acc-inner li{font-size:11.5px;color:#cbd5e1;line-height:1.65}
+        .help-acc-inner li strong{color:#f8fafc;font-weight:700}
+
+        .help-footer{background:linear-gradient(135deg,rgba(168,85,247,.12),rgba(236,72,153,.12));border:1px solid rgba(168,85,247,.35);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;font-size:11px;color:#cbd5e1;line-height:1.65;flex-shrink:0}
+        .help-footer i{color:#a855f7;font-size:16px;flex-shrink:0}
+
         footer{text-align:center;padding:10px;font-size:11px;color:#64748b;border-top:1px solid rgba(255,255,255,.05);display:flex;justify-content:space-between;align-items:center;max-width:900px;margin:0 auto;width:100%;padding-left:12px;padding-right:12px}
-        
-        /* ★ دکمه شناور کازینو */
-        .floating-casino-wrap {
-            position: fixed; 
-            right: 24px; 
-            bottom: 28px; 
-            z-index: 9999;
+
+        .floating-casino-wrap{position:fixed;right:24px;bottom:28px;z-index:9999}
+        [dir="rtl"] .floating-casino-wrap{right:auto;left:24px}
+        .floating-casino{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:64px;height:64px;border-radius:50%;background:rgba(15,23,42,0.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px 0 rgba(0,0,0,0.6),inset 0 0 0 1px rgba(255,255,255,0.05);cursor:pointer;transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);overflow:hidden}
+        .floating-casino::before{content:'';position:absolute;inset:-3px;background:conic-gradient(from 0deg,#f43f5e,#a855f7,#38bdf8,#f43f5e);z-index:-1;border-radius:50%;animation:spinCasinoBorder 3s linear infinite;opacity:0.8}
+        .floating-casino::after{content:'';position:absolute;inset:2px;background:#0f172a;border-radius:50%;z-index:-1}
+        .floating-casino:hover{transform:translateY(-5px) scale(1.08);box-shadow:0 15px 45px rgba(244,63,94,0.5),inset 0 0 20px rgba(168,85,247,0.3)}
+        .floating-casino i{font-size:24px;background:linear-gradient(135deg,#38bdf8,#c084fc,#f43f5e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px;transition:transform 0.4s ease}
+        .floating-casino:hover i{transform:rotate(25deg) scale(1.1)}
+        .floating-casino span{font-size:9px;font-weight:800;color:#fff;letter-spacing:0.5px;text-shadow:0 1px 3px rgba(0,0,0,0.8);z-index:1}
+        @keyframes spinCasinoBorder{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+        @media (max-width:480px){
+            .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+            .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+            .hr{gap:5px}
+            .lb{width:32px;height:32px;font-size:12px}
+            .logo-text{font-size:16px}
+            .wel{padding:12px}
+            .wel-head{gap:6px}
+            .wel-head h1{font-size:14px}
+            .wel-verified{font-size:9.5px;padding:3px 6px}
+            .sc{padding:10px;gap:8px}
+            .sc-bal .si,.sc-ref .si{width:32px;height:32px;font-size:13px}
+            .sn span{font-size:9.5px}
+            .sn h3{font-size:13px}
+            .nc{padding:9px}
+            .ncl{gap:7px}
+            .nci{width:30px;height:30px;font-size:12px}
+            .ninf h3{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+            .ninf p{font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+            .nca{font-size:10px}
+            .help-modal-content{max-width:100%!important;max-height:92vh!important;border-radius:16px!important}
+            .help-modal-header{padding:12px 14px!important}
+            .help-modal-icon{width:38px!important;height:38px!important;font-size:16px!important}
+            .help-modal-title-wrap h2{font-size:13px!important}
+            .help-modal-title-wrap p{font-size:9.5px!important}
+            .help-modal-body{padding:11px!important;gap:8px!important}
+            .help-hero p{font-size:11px!important}
+            .help-acc-btn{padding:10px 11px!important}
+            .help-acc-icon{width:30px!important;height:30px!important;font-size:13px!important}
+            .help-acc-title{font-size:11.5px!important}
+            .help-acc-inner p,.help-acc-inner li{font-size:11px!important}
+            .help-footer{font-size:10px!important}
         }
-        [dir="rtl"] .floating-casino-wrap {
-            right: auto;
-            left: 24px;
+        @media (max-width:360px){
+            .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+            .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+            .sc{padding:8px;gap:6px}
+            .sc-bal .si,.sc-ref .si{width:28px;height:28px;font-size:11px}
+            .sn span{font-size:9px}
+            .sn h3{font-size:11.5px}
+            .nc{padding:7px}
+            .nci{width:26px;height:26px;font-size:11px}
+            .ninf h3{font-size:10.5px}
+            .ninf p{font-size:9px}
+            .nca{display:none}
+            .wel-head h1{font-size:13px}
+            .wel-verified{font-size:9px;padding:2px 5px}
         }
-        
-        .floating-casino {
-            position: relative;
-            display: flex;
-            flex-direction: column;
+
+        /* ═══ Zenix Auth Check Loader — لوگوی طلایی ═══ */
+        body.zenix-auth-checking { overflow: hidden !important; }
+        body.zenix-auth-checking > *:not(#zenix-auth-loader) { visibility: hidden !important; }
+        #zenix-auth-loader {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #030712;
+            z-index: 99999;
             align-items: center;
             justify-content: center;
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-direction: column;
+        }
+        body.zenix-auth-checking #zenix-auth-loader { display: flex; }
+
+        .zenix-loader-logo{display:flex;flex-direction:column;align-items:center;gap:2px;}
+        .zenix-loader-mark{position:relative;width:72px;height:72px;display:flex;align-items:center;justify-content:center;}
+        .zenix-loader-glow{position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,.55),transparent 65%);filter:blur(16px);animation:zenix-loader-glowPulse 3s ease-in-out infinite;pointer-events:none;}
+        @keyframes zenix-loader-glowPulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:.9;transform:scale(1.05)}}
+        .zenix-loader-crown{position:relative;width:72px;height:72px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 8px 20px rgba(251,191,36,.45)) drop-shadow(0 4px 10px rgba(245,158,11,.3));z-index:2;}
+        .zenix-loader-crown svg{position:absolute;inset:0;width:100%;height:100%;display:block;}
+        .zenix-loader-z{position:relative;z-index:2;font-family:'Cinzel',serif;font-weight:900;font-size:32px;line-height:1;padding-top:14px;background:linear-gradient(180deg,#fef9c3 0%,#fbbf24 30%,#f59e0b 55%,#ffffff 60%,#d97706 70%,#b45309 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 1px 0 #78350f) drop-shadow(0 2px 0 #78350f) drop-shadow(0 3px 6px rgba(0,0,0,.5)) drop-shadow(0 0 14px rgba(251,191,36,.6));}
+        .zenix-loader-orbit{position:absolute;top:50%;left:50%;border-radius:50%;border:1.5px solid transparent;pointer-events:none;z-index:3;}
+        .zenix-loader-orbit-a{width:86px;height:86px;margin:-43px 0 0 -43px;border-top-color:rgba(251,191,36,.9);border-right-color:rgba(251,191,36,.2);animation:zenix-loader-orbitA 3.5s linear infinite;}
+        .zenix-loader-orbit-b{width:96px;height:96px;margin:-48px 0 0 -48px;border-bottom-color:rgba(245,158,11,.7);border-left-color:rgba(245,158,11,.15);animation:zenix-loader-orbitB 4.5s linear infinite reverse;}
+        @keyframes zenix-loader-orbitA{to{transform:rotate(360deg)}}
+        @keyframes zenix-loader-orbitB{to{transform:rotate(-360deg)}}
+        .zenix-loader-text{font-family:'Italianno',cursive;font-weight:700;font-size:96px;letter-spacing:1px;line-height:.85;margin-top:-6px;background:linear-gradient(180deg,#fef9c3 0%,#fde68a 20%,#fbbf24 40%,#ffffff 50%,#f59e0b 62%,#b45309 85%,#78350f 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 2px 0 rgba(120,53,15,.9)) drop-shadow(0 4px 16px rgba(251,191,36,.5));}
+        .zenix-loader-dots{display:flex;gap:6px;margin-top:8px;}
+        .zenix-loader-dots span{width:6px;height:6px;border-radius:50%;background:#fbbf24;box-shadow:0 0 8px rgba(251,191,36,.7);animation:zenix-loader-dotPulse 1.4s ease-in-out infinite;}
+        .zenix-loader-dots span:nth-child(2){animation-delay:.2s}
+        .zenix-loader-dots span:nth-child(3){animation-delay:.4s}
+        @keyframes zenix-loader-dotPulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+        @media (max-width: 480px){
+            .zenix-loader-mark{width:58px;height:58px}
+            .zenix-loader-crown{width:58px;height:58px}
+            .zenix-loader-z{font-size:26px;padding-top:12px}
+            .zenix-loader-orbit-a{width:70px;height:70px;margin:-35px 0 0 -35px}
+            .zenix-loader-orbit-b{width:80px;height:80px;margin:-40px 0 0 -40px}
+            .zenix-loader-text{font-size:72px;margin-top:-4px}
+        }
+
+        /* ═══ Casino Wallet — Base Styles ═══ */
+        .casino-wallet-card {
+            background: linear-gradient(135deg, rgba(15,23,42,.95), rgba(120,53,15,.28));
+            border: 1px solid rgba(251,191,36,.4);
+            border-radius: 12px;
+            padding: 14px;
+            flex-shrink: 0;
+            position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,.3);
         }
-
-        .floating-casino::before {
+        .casino-wallet-card::before {
             content: '';
             position: absolute;
-            inset: -3px;
-            background: conic-gradient(from 0deg, #f43f5e, #a855f7, #38bdf8, #f43f5e);
-            z-index: -1;
-            border-radius: 50%;
-            animation: spinCasinoBorder 3s linear infinite;
-            opacity: 0.8;
+            top: -30%; right: -20%;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(251,191,36,.18), transparent 70%);
+            pointer-events: none;
+        }
+        .casino-wallet-head {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 12px; position: relative; z-index: 1;
+        }
+        .casino-wallet-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            display: flex; align-items: center; justify-content: center;
+            color: #0f172a; font-size: 15px;
+            box-shadow: 0 4px 12px rgba(251,191,36,.4);
+            flex-shrink: 0;
+        }
+        .casino-wallet-title h4 { font-size: 13px; color: #fbbf24; margin: 0 0 2px; font-weight: 800; }
+        .casino-wallet-title p { font-size: 10.5px; color: #94a3b8; margin: 0; }
+        .casino-bal-label { font-size: 9.5px; color: #94a3b8; }
+        .casino-bal-value {
+            font-size: 14px; font-weight: 800; color: #fff;
+            direction: ltr; text-align: right;
+            font-family: 'Plus Jakarta Sans', 'Vazirmatn', sans-serif;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .casino-bal-value.chips { color: #fbbf24; }
+        .casino-convert-row {
+            display: flex; gap: 8px; margin-bottom: 8px;
+            position: relative; z-index: 1;
+        }
+        .casino-convert-row input {
+            flex: 1; min-width: 0;
+            background: rgba(2,6,23,.6);
+            border: 1px solid rgba(251,191,36,.3);
+            border-radius: 8px; padding: 9px 11px;
+            color: #fff; font-size: 13px;
+            font-family: 'Plus Jakarta Sans', 'Vazirmatn', sans-serif;
+            font-variant-numeric: tabular-nums;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .casino-convert-row input:focus {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 2px rgba(251,191,36,.15);
+        }
+        .casino-convert-row input::-webkit-outer-spin-button,
+        .casino-convert-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .casino-convert-row input[type=number] { -moz-appearance: textfield; }
+        .casino-convert-btn {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #0f172a; border: none;
+            border-radius: 8px; padding: 9px 14px;
+            font-size: 12px; font-weight: 800;
+            cursor: pointer; font-family: inherit;
+            display: flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 12px rgba(251,191,36,.35);
+            transition: transform .15s, box-shadow .2s, opacity .2s;
+            flex-shrink: 0;
+        }
+        .casino-convert-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(251,191,36,.5); }
+        .casino-convert-btn:active:not(:disabled) { transform: translateY(0); }
+        .casino-convert-btn:disabled { opacity: .6; cursor: not-allowed; }
+        .casino-rate-info {
+            font-size: 10px; color: #94a3b8;
+            display: flex; align-items: center; gap: 5px;
+            position: relative; z-index: 1;
+        }
+        .casino-rate-info i { color: #fbbf24; font-size: 10px; }
+
+        .casino-toast {
+            position: fixed; bottom: 100px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(15,23,42,.97);
+            border: 1px solid #22c55e;
+            color: #fff; padding: 10px 18px;
+            border-radius: 10px; font-size: 12px;
+            z-index: 10000; opacity: 0;
+            transition: all .3s ease;
+            pointer-events: none;
+            box-shadow: 0 8px 30px rgba(0,0,0,.6);
+            font-weight: 600; white-space: nowrap;
+            max-width: 90vw;
+        }
+        .casino-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .casino-toast.error { border-color: #ef4444; }
+        .casino-toast i { margin-right: 5px; }
+        .casino-toast:not(.error) i { color: #22c55e; }
+        .casino-toast.error i { color: #ef4444; }
+
+        .casino-usdt-balance-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px;
+            background: rgba(251,191,36,.08);
+            border: 1px solid rgba(251,191,36,.25);
+            border-radius: 8px; margin-bottom: 8px;
+            position: relative; z-index: 1;
+        }
+        .casino-usdt-balance-row .casino-bal-value {
+            font-size: 16px; color: #fbbf24;
+            font-family: 'Plus Jakarta Sans', 'Vazirmatn', sans-serif;
+            font-variant-numeric: tabular-nums;
+            direction: ltr;
         }
 
-        .floating-casino::after {
-            content: '';
-            position: absolute;
-            inset: 2px;
-            background: #0f172a;
-            border-radius: 50%;
-            z-index: -1;
+        .casino-games-container {
+            display: flex; flex-direction: column; gap: 8px;
+            margin-bottom: 10px; position: relative; z-index: 1;
         }
 
-        .floating-casino:hover {
-            transform: translateY(-5px) scale(1.08);
-            box-shadow: 0 15px 45px rgba(244, 63, 94, 0.5), inset 0 0 20px rgba(168, 85, 247, 0.3);
+        .casino-game-item {
+            background: rgba(255,255,255,.03);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 10px; overflow: hidden;
+            transition: border-color .25s, background .25s;
+        }
+        .casino-game-item:hover { border-color: rgba(251,191,36,.35); }
+
+        .casino-game-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px;
+        }
+        .casino-game-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+        }
+        .casino-game-info { flex: 1; min-width: 0; }
+        .casino-game-info h5 {
+            font-size: 12px; color: #f8fafc; margin: 0 0 2px; font-weight: 700;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .casino-game-chips {
+            font-size: 10.5px; color: #fbbf24; font-weight: 700;
+            font-family: 'Plus Jakarta Sans', 'Vazirmatn', sans-serif;
+            font-variant-numeric: tabular-nums;
+            direction: ltr; display: inline-block;
+        }
+        .casino-game-buy-btn {
+            background: rgba(251,191,36,.12);
+            border: 1px solid rgba(251,191,36,.4);
+            color: #fbbf24; padding: 6px 10px;
+            border-radius: 7px; font-size: 11px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 5px;
+            font-family: inherit; flex-shrink: 0;
+            transition: background .2s, transform .15s;
+        }
+        .casino-game-buy-btn:hover {
+            background: rgba(251,191,36,.25);
+            transform: translateY(-1px);
+        }
+        .casino-game-buy-btn.active {
+            background: linear-gradient(135deg,#fbbf24,#f59e0b);
+            color: #0f172a; border-color: #fbbf24;
+        }
+        .casino-game-buy-panel {
+            padding: 0 12px 12px;
+            animation: casinoSlideDown .25s ease;
+        }
+        @keyframes casinoSlideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        .floating-casino i {
-            font-size: 24px;
-            background: linear-gradient(135deg, #38bdf8, #c084fc, #f43f5e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 3px;
-            transition: transform 0.4s ease;
-        }
-
-        .floating-casino:hover i {
-            transform: rotate(25deg) scale(1.1);
-        }
-
-        .floating-casino span {
-            font-size: 9px;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: 0.5px;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        /* ═══ ★ NEW ★ Charge Wallet Section ═══ */
+        .casino-charge-section {
+            background: rgba(34,197,94,.08);
+            border: 1px solid rgba(34,197,94,.3);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+            position: relative;
             z-index: 1;
         }
-
-        @keyframes spinCasinoBorder {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .casino-charge-label {
+            font-size: 10px;
+            color: #22c55e;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 6px;
+        }
+        .casino-charge-row {
+            display: flex;
+            gap: 8px;
+        }
+        .casino-charge-row input {
+            flex: 1;
+            min-width: 0;
+            background: rgba(2,6,23,.6);
+            border: 1px solid rgba(34,197,94,.35);
+            border-radius: 8px;
+            padding: 8px 11px;
+            color: #fff;
+            font-size: 12px;
+            font-family: 'Plus Jakarta Sans', 'Vazirmatn', sans-serif;
+            font-variant-numeric: tabular-nums;
+            outline: none;
+            transition: border-color .2s;
+        }
+        .casino-charge-row input:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 2px rgba(34,197,94,.15);
+        }
+        .casino-charge-row input::-webkit-outer-spin-button,
+        .casino-charge-row input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .casino-charge-row input[type=number] { -moz-appearance: textfield; }
+        .casino-charge-btn {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 11px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(34,197,94,.3);
+            transition: transform .15s, box-shadow .2s;
+            flex-shrink: 0;
+        }
+        .casino-charge-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(34,197,94,.5);
         }
 
-        /* ★ اصلاحات ریسپانسیو برای موبایل */
+        /* ═══ ★ NEW ★ Bidirectional Conversion (per game) ═══ */
+        .casino-convert-section {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .casino-convert-divider {
+            font-size: 9.5px;
+            color: #94a3b8;
+            text-align: center;
+            padding: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .casino-convert-divider::before,
+        .casino-convert-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255,255,255,.08);
+        }
+        .casino-convert-label {
+            font-size: 10px;
+            color: #cbd5e1;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        .casino-convert-label.buy { color: #22c55e; }
+        .casino-convert-label.sell { color: #f59e0b; }
+        .casino-sell-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+            box-shadow: 0 4px 12px rgba(245,158,11,.35) !important;
+        }
+        .casino-sell-btn:hover:not(:disabled) {
+            box-shadow: 0 6px 16px rgba(245,158,11,.5) !important;
+        }
+
+        /* ═══ ★ NEW ★ Tap Highlight Fix (رفع باکس آبی/سیاه هنگام کلیک) ═══ */
+        button, a, [role="button"],
+        .floating-casino,
+        .lb, .mi, .nc,
+        .modal-hamburger, .modal-close,
+        .casino-game-buy-btn,
+        .casino-convert-btn,
+        .casino-wallet-link-btn,
+        .casino-charge-btn,
+        .about-toggle,
+        .notif-tab,
+        .help-acc-btn,
+        .casino-wallet-card,
+        .casino-game-item {
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            outline: none;
+        }
+        .floating-casino:focus,
+        .floating-casino:active,
+        .modal-hamburger:focus,
+        .modal-hamburger:active,
+        .casino-game-buy-btn:focus,
+        .casino-game-buy-btn:active,
+        .casino-convert-btn:focus,
+        .casino-convert-btn:active,
+        .casino-charge-btn:focus,
+        .casino-charge-btn:active,
+        .casino-wallet-link-btn:focus,
+        .casino-wallet-link-btn:active,
+        button:focus,
+        button:active {
+            outline: none !important;
+            box-shadow: none;
+        }
+        /* در حین کلیک، سایه‌های مخصوص خودشان حفظ شوند */
+        .casino-game-buy-btn:active,
+        .casino-convert-btn:active,
+        .casino-charge-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ═══ Casino Wallet Modal (NEW) ═══ */
+        .modal-hamburger {
+            background: rgba(251,191,36,.1);
+            border: 1px solid rgba(251,191,36,.35);
+            color: #fbbf24;
+            cursor: pointer;
+            font-size: 13px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .2s;
+            flex-shrink: 0;
+        }
+        .modal-hamburger:hover { background: rgba(251,191,36,.25); }
+        .modal-hamburger.active {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #0f172a;
+            border-color: #fbbf24;
+            box-shadow: 0 0 10px rgba(251,191,36,.4);
+        }
+        .modal-hamburger i { transition: transform .3s ease; }
+        .modal-hamburger.active i { transform: rotate(90deg); }
+
+        #casino-games-container {
+            animation: casinoGamesSlideIn .3s ease;
+        }
+        @keyframes casinoGamesSlideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .casino-wallet-link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, rgba(251,191,36,.15), rgba(245,158,11,.15));
+            border: 1px solid rgba(251,191,36,.4);
+            border-radius: 12px;
+            color: #fbbf24;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .25s;
+            margin-bottom: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .casino-wallet-link-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(251,191,36,.15), transparent 70%);
+            pointer-events: none;
+        }
+        .casino-wallet-link-btn:hover {
+            background: linear-gradient(135deg, rgba(251,191,36,.25), rgba(245,158,11,.25));
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(251,191,36,.3);
+        }
+        .casino-wallet-link-btn i { font-size: 16px; flex-shrink: 0; }
+
         @media (max-width: 480px) {
-            /* .stats و .grid همچنان دو ستونه می‌مانند */
-            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-
-            .hr { gap: 5px; }
-            .lb { width: 32px; height: 32px; font-size: 12px; }
-            .logo-text { font-size: 16px; }
-            .wel { flex-direction: column; align-items: flex-start; }
-
-            /* فشرده‌سازی کارت‌های آمار (موجودی / زیرمجموعه) */
-            .sc { padding: 10px; gap: 8px; }
-            .sc-bal .si, .sc-ref .si { width: 32px; height: 32px; font-size: 13px; }
-            .sn span { font-size: 9.5px; }
-            .sn h3 { font-size: 13px; }
-
-            /* فشرده‌سازی کارت‌های میانبر */
-            .nc { padding: 9px; }
-            .ncl { gap: 7px; }
-            .nci { width: 30px; height: 30px; font-size: 12px; }
-            .ninf h3 { font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .ninf p  { font-size: 9.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .nca { font-size: 10px; }
-        }
-
-        /* ★ روی گوشی‌های خیلی باریک هم دو ستونه باقی بماند */
-        @media (max-width: 360px) {
-            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-            .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-
-            .sc { padding: 8px; gap: 6px; }
-            .sc-bal .si, .sc-ref .si { width: 28px; height: 28px; font-size: 11px; }
-            .sn span { font-size: 9px; }
-            .sn h3 { font-size: 11.5px; }
-
-            .nc  { padding: 7px; }
-            .nci { width: 26px; height: 26px; font-size: 11px; }
-            .ninf h3 { font-size: 10.5px; }
-            .ninf p  { font-size: 9px; }
-            .nca { display: none; }
+            .casino-wallet-card { padding: 12px; }
+            .casino-wallet-icon { width: 32px; height: 32px; font-size: 13px; }
+            .casino-wallet-title h4 { font-size: 12px; }
+            .casino-wallet-title p { font-size: 9.5px; }
+            .casino-usdt-balance-row .casino-bal-value { font-size: 14px; }
+            .casino-game-header { padding: 8px 10px; gap: 8px; }
+            .casino-game-icon { width: 30px; height: 30px; font-size: 12px; }
+            .casino-game-info h5 { font-size: 11px; }
+            .casino-game-chips { font-size: 10px; }
+            .casino-game-buy-btn { padding: 5px 8px; font-size: 10px; }
+            .casino-game-buy-panel { padding: 0 10px 10px; }
+            .casino-convert-btn { padding: 8px 12px; font-size: 11px; }
+            .casino-convert-row input { padding: 8px 10px; font-size: 12px; }
+            .casino-charge-row input { padding: 7px 9px; font-size: 11px; }
+            .casino-charge-btn { padding: 7px 10px; font-size: 10px; }
         }
     </style>
 </head>
-<body>
+<body class="zenix-auth-checking">
+    <div id="zenix-auth-loader">
+        <div class="zenix-loader-logo">
+            <div class="zenix-loader-mark">
+                <div class="zenix-loader-glow"></div>
+                <div class="zenix-loader-crown">
+                    <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="crown-gold-loader" x1="50%" y1="0%" x2="50%" y2="100%">
+                                <stop offset="0%" stop-color="#fbbf24"/>
+                                <stop offset="50%" stop-color="#f59e0b"/>
+                                <stop offset="100%" stop-color="#b45309"/>
+                            </linearGradient>
+                        </defs>
+                        <path d="M8 48 L8 18 L18 30 L30 10 L42 30 L52 18 L52 48 Z" fill="url(#crown-gold-loader)"/>
+                        <path d="M8 48 L8 18 L18 30 L30 10 L42 30 L52 18 L52 48 Z" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="0.8"/>
+                        <circle cx="30" cy="13" r="1.8" fill="#fef9c3"/>
+                        <circle cx="18" cy="32" r="1.4" fill="#fef9c3" opacity=".9"/>
+                        <circle cx="42" cy="32" r="1.4" fill="#fef9c3" opacity=".9"/>
+                    </svg>
+                    <span class="zenix-loader-z">Z</span>
+                </div>
+                <div class="zenix-loader-orbit zenix-loader-orbit-a"></div>
+                <div class="zenix-loader-orbit zenix-loader-orbit-b"></div>
+            </div>
+            <div class="zenix-loader-text">Zenix</div>
+            <div class="zenix-loader-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
     <div class="floating-casino-wrap">
         <button type="button" class="floating-casino" id="floating-casino-btn" title="کازینو" onclick="window.openCasinoModal(); return false;">
             <i class="fas fa-dice"></i>
@@ -242,6 +732,7 @@
         </button>
     </div>
 
+    <!-- ═══ مودال انتخاب بازی کازینو ═══ -->
     <div class="modal" id="m-casino-modal" style="z-index:1050;">
         <div class="modal-content">
             <div class="modal-header">
@@ -249,7 +740,14 @@
                 <button class="modal-close" onclick="window.closeCasinoModal()"><i class="fas fa-times"></i></button>
             </div>
             <div style="overflow-y:auto;padding-right:6px;display:flex;flex-direction:column;gap:10px;">
-                <a href="poker.html" class="nc" style="text-decoration:none;color:inherit;">
+
+                <button type="button" class="casino-wallet-link-btn" onclick="window.closeCasinoModal(); setTimeout(()=>window.openCasinoWalletModal(), 200);">
+                    <i class="fas fa-wallet"></i>
+                    <span id="t-open-casino-wallet-btn">ورود به کیف پول کازینو</span>
+                    <i class="fas fa-chevron-left" style="font-size:11px;opacity:.7;"></i>
+                </button>
+
+                <a href="roulette.html" class="nc" style="text-decoration:none;color:inherit;">
                     <div class="ncl">
                         <div class="nci" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444"><i class="fas fa-dice-roulette"></i></div>
                         <div class="ninf">
@@ -259,6 +757,7 @@
                     </div>
                     <div class="nca"><i class="fas fa-chevron-left"></i></div>
                 </a>
+
                 <a href="plinko.html" class="nc" style="text-decoration:none;color:inherit;">
                     <div class="ncl">
                         <div class="nci" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#22c55e"><i class="fas fa-circle-dot"></i></div>
@@ -269,9 +768,172 @@
                     </div>
                     <div class="nca"><i class="fas fa-chevron-left"></i></div>
                 </a>
+
             </div>
         </div>
     </div>
+
+    <!-- ═══ مودال مستقل کیف پول کازینو ═══ -->
+    <div class="modal" id="m-casino-wallet-modal" style="z-index:1050;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="t-casino-wallet-modal-title">
+                    <i class="fas fa-wallet" style="color:#fbbf24;"></i> کیف پول کازینو
+                </span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button type="button" class="modal-hamburger" id="casino-wallet-hamburger" onclick="window.toggleCasinoWalletGames()" title="لیست بازی‌ها">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <button class="modal-close" onclick="window.closeCasinoWalletModal()"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div style="overflow-y:auto;padding-right:6px;display:flex;flex-direction:column;gap:12px;">
+
+                <!-- موجودی تتر کازینو (مستقل از پلتفرم) -->
+                <div class="casino-usdt-balance-row">
+                    <span class="casino-bal-label" id="t-casino-usdt-label">موجودی تتر کازینو</span>
+                    <span class="casino-bal-value" id="casino-usdt-balance">$0.00</span>
+                </div>
+
+                <!-- بخش شارژ کیف پول کازینو -->
+                <div class="casino-charge-section">
+                    <div class="casino-charge-label">
+                        <i class="fas fa-plus-circle"></i>
+                        <span id="t-casino-charge-label">شارژ کیف پول کازینو</span>
+                    </div>
+                    <div class="casino-charge-row">
+                        <input type="number" id="casino-charge-amount" placeholder="مبلغ شارژ (USDT)" min="1" step="1" inputmode="decimal">
+                        <button type="button" class="casino-charge-btn" onclick="window.chargeCasinoWallet()">
+                            <i class="fas fa-bolt"></i>
+                            <span id="t-casino-charge-btn">شارژ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- لیست بازی‌ها (با منوی سه خط کنترل می‌شود) -->
+                <div class="casino-games-container" id="casino-games-container" style="display:none;">
+
+                    <!-- بازی ۱: رولت -->
+                    <div class="casino-game-item" data-game="roulette">
+                        <div class="casino-game-header">
+                            <div class="casino-game-icon" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#ef4444">
+                                <i class="fas fa-dice-roulette"></i>
+                            </div>
+                            <div class="casino-game-info">
+                                <h5 id="t-game-roulette">رولت آنلاین</h5>
+                                <span class="casino-game-chips" id="chips-roulette">0 ژتون</span>
+                            </div>
+                            <button class="casino-game-buy-btn" data-game="roulette" type="button">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span id="t-trade-1">تبدیل</span>
+                            </button>
+                        </div>
+                        <div class="casino-game-buy-panel" id="buy-panel-roulette" style="display:none;">
+                            <div class="casino-convert-section">
+                                <!-- تتر → ژتون -->
+                                <div>
+                                    <div class="casino-convert-label buy">
+                                        <i class="fas fa-arrow-left"></i>
+                                        <span id="t-buy-label-1">خرید ژتون با تتر</span>
+                                    </div>
+                                    <div class="casino-convert-row">
+                                        <input type="number" id="convert-amount-roulette" placeholder="مقدار تتر (USDT)" min="1" step="1" inputmode="decimal">
+                                        <button type="button" class="casino-convert-btn" data-game="roulette" data-dir="buy">
+                                            <i class="fas fa-coins"></i>
+                                            <span id="t-buy-btn-1">خرید</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="casino-convert-divider">
+                                    <span id="t-or-1">یا</span>
+                                </div>
+                                <!-- ژتون → تتر -->
+                                <div>
+                                    <div class="casino-convert-label sell">
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span id="t-sell-label-1">فروش ژتون و دریافت تتر</span>
+                                    </div>
+                                    <div class="casino-convert-row">
+                                        <input type="number" id="sell-amount-roulette" placeholder="تعداد ژتون" min="10" step="10" inputmode="decimal">
+                                        <button type="button" class="casino-convert-btn casino-sell-btn" data-game="roulette" data-dir="sell">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            <span id="t-sell-btn-1">فروش</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بازی ۲: پلینکو -->
+                    <div class="casino-game-item" data-game="plinko">
+                        <div class="casino-game-header">
+                            <div class="casino-game-icon" style="background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:#22c55e">
+                                <i class="fas fa-circle-dot"></i>
+                            </div>
+                            <div class="casino-game-info">
+                                <h5 id="t-game-plinko">پلینکو (پاپالان)</h5>
+                                <span class="casino-game-chips" id="chips-plinko">0 ژتون</span>
+                            </div>
+                            <button class="casino-game-buy-btn" data-game="plinko" type="button">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span id="t-trade-2">تبدیل</span>
+                            </button>
+                        </div>
+                        <div class="casino-game-buy-panel" id="buy-panel-plinko" style="display:none;">
+                            <div class="casino-convert-section">
+                                <!-- تتر → ژتون -->
+                                <div>
+                                    <div class="casino-convert-label buy">
+                                        <i class="fas fa-arrow-left"></i>
+                                        <span id="t-buy-label-2">خرید ژتون با تتر</span>
+                                    </div>
+                                    <div class="casino-convert-row">
+                                        <input type="number" id="convert-amount-plinko" placeholder="مقدار تتر (USDT)" min="1" step="1" inputmode="decimal">
+                                        <button type="button" class="casino-convert-btn" data-game="plinko" data-dir="buy">
+                                            <i class="fas fa-coins"></i>
+                                            <span id="t-buy-btn-2">خرید</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="casino-convert-divider">
+                                    <span id="t-or-2">یا</span>
+                                </div>
+                                <!-- ژتون → تتر -->
+                                <div>
+                                    <div class="casino-convert-label sell">
+                                        <i class="fas fa-arrow-right"></i>
+                                        <span id="t-sell-label-2">فروش ژتون و دریافت تتر</span>
+                                    </div>
+                                    <div class="casino-convert-row">
+                                        <input type="number" id="sell-amount-plinko" placeholder="تعداد ژتون" min="10" step="10" inputmode="decimal">
+                                        <button type="button" class="casino-convert-btn casino-sell-btn" data-game="plinko" data-dir="sell">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                            <span id="t-sell-btn-2">فروش</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- راهنمای منوی سه خط -->
+                <div id="casino-wallet-hint" style="text-align:center;font-size:11px;color:#94a3b8;padding:6px;">
+                    <i class="fas fa-bars" style="color:#fbbf24;margin-left:4px;"></i>
+                    برای دیدن لیست بازی‌ها روی آیکون سه خط بالا کلیک کنید
+                </div>
+
+                <div class="casino-rate-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span id="casino-rate-text">نرخ: ۱ تتر = ۱۰ ژتون (خرید و فروش)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="casino-toast" id="casino-toast"></div>
 
     <header>
         <div class="logo"><div class="logo-icon">Z</div><div class="logo-text">ZENIX</div></div>
@@ -292,6 +954,7 @@
                     <a href="quantification.html" class="mi"><i class="fas fa-robot" style="color:#a855f7"></i><span id="m2">کوانتیفیکیشن</span></a>
                     <a href="deposit.html" class="mi"><i class="fas fa-arrow-down" style="color:#22c55e"></i><span id="m3">واریز</span></a>
                     <a href="receive.html" class="mi"><i class="fas fa-arrow-up" style="color:#fbbf24"></i><span id="m4">برداشت</span></a>
+                    <a href="#" class="mi" onclick="window.openCasinoWalletModal();return false;"><i class="fas fa-wallet" style="color:#fbbf24"></i><span id="m_casino_wallet">کیف پول کازینو</span></a>
                     <a href="team.html" class="mi"><i class="fas fa-users" style="color:#ec4899"></i><span id="m_team">تیم من</span></a>
                     <a href="transactions.html" class="mi"><i class="fas fa-history" style="color:#06b6d4"></i><span id="m5">تراکنش</span></a>
                     <a href="profile.html" class="mi"><i class="fas fa-user-cog" style="color:#ec4899"></i><span id="m6">پروفایل</span></a>
@@ -304,7 +967,13 @@
     </header>
 
     <div class="c">
-        <div class="wel"><div><h1 id="t-wel">خوش آمدید</h1><p id="t-sub">پنل مدیریت کاربری</p></div><div style="font-size:11px;background:rgba(56,189,248,.1);border:1px solid #38bdf8;padding:4px 8px;border-radius:6px;color:#38bdf8"><i class="fas fa-shield-check"></i> <span id="t-st">تایید شده</span></div></div>
+        <div class="wel">
+            <div class="wel-head">
+                <h1 id="t-wel">خوش آمدید</h1>
+                <div class="wel-verified"><i class="fas fa-shield-check"></i> <span id="t-st">تایید شده</span></div>
+            </div>
+            <p id="t-sub">پنل مدیریت کاربری</p>
+        </div>
         <div class="stats">
             <div class="sc sc-bal"><div class="si"><i class="fas fa-wallet" style="color:#38bdf8"></i></div><div class="sn"><span id="ts1">موجودی</span><h3 id="val-balance">$0.00</h3></div></div>
             <div class="sc sc-ref"><div class="si"><i class="fas fa-users" style="color:#c084fc"></i></div><div class="sn"><span id="ts2">زیرمجموعه</span><h3 id="val-ref">0</h3></div></div>
@@ -327,21 +996,22 @@
             <div id="crypto-ticker-list"></div>
         </div>
 
-        <!-- متن معرفی جدید و عمیق‌تر -->
-        <div class="platform-info-box">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:10px;">
-                <div style="width:34px;height:34px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.3);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#38bdf8;font-size:15px;">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h3 style="font-size:13px;color:#38bdf8;font-weight:800;" id="t-about-box-title">درباره پلتفرم هوشمند زِنیکس (Zenix)</h3>
+        <div class="platform-info-box" id="platformInfoBox">
+            <div class="about-box-head">
+                <div class="about-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3 id="t-about-box-title">درباره پلتفرم هوشمند زِنیکس (Zenix)</h3>
             </div>
-            <div style="font-size:11px;color:#cbd5e1;line-height:1.8;display:flex;flex-direction:column;gap:10px;">
+            <div class="about-content">
                 <p id="t-about-box-intro">به زِنیکس (Zenix) خوش آمدید؛ جایی که افق‌های مالی دیجیتال و قدرت فناوری مدرن در هم می‌آمیزند تا مسیری به سوی آینده‌ای روشن‌تر را روشن کنند. زِنیکس بر پایه یک باور عمیق بنا شده است: دنیای دارایی‌های دیجیتال نباید یک هزارتوی پیچیده باشد، بلکه باید یک اکوسیستم شفاف، در دسترس و امن برای همه باشد.</p>
                 <p id="t-about-box-desc">در عصری که با شتاب بی‌وقفه تعریف می‌شود، جایی که بازارهای جهانی هرگز نمی‌خوابند و تغییر تنها ثابتِ آن است، داشتن یک همراه مطمئن و هوشمند امری حیاتی است. زِنیکس با تکیه بر معماری ابری پیشرفته، الگوریتم‌های کوانتیفیکیشن نوین و لایه‌های امنیتی چندگانه و نفوذناپذیر، پناهگاهی یکپارچه و یکدست برای مدیریت ثروت شما فراهم کرده است. ما فقط در حال ساختن یک پلتفرم نیستیم؛ ما در حال خلق محیطی هستیم که در آن فناوری در خدمت جاه‌طلبی‌های انسانی قرار می‌گیرد، موانع را از بین می‌برد و آنچه را که در اقتصاد دیجیتال ممکن است، بازتعریف می‌کند.</p>
                 <p id="t-about-box-goal"><strong style="color:#38bdf8;">هدف ما:</strong> دموکراتیزه کردن امور استثنایی است. ما تلاش می‌کنیم همان ابزارهای مالی قدرتمندی که نخبگان نهادی از آن استفاده می‌کنند را در اختیار صاحبان دید روزمره قرار دهیم. چه در حال برداشتن اولین قدم خود باشید و چه یک متخصص کارکشته، زِنیکس به شما قدرت می‌دهد تا با اطمینان در بازارهای جهانی حرکت کنید، بدون نیاز به تخصص پیچیده، و تضمین می‌کند که سرمایه شما در محیطی از امنیت مطلق، شفافیت و پتانسیل پویا رشد کند.</p>
                 <p id="t-about-box-strategy"><strong style="color:#38bdf8;">استراتژی ما:</strong> بر یک سه‌گانه ناگسستنی بنا شده است—امنیت بدون سازش، شفافیت رادیکال و نوآوری بی‌وقفه. با ادغام الگوریتم‌های پردازش داده پیشرفته، یک سیستم پاداش چندلایه پویا و زیرساخت‌های بی‌نهایت مقیاس‌پذیر، ما تجربه‌ای بی‌نقص، فوق‌العاده سریع و بسیار قابل اعتماد را مهندسی می‌کنیم. ما پیچیدگی‌ها را مدیریت می‌کنیم تا تمرکز شما تنها روی مهم‌ترین چیز باقی بماند: رشد و موفقیت شما.</p>
                 <p id="t-about-box-conclusion" style="color:#94a3b8;border-top:1px dashed rgba(255,255,255,.08);padding-top:8px;margin-top:2px;"><i class="fas fa-quote-right" style="color:#38bdf8;margin-left:4px;"></i> زِنیکس فراتر از تعریف یک پلتفرم صرف است؛ این یک اکوسیستم پرجنب‌وجوش است که در آن فناوری، سرمایه و جامعه‌ای از پیشروان اندیشه گرد هم می‌آیند. ما شریک استوار شما در این سفر هستیم و متعهد به هدایت شما به سوی آینده‌ای با آزادی مالی بیشتر، فرصت‌های بی‌کران و دستاوردهای عظیم هستیم. ما با هم نه تنها آینده را پیش‌بینی می‌کنیم—بلکه آن را می‌سازیم.</p>
             </div>
+            <button class="about-toggle" onclick="window.toggleAboutBox()">
+                <i class="fas fa-chevron-down"></i>
+                <span id="t-about-toggle">مشاهده بیشتر</span>
+            </button>
         </div>
     </div>
 
@@ -392,40 +1062,110 @@
     </div>
 
     <div class="modal" id="m-help-modal" style="z-index:1050;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span id="t-help-modal-title"><i class="fas fa-circle-question" style="color:#38bdf8;"></i> راهنمای جامع داشبورد زِنیکس</span>
+        <div class="modal-content help-modal-content">
+            <div class="help-modal-header">
+                <div class="help-modal-brand">
+                    <div class="help-modal-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="help-modal-title-wrap">
+                        <h2 id="t-help-modal-title">راهنمای جامع داشبورد زِنیکس</h2>
+                        <p id="t-help-modal-subtitle">راهنمای کامل استفاده از پنل</p>
+                    </div>
+                </div>
                 <button class="modal-close" onclick="window.closeHelpModal()"><i class="fas fa-times"></i></button>
             </div>
-            <div style="overflow-y:auto;padding-right:6px;font-size:12px;color:#cbd5e1;line-height:1.8;display:flex;flex-direction:column;gap:12px;">
-                <div style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:10px;padding:10px;margin-bottom:4px;">
-                    <p id="t-help-intro" style="color:#f8fafc;font-weight:600;">به بخش مدیریت و داشبورد کاربری پلتفرم زِنیکس خوش آمدید. در این بخش می‌توانید خلاصه‌ای از عملکرد مالی و دسترسی سریع به بخش‌های اصلی داشته باشید.</p>
-                </div>
-                
-                <div>
-                    <h4 style="color:#38bdf8;font-size:13px;margin-bottom:4px;" id="t-help-s1-title"><i class="fas fa-wallet" style="margin-left:5px;"></i> ۱. آمار و موجودی</h4>
-                    <p id="t-help-s1-desc">در بالای صفحه، کل موجودی حساب (USDT) و تعداد کاربران زیرمجموعه شبکه شما به صورت زنده نمایش داده می‌شود.</p>
+            <div class="help-modal-body">
+                <div class="help-hero">
+                    <p id="t-help-intro">به بخش مدیریت و داشبورد کاربری پلتفرم زِنیکس خوش آمدید. در این بخش می‌توانید خلاصه‌ای از عملکرد مالی و دسترسی سریع به بخش‌های اصلی داشته باشید.</p>
                 </div>
 
-                <div>
-                    <h4 style="color:#38bdf8;font-size:13px;margin-bottom:4px;" id="t-help-s2-title"><i class="fas fa-th-large" style="margin-left:5px;"></i> ۲. دسترسی سریع (میانبرها)</h4>
-                    <ul style="padding-right:18px;display:flex;flex-direction:column;gap:4px;" id="t-help-s2-list">
-                        <li><strong>کوانتیفیکیشن:</strong> ورود به بخش معاملات هوشمند و رباتیک و دریافت سود روزانه.</li>
-                        <li><strong>واریز:</strong> شارژ حساب کاربری از طریق ولت‌های دیجیتال با تأیید شبکه.</li>
-                        <li><strong>برداشت:</strong> ثبت درخواست برداشت درآمدها و دارایی‌ها به کیف پول شخصی.</li>
-                        <li><strong>تیم:</strong> مشاهده آمار کامل اعضا و لینک اختصاصی دعوت زیرمجموعه‌ها (سطوح ۱ تا ۳).</li>
-                        <li><strong>تراکنش‌ها:</strong> بررسی تاریخچه کامل وضیعت ریز تراکنش‌های مالی، واریزی‌ها و برداشت‌ها.</li>
-                        <li><strong>پروفایل:</strong> مدیریت امنیت حساب، رمز عبور و تنظیمات کاربری.</li>
-                    </ul>
+                <div class="help-accordion open">
+                    <button class="help-acc-btn" onclick="window.toggleHelpAccordion(this)">
+                        <div class="help-acc-icon" style="background:linear-gradient(135deg,#38bdf8,#0ea5e9)"><i class="fas fa-wallet"></i></div>
+                        <span class="help-acc-title" id="t-help-s1-title">آمار و موجودی</span>
+                        <i class="fas fa-chevron-down help-acc-arrow"></i>
+                    </button>
+                    <div class="help-acc-content">
+                        <div class="help-acc-inner">
+                            <p id="t-help-s1-desc">در بالای صفحه، موجودی کل حساب (USDT) و تعداد اعضای زیرمجموعه به‌صورت زنده نمایش داده می‌شود. با هر تراکنش، موجودی به‌روز می‌شود.</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <h4 style="color:#38bdf8;font-size:13px;margin-bottom:4px;" id="t-help-s3-title"><i class="fas fa-chart-line" style="margin-left:5px;"></i> ۳. بازار ارزهای دیجیتال و اعلان‌ها</h4>
-                    <p id="t-help-s3-desc">قیمت ۳ ارز برتر بازار به صورت زنده به‌روزرسانی می‌شود. همچنین با کلیک روی آیکون زنگوله هدر می‌توانید پیام‌ها و اطلاعیه‌های سیستم را مشاهده کنید.</p>
+                <div class="help-accordion">
+                    <button class="help-acc-btn" onclick="window.toggleHelpAccordion(this)">
+                        <div class="help-acc-icon" style="background:linear-gradient(135deg,#a855f7,#c084fc)"><i class="fas fa-th-large"></i></div>
+                        <span class="help-acc-title" id="t-help-s2-title">دسترسی سریع (میانبرها)</span>
+                        <i class="fas fa-chevron-down help-acc-arrow"></i>
+                    </button>
+                    <div class="help-acc-content">
+                        <div class="help-acc-inner">
+                            <ul id="t-help-s2-list">
+                                <li><strong>کوانتیفیکیشن:</strong> ورود به معاملات هوشمند و رباتیک و دریافت سود روزانه.</li>
+                                <li><strong>واریز:</strong> شارژ حساب با ولت‌های دیجیتال و تأیید شبکه.</li>
+                                <li><strong>برداشت:</strong> ثبت درخواست برداشت به کیف پول شخصی.</li>
+                                <li><strong>تیم:</strong> مشاهده اعضای زیرمجموعه (سطوح ۱ تا ۳) و لینک دعوت اختصاصی.</li>
+                                <li><strong>تراکنش‌ها:</strong> تاریخچه کامل واریز، برداشت و سود.</li>
+                                <li><strong>پروفایل:</strong> مدیریت امنیت، رمز عبور و تنظیمات.</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="border-top:1px dashed rgba(255,255,255,.1);padding-top:8px;color:#94a3b8;font-size:11px;" id="t-help-footer">
-                    <i class="fas fa-headset" style="color:#a855f7;margin-left:4px;"></i> در صورت نیاز به راهنمایی بیشتر می‌توانید با پشتیبانی زِنیکس در ارتباط باشید.
+                <div class="help-accordion">
+                    <button class="help-acc-btn" onclick="window.toggleHelpAccordion(this)">
+                        <div class="help-acc-icon" style="background:linear-gradient(135deg,#22c55e,#13a66a)"><i class="fas fa-chart-line"></i></div>
+                        <span class="help-acc-title" id="t-help-s3-title">بازار ارزهای دیجیتال</span>
+                        <i class="fas fa-chevron-down help-acc-arrow"></i>
+                    </button>
+                    <div class="help-acc-content">
+                        <div class="help-acc-inner">
+                            <p id="t-help-s3-desc">قیمت ۳ ارز برتر بازار به‌صورت زنده هر ۳۰ ثانیه به‌روزرسانی می‌شود. رنگ سبز نشان‌دهنده رشد و رنگ قرمز کاهش قیمت در ۲۴ ساعت گذشته است.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-accordion">
+                    <button class="help-acc-btn" onclick="window.toggleHelpAccordion(this)">
+                        <div class="help-acc-icon" style="background:linear-gradient(135deg,#fbbf24,#f59e0b)"><i class="fas fa-bell"></i></div>
+                        <span class="help-acc-title" id="t-help-s4-title">اعلان‌ها و پیام‌ها</span>
+                        <i class="fas fa-chevron-down help-acc-arrow"></i>
+                    </button>
+                    <div class="help-acc-content">
+                        <div class="help-acc-inner">
+                            <p id="t-help-s4-desc">با کلیک روی آیکون زنگوله در هدر، پیام‌های مدیریت، تأیید یا لغو درخواست‌ها را ببینید. تعداد پیام‌های جدید روی آیکون زنگوله نمایش داده می‌شود.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-accordion">
+                    <button class="help-acc-btn" onclick="window.toggleHelpAccordion(this)">
+                        <div class="help-acc-icon" style="background:linear-gradient(135deg,#f43f5e,#ec4899)"><i class="fas fa-dice"></i></div>
+                        <span class="help-acc-title" id="t-help-s5-title">بازی‌های کازینو</span>
+                        <i class="fas fa-chevron-down help-acc-arrow"></i>
+                    </button>
+                    <div class="help-acc-content">
+                        <div class="help-acc-inner">
+                            <p id="t-help-s5-desc">با کلیک روی دکمه شناور گوشه صفحه، وارد بخش بازی‌های کازینو می‌شوید. رولت آنلاین و پلینکو در دسترس هستند و بازی‌ها با موجودی مجزا و به‌صورت دمو اجرا می‌شوند.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-accordion">
+                    <button class="help-acc-btn" onclick="window.toggleHelpAccordion(this)">
+                        <div class="help-acc-icon" style="background:linear-gradient(135deg,#ec4899,#be185d)"><i class="fas fa-shield-alt"></i></div>
+                        <span class="help-acc-title" id="t-help-s6-title">نکات امنیتی مهم</span>
+                        <i class="fas fa-chevron-down help-acc-arrow"></i>
+                    </button>
+                    <div class="help-acc-content">
+                        <div class="help-acc-inner">
+                            <p id="t-help-s6-desc">هرگز رمز عبور خود را با کسی به اشتراک نگذارید. زِنیکس هرگز از شما رمز، کد تأیید یا کلید خصوصی نمی‌خواهد. برای برداشت، تأیید دو مرحله‌ای فعال کنید و از لینک‌های ناشناس وارد نشوید.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-footer">
+                    <i class="fas fa-headset"></i>
+                    <span id="t-help-footer">در صورت نیاز به راهنمایی بیشتر، با پشتیبانی زِنیکس از طریق صفحه پشتیبانی در ارتباط باشید.</span>
                 </div>
             </div>
         </div>
@@ -436,6 +1176,25 @@
     </footer>
 
     <script src="https://cdn.jsdmirror.com/npm/@supabase/supabase-js@2" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script type="module" src="dashboard.js?v=22"></script>
+    <script type="module" src="dashboard.js?v=31"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('sw.js?v=4.7').then(function (reg) {
+                    setInterval(function () {
+                        reg.update().catch(function () {});
+                    }, 60000);
+                    document.addEventListener('visibilitychange', function () {
+                        if (document.visibilityState === 'visible') {
+                            reg.update().catch(function () {});
+                        }
+                    });
+                }).catch(function (e) {
+                    console.warn('[Zenix SW] register failed:', e);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
